@@ -1462,13 +1462,13 @@
             renderExercises();
         }
 
+        /* ALTERAÇÃO DE SÉRIES INDIVIDUAL POR SEMANA */
         function changeSetsCount(exIdx, delta) {
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
-                    const ex = week.days[currentDayIdx].exercises[exIdx];
-                    ex.sets = Math.max(1, (ex.sets || 3) + delta);
-                }
-            });
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises[exIdx]) {
+                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+                ex.sets = Math.max(1, (ex.sets || 3) + delta);
+            }
             saveWorkoutData();
             renderExercises();
         }
