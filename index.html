@@ -339,7 +339,7 @@
             }
         };
 
-        /* PROGRAMA PADRÃO DO TREINO */
+        /* PROGRAMA PADRÃO DO TREINO (PRÉ-PREENCHIDO COM O MODELO COMPLETO) */
         const DEFAULT_PROGRAM = {
             studentName: "Nome do Aluno",
             history: {},
@@ -353,20 +353,69 @@
                     rirText: "RIR 1",
                     paletteIdx: 0,
                     days: [
-                        { id: "SEG", shortName: "Seg • Upper", name: "Segunda: Upper (Superior Geral)", exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
-                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
-                            { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." }
-                        ]},
-                        { id: "TER", shortName: "Ter • Lower", name: "Terça: Lower (Inferior Geral)", exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
-                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
-                            { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." }
-                        ]}
+                        { 
+                            id: "SEG", 
+                            shortName: "Seg • Upper", 
+                            name: "Segunda: Upper (Superior Geral)", 
+                            exercises: [
+                                { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
+                                { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
+                                { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
+                                { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
+                                { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." },
+                                { name: "Abdominal Infra no Banco Inclinado", sets: 3, targetReps: "12-15", rest: "45s", notes: "Elevação controlada do quadril, focando na porção inferior do reto abdominal." }
+                            ]
+                        },
+                        { 
+                            id: "TER", 
+                            shortName: "Ter • Lower", 
+                            name: "Terça: Lower (Inferior Geral)", 
+                            exercises: [
+                                { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
+                                { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
+                                { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
+                                { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
+                                { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." },
+                                { name: "Prancha Lateral", sets: 3, targetReps: "30-45s", rest: "45s", notes: "Sustentação isométrica focada nos oblíquos, alinhando quadril e ombros." }
+                            ]
+                        },
+                        { 
+                            id: "QUA", 
+                            shortName: "Qua • Push", 
+                            name: "Quarta: Push (Peito, Ombro, Tríceps)", 
+                            exercises: [
+                                { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
+                                { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
+                                { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
+                                { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." },
+                                { name: "Abdominal Supra (Solo ou Puxada)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Expiração completa na flexão do tronco, esmagando o abdômen." }
+                            ]
+                        },
+                        { 
+                            id: "QUI", 
+                            shortName: "Qui • Pull", 
+                            name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)", 
+                            exercises: [
+                                { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
+                                { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
+                                { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
+                                { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." },
+                                { name: "Prancha Isométrica (Frontal)", sets: 3, targetReps: "45-60s", rest: "45s", notes: "Estabilidade do core, mantendo glúteos e abdômen bem contraídos." }
+                            ]
+                        },
+                        { 
+                            id: "SEX", 
+                            shortName: "Sex • Legs", 
+                            name: "Sexta: Legs (Pernas Hipertrofia)", 
+                            exercises: [
+                                { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
+                                { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
+                                { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
+                                { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
+                                { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." },
+                                { name: "Hiperextensão Lombar (Banco Romano)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Movimento cadenciado focado nos eretores da espinha e glúteos." }
+                            ]
+                        }
                     ]
                 }
             ]
