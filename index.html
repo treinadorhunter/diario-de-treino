@@ -265,254 +265,46 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'ULPPL_WUP_WORKOUT_MOBILE_V1';
+        /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS */
+        const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
 
-        /* DEFAULT PROGRAM DATA */
-        const DEFAULT_PROGRAM = {
-            W1: {
-                title: "Semana 1 — Estresse Metabólico",
-                desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
-                badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-                rirText: "RIR 1",
-                restText: "60s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Superior Geral)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
-                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
-                            { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Inferior Geral)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
-                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
-                            { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Peito, Ombro, Tríceps)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
-                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
-                            { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)",
-                        exercises: [
-                            { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Pernas Hipertrofia)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." }
-                        ]
-                    }
-                }
-            },
-            W2: {
-                title: "Semana 2 — Tensão Mecânica / Força",
-                desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2-3 min).",
-                badgeClass: "bg-red-500/15 text-red-400 border-red-500/30",
-                rirText: "RIR 2",
-                restText: "2.5-3 min",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Força - Pesos Livres)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Carga alta. Manter RIR 2." },
-                            { name: "Remada Curvada c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Puxada firme até o abdômen." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "4-6", rest: "2.5min", notes: "Estabilidade de ombro." },
-                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "4-6", rest: "2.5min", notes: "Subida controlada." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "6-8", rest: "2min", notes: "Preservar articulação dos cotovelos." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Força - Pesos Livres)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 3, targetReps: "4-6", rest: "3-4min", notes: "Tensão mecânica máxima na barra." },
-                            { name: "Stiff / RDL c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Coluna neutra sob carga." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Isolamento de suporte." },
-                            { name: "Mesa Flexora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Fase excêntrica sob controle." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 3, targetReps: "6-8", rest: "90s", notes: "Carga pesada na plataforma." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Força Auxiliar / Máquinas)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Segurança de ombro." },
-                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "6-8", rest: "2min", notes: "Sobrecarga sem estresse articular excessivo." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 3, targetReps: "8-10", rest: "90s", notes: "Movimento limpo." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 3, targetReps: "6-8", rest: "90s", notes: "Preservar cotovelos." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Força Auxiliar / Máquinas)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Tracionar sem balançar o tronco." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquinas para aliviar lombar." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de ombro." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 3, targetReps: "6-8", rest: "90s", notes: "Execução estrita." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Força Auxiliar)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Máquina com carga sólida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 3, targetReps: "6-8", rest: "2min", notes: "Quadril travado no topo." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Isolado com carga alta." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de coxa firme." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 3, targetReps: "8-10", rest: "60s", notes: "Carga sem salto." }
-                        ]
-                    }
-                }
-            },
-            W3: {
-                title: "Semana 3 — Hipertrofia Tradicional",
-                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
-                badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-                rirText: "RIR 0-1",
-                restText: "90-120s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Hipertrofia)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Última série até a falha técnica." },
-                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Retração forte das costas." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "8-10", rest: "90s", notes: "Carga estrita para 8-10 reps." },
-                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "8-10", rest: "90s", notes: "Puxar no peitoral superior." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "10-12", rest: "60s", notes: "Máximo pump mecânico." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Hipertrofia)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "8-10", rest: "2min", notes: "Profundidade máxima mantida." },
-                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Sentir o alongamento dos isquiotibiais." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Falha na última repetição." },
-                            { name: "Mesa Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Foco no pico de contração." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Pausa rápida na extensão." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Hipertrofia)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "8-10", rest: "90s", notes: "Ponto de inversão controlado." },
-                            { name: "Chest Press Articulado", sets: 3, targetReps: "8-10", rest: "90s", notes: "Próximo à falha." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 4, targetReps: "10-12", rest: "60s", notes: "Ombros deprimidos." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "10-12", rest: "60s", notes: "Extensão total." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Hipertrofia)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 4, targetReps: "8-10", rest: "90s", notes: "Esmagar as costas no final." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "8-10", rest: "90s", notes: "Amplitude total de movimento." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Isolamento limpo." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "10-12", rest: "60s", notes: "Tensão máxima no bíceps." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Hipertrofia)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 4, targetReps: "8-10", rest: "2min", notes: "Carga sólida mantida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Pausa no pico contraído." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Cadência 3-0-1-0." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Posterior bem ativado." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Movimento cadenciado." }
-                        ]
-                    }
-                }
-            },
-            W4: {
-                title: "Semana 4 — Deload / Recuperação",
-                desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
-                badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-                rirText: "RIR 3-4",
-                restText: "90s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Deload)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Carga leve. 3-4 reps de folga." },
-                            { name: "Remada Curvada c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Lubrificação articular." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Movimento leve." },
-                            { name: "Puxada Alta Neutra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Fluido e leve." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação ativa." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Deload)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter técnica sem peso alto." },
-                            { name: "Stiff / RDL c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Alongamento suave." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Circulação ativa." },
-                            { name: "Mesa Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Preservação articular." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Carga confortável." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Deload)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Leve e controlado." },
-                            { name: "Chest Press Articulado", sets: 2, targetReps: "8-10", rest: "90s", notes: "Trabalho relaxado na máquina." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 2, targetReps: "10-12", rest: "60s", notes: "Bombeamento leve." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem estresse no cotovelo." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Deload)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 2, targetReps: "8-10", rest: "90s", notes: "Sem fadiga lombar." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter padrão ativo." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Descompressão." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem esforço exaustivo." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Deload)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 2, targetReps: "8-10", rest: "90s", notes: "Metade do volume habitual." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Ativação suave." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Volume mínimo indispensável." },
-                            { name: "Cadeira Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Regeneração celular." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação de tendão." }
-                        ]
-                    }
-                }
-            }
-        };
+        // Captura o ID do aluno da URL (Exemplo: ?aluno=hu-1057)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
 
-        /* APP STATE */
+        /* ESTADO DO APP */
         let currentWeek = 'W1';
         let currentDay = 'SEG';
         let workoutData = {};
         let isAdminMode = false;
+        let saveTimeout = null;
 
-        /* INITIALIZATION */
-        window.addEventListener('DOMContentLoaded', () => {
-            loadWorkoutData();
+        /* INICIALIZAÇÃO */
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadWorkoutData();
             renderApp();
         });
 
-        function loadWorkoutData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
+        async function loadWorkoutData() {
+            if (API_URL && API_URL !== "COLE_SUA_URL_DO_APPS_SCRIPT_AQUI") {
+                try {
+                    showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
+                    const response = await fetch(`${API_URL}?aluno=${currentStudent}`);
+                    const data = await response.json();
+
+                    if (data && !data.error && !data.empty) {
+                        workoutData = data;
+                        localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
+                        showToast("Treino atualizado!", "fa-circle-check", "text-emerald-400");
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Erro ao conectar à nuvem, carregando dados locais:", e);
+                }
+            }
+
+            // Fallback local caso esteja offline
+            const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
             if (saved) {
                 try {
                     workoutData = JSON.parse(saved);
@@ -525,8 +317,28 @@
         }
 
         function saveWorkoutData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(workoutData));
+            // Salva no armazenamento local instantaneamente
+            localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
+
+            // Envia para o Google Sheets em segundo plano (com intervalo de 1s para não sobrecarregar)
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                if (!API_URL || API_URL === "COLE_SUA_URL_DO_APPS_SCRIPT_AQUI") return;
+                try {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aluno: currentStudent,
+                            data: workoutData
+                        })
+                    });
+                } catch (e) {
+                    console.error("Erro ao salvar no Google Sheets:", e);
+                }
+            }, 1000);
         }
 
         /* PARSING & STEPPER HELPERS */
