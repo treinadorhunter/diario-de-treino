@@ -188,10 +188,8 @@
 
             <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
 
-            <!-- Lista de Exercícios Registrados naquele dia -->
             <div id="detail-exercises-container" class="space-y-3"></div>
 
-            <!-- Anotações daquele dia -->
             <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
 
             <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
@@ -381,7 +379,6 @@
         let isAdminMode = false;
         let saveTimeout = null;
 
-        // Controle do Calendário de Histórico
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
 
@@ -399,6 +396,13 @@
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        function getTodayMonthKey() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${year}-${month}`;
         }
 
         function renderHeaderDate() {
@@ -456,7 +460,8 @@
             if (API_URL) {
                 try {
                     showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
-                    const response = await fetch(`${API_URL}?aluno=${currentStudent}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                    const currentMonth = getTodayMonthKey();
+                    const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                     const data = await response.json();
 
                     if (data && data.error === "Aluno não encontrado.") {
@@ -491,7 +496,6 @@
             normalizeWorkoutData(workoutData);
         }
 
-        /* GRAVA O HISTÓRICO DO DIA ATUAL */
         function updateTodayHistoryRecord() {
             const todayKey = getTodayKey();
             const currentWeek = workoutData.weeks[currentWeekIdx];
@@ -533,12 +537,14 @@
             saveTimeout = setTimeout(async () => {
                 if (!API_URL) return;
                 try {
+                    const currentMonth = getTodayMonthKey();
                     await fetch(API_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             aluno: currentStudent,
+                            mes: currentMonth,
                             token: API_SECRET_TOKEN,
                             data: workoutData
                         })
