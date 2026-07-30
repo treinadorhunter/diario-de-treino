@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ULPPL WUP App - Diário de Treino</title>
+    <title>Treinador Hunter - Diário de Treino</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -40,9 +40,11 @@
                 </div>
                 <div>
                     <h1 class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                        ULPPL <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">WUP</span>
+                        Treinador Hunter <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">PRO</span>
                     </h1>
-                    <p class="text-[10px] text-slate-400 font-medium">Diário Móvel • 5 Dias</p>
+                    <div id="student-name-container" class="text-[11px] text-slate-300 font-medium">
+                        <!-- Dynamic Student Name -->
+                    </div>
                 </div>
             </div>
 
@@ -59,100 +61,38 @@
             </div>
         </div>
 
-        <!-- Week Selector -->
-        <div class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50">
-            <button onclick="switchWeek('W1')" id="tab-W1" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
-                <div class="text-[9px] font-bold uppercase tracking-wider text-amber-400 flex items-center justify-between">
-                    Semana 1 <i class="fa-solid fa-bolt text-[8px]"></i>
-                </div>
-                <div class="font-extrabold text-xs text-white">12-15 RM</div>
-            </button>
-
-            <button onclick="switchWeek('W2')" id="tab-W2" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
-                <div class="text-[9px] font-bold uppercase tracking-wider text-red-400 flex items-center justify-between">
-                    Semana 2 <i class="fa-solid fa-weight-hanging text-[8px]"></i>
-                </div>
-                <div class="font-extrabold text-xs text-white">4-6 RM</div>
-            </button>
-
-            <button onclick="switchWeek('W3')" id="tab-W3" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
-                <div class="text-[9px] font-bold uppercase tracking-wider text-purple-400 flex items-center justify-between">
-                    Semana 3 <i class="fa-solid fa-cubes text-[8px]"></i>
-                </div>
-                <div class="font-extrabold text-xs text-white">8-10 RM</div>
-            </button>
-
-            <button onclick="switchWeek('W4')" id="tab-W4" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
-                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
-                    Semana 4 <i class="fa-solid fa-heart-pulse text-[8px]"></i>
-                </div>
-                <div class="font-extrabold text-xs text-white">Deload</div>
-            </button>
+        <!-- Dynamic Week Selector Bar -->
+        <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50">
+            <!-- Dynamic Weeks Rendered Here -->
         </div>
     </header>
 
     <!-- Sticky Day Navigation Bar -->
     <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[108px] z-30 shadow-sm">
-        <div class="px-2 py-2 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
-            <button onclick="switchDay('SEG')" id="day-tab-SEG" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
-                Seg • Upper
-            </button>
-            <button onclick="switchDay('TER')" id="day-tab-TER" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
-                Ter • Lower
-            </button>
-            <button onclick="switchDay('QUA')" id="day-tab-QUA" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
-                Qua • Push
-            </button>
-            <button onclick="switchDay('QUI')" id="day-tab-QUI" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
-                Qui • Pull
-            </button>
-            <button onclick="switchDay('SEX')" id="day-tab-SEX" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
-                Sex • Legs
-            </button>
+        <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar">
+            <!-- Dynamic Day Tabs Rendered Here -->
         </div>
     </nav>
 
     <!-- Main Content Area -->
     <main class="px-3 py-4 space-y-4 flex-1">
         
-        <!-- Strategy & Progress Banner Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-            <div class="flex items-center justify-between mb-2">
-                <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border"></span>
-                <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
-            </div>
-
-            <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3"></p>
-
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
-                <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-
-            <!-- Compact Metrics Grid -->
-            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
-                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                    <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
-                    <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
-                </div>
-                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                    <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
-                    <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
-                </div>
-                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                    <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
-                    <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">RIR -</div>
-                </div>
-            </div>
+        <!-- Strategy & Progress Banner Card / Week Admin Config -->
+        <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <!-- Dynamic Content -->
         </div>
 
         <!-- Day Title Bar & Admin Controls -->
-        <div class="flex items-center justify-between pt-1">
-            <h2 id="day-title" class="text-sm font-extrabold text-white flex items-center gap-2"></h2>
+        <div class="flex flex-col gap-2 pt-1">
+            <div id="day-title-container" class="w-full">
+                <!-- Dynamic Day Title / Admin Form -->
+            </div>
 
-            <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                <i class="fa-solid fa-plus text-xs"></i> Exercício
-            </button>
+            <div class="flex justify-end">
+                <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus text-xs"></i> Exercício
+                </button>
+            </div>
         </div>
 
         <!-- Exercises List Container -->
@@ -257,245 +197,155 @@
         /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS */
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
 
-        // Captura o ID do aluno da URL (?aluno=ma-8942)
         const urlParams = new URLSearchParams(window.location.search);
         const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
 
+        /* PALETA DE CORES E ÍCONES DAS SEMANAS */
+        const WEEK_PALETTES = [
+            { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
+            { textClass: "text-red-400", badgeClass: "bg-red-500/15 text-red-400 border-red-500/30", icon: "fa-weight-hanging" },
+            { textClass: "text-purple-400", badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30", icon: "fa-cubes" },
+            { textClass: "text-emerald-400", badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: "fa-heart-pulse" }
+        ];
+
+        /* MODELOS PRONTOS DE FOCO ESTRATÉGICO (PRESETS) COM TEMPOS DE DESCANSO PADRÃO */
+        const WEEK_PRESETS = {
+            metabolic: {
+                label: "Estresse Metabólico",
+                targetReps: "12-15 RM",
+                titleSuffix: "Estresse Metabólico",
+                desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
+                rirText: "RIR 1",
+                paletteIdx: 0,
+                defaultRest: "60s"
+            },
+            strength: {
+                label: "Tensão Mecânica / Força",
+                targetReps: "4-6 RM",
+                titleSuffix: "Tensão Mecânica / Força",
+                desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2 min).",
+                rirText: "RIR 2",
+                paletteIdx: 1,
+                defaultRest: "2min"
+            },
+            hypertrophy: {
+                label: "Hipertrofia Tradicional",
+                targetReps: "8-10 RM",
+                titleSuffix: "Hipertrofia Tradicional",
+                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
+                rirText: "RIR 0-1",
+                paletteIdx: 2,
+                defaultRest: "90s"
+            },
+            deload: {
+                label: "Deload / Recuperação",
+                targetReps: "Deload",
+                titleSuffix: "Deload / Recuperação",
+                desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
+                rirText: "RIR 3-4",
+                paletteIdx: 3,
+                defaultRest: "60s"
+            }
+        };
+
         /* PROGRAMA PADRÃO DO TREINO */
         const DEFAULT_PROGRAM = {
-            W1: {
-                title: "Semana 1 — Estresse Metabólico",
-                desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
-                badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-                rirText: "RIR 1",
-                restText: "60s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Superior Geral)",
-                        exercises: [
+            studentName: "Nome do Aluno",
+            weeks: [
+                {
+                    id: "W1",
+                    shortTitle: "Semana 1",
+                    targetReps: "12-15 RM",
+                    title: "Semana 1 — Estresse Metabólico",
+                    desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
+                    rirText: "RIR 1",
+                    paletteIdx: 0,
+                    days: [
+                        { id: "SEG", shortName: "Seg • Upper", name: "Segunda: Upper (Superior Geral)", exercises: [
                             { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
                             { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
                             { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
                             { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
                             { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Inferior Geral)",
-                        exercises: [
+                        ]},
+                        { id: "TER", shortName: "Ter • Lower", name: "Terça: Lower (Inferior Geral)", exercises: [
                             { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
                             { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
                             { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
                             { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
                             { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Peito, Ombro, Tríceps)",
-                        exercises: [
+                        ]},
+                        { id: "QUA", shortName: "Qua • Push", name: "Quarta: Push (Peito, Ombro, Tríceps)", exercises: [
                             { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
                             { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
                             { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
                             { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)",
-                        exercises: [
+                        ]},
+                        { id: "QUI", shortName: "Qui • Pull", name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)", exercises: [
                             { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
                             { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
                             { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
                             { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Pernas Hipertrofia)",
-                        exercises: [
+                        ]},
+                        { id: "SEX", shortName: "Sex • Legs", name: "Sexta: Legs (Pernas Hipertrofia)", exercises: [
                             { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
                             { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
                             { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
                             { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
                             { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." }
-                        ]
-                    }
-                }
-            },
-            W2: {
-                title: "Semana 2 — Tensão Mecânica / Força",
-                desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2-3 min).",
-                badgeClass: "bg-red-500/15 text-red-400 border-red-500/30",
-                rirText: "RIR 2",
-                restText: "2.5-3 min",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Força - Pesos Livres)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Carga alta. Manter RIR 2." },
-                            { name: "Remada Curvada c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Puxada firme até o abdômen." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "4-6", rest: "2.5min", notes: "Estabilidade de ombro." },
-                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "4-6", rest: "2.5min", notes: "Subida controlada." },
+                        ]}
+                    ]
+                },
+                {
+                    id: "W2",
+                    shortTitle: "Semana 2",
+                    targetReps: "4-6 RM",
+                    title: "Semana 2 — Tensão Mecânica / Força",
+                    desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2-3 min).",
+                    rirText: "RIR 2",
+                    paletteIdx: 1,
+                    days: [
+                        { id: "SEG", shortName: "Seg • Upper", name: "Segunda: Upper (Força - Pesos Livres)", exercises: [
+                            { name: "Supino Reto c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Carga alta. Manter RIR 2." },
+                            { name: "Remada Curvada c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Puxada firme até o abdômen." },
+                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "4-6", rest: "2min", notes: "Estabilidade de ombro." },
+                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Subida controlada." },
                             { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "6-8", rest: "2min", notes: "Preservar articulação dos cotovelos." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Força - Pesos Livres)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 3, targetReps: "4-6", rest: "3-4min", notes: "Tensão mecânica máxima na barra." },
-                            { name: "Stiff / RDL c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Coluna neutra sob carga." },
+                        ]},
+                        { id: "TER", shortName: "Ter • Lower", name: "Terça: Lower (Força - Pesos Livres)", exercises: [
+                            { name: "Agachamento Livre c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Tensão mecânica máxima na barra." },
+                            { name: "Stiff / RDL c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Coluna neutra sob carga." },
                             { name: "Cadeira Extensora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Isolamento de suporte." },
                             { name: "Mesa Flexora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Fase excêntrica sob controle." },
                             { name: "Panturrilha em Pé (Gêmeos)", sets: 3, targetReps: "6-8", rest: "90s", notes: "Carga pesada na plataforma." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Força Auxiliar / Máquinas)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Segurança de ombro." },
+                        ]},
+                        { id: "QUA", shortName: "Qua • Push", name: "Quarta: Push (Força Auxiliar / Máquinas)", exercises: [
+                            { name: "Supino Inclinado c/ Halteres", sets: 3, targetReps: "6-8", rest: "2min", notes: "Segurança de ombro." },
                             { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "6-8", rest: "2min", notes: "Sobrecarga sem estresse articular excessivo." },
                             { name: "Elevação Lateral c/ Cabo", sets: 3, targetReps: "8-10", rest: "90s", notes: "Movimento limpo." },
                             { name: "Tríceps Pulley c/ Corda", sets: 3, targetReps: "6-8", rest: "90s", notes: "Preservar cotovelos." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Força Auxiliar / Máquinas)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Tracionar sem balançar o tronco." },
+                        ]},
+                        { id: "QUI", shortName: "Qui • Pull", name: "Quinta: Pull (Força Auxiliar / Máquinas)", exercises: [
+                            { name: "Remada Cavalinho ou Apoiada", sets: 3, targetReps: "6-8", rest: "2min", notes: "Tracionar sem balançar o tronco." },
                             { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquinas para aliviar lombar." },
                             { name: "Crucifixo Invertido (Peck Deck)", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de ombro." },
                             { name: "Rosca Inclinada c/ Halteres", sets: 3, targetReps: "6-8", rest: "90s", notes: "Execução estrita." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Força Auxiliar)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Máquina com carga sólida." },
+                        ]},
+                        { id: "SEX", shortName: "Sex • Legs", name: "Sexta: Legs (Força Auxiliar)", exercises: [
+                            { name: "Leg Press 45º", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquina com carga sólida." },
                             { name: "Elevação Pélvica c/ Barra", sets: 3, targetReps: "6-8", rest: "2min", notes: "Quadril travado no topo." },
                             { name: "Cadeira Extensora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Isolado com carga alta." },
                             { name: "Cadeira Flexora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de coxa firme." },
                             { name: "Panturrilha Sentado (Solear)", sets: 3, targetReps: "8-10", rest: "60s", notes: "Carga sem salto." }
-                        ]
-                    }
+                        ]}
+                    ]
                 }
-            },
-            W3: {
-                title: "Semana 3 — Hipertrofia Tradicional",
-                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
-                badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-                rirText: "RIR 0-1",
-                restText: "90-120s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Hipertrofia)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Última série até a falha técnica." },
-                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Retração forte das costas." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "8-10", rest: "90s", notes: "Carga estrita para 8-10 reps." },
-                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "8-10", rest: "90s", notes: "Puxar no peitoral superior." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "10-12", rest: "60s", notes: "Máximo pump mecânico." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Hipertrofia)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "8-10", rest: "2min", notes: "Profundidade máxima mantida." },
-                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Sentir o alongamento dos isquiotibiais." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Falha na última repetição." },
-                            { name: "Mesa Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Foco no pico de contração." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Pausa rápida na extensão." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Hipertrofia)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "8-10", rest: "90s", notes: "Ponto de inversão controlado." },
-                            { name: "Chest Press Articulado", sets: 3, targetReps: "8-10", rest: "90s", notes: "Próximo à falha." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 4, targetReps: "10-12", rest: "60s", notes: "Ombros deprimidos." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "10-12", rest: "60s", notes: "Extensão total." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Hipertrofia)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 4, targetReps: "8-10", rest: "90s", notes: "Esmagar as costas no final." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "8-10", rest: "90s", notes: "Amplitude total de movimento." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Isolamento limpo." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "10-12", rest: "60s", notes: "Tensão máxima no bíceps." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Hipertrofia)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 4, targetReps: "8-10", rest: "2min", notes: "Carga sólida mantida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Pausa no pico contraído." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Cadência 3-0-1-0." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Posterior bem ativado." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Movimento cadenciado." }
-                        ]
-                    }
-                }
-            },
-            W4: {
-                title: "Semana 4 — Deload / Recuperação",
-                desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
-                badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-                rirText: "RIR 3-4",
-                restText: "90s",
-                days: {
-                    SEG: {
-                        name: "Segunda: Upper (Deload)",
-                        exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Carga leve. 3-4 reps de folga." },
-                            { name: "Remada Curvada c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Lubrificação articular." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Movimento leve." },
-                            { name: "Puxada Alta Neutra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Fluido e leve." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação ativa." }
-                        ]
-                    },
-                    TER: {
-                        name: "Terça: Lower (Deload)",
-                        exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter técnica sem peso alto." },
-                            { name: "Stiff / RDL c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Alongamento suave." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Circulação ativa." },
-                            { name: "Mesa Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Preservação articular." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Carga confortável." }
-                        ]
-                    },
-                    QUA: {
-                        name: "Quarta: Push (Deload)",
-                        exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Leve e controlado." },
-                            { name: "Chest Press Articulado", sets: 2, targetReps: "8-10", rest: "90s", notes: "Trabalho relaxado na máquina." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 2, targetReps: "10-12", rest: "60s", notes: "Bombeamento leve." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem estresse no cotovelo." }
-                        ]
-                    },
-                    QUI: {
-                        name: "Quinta: Pull (Deload)",
-                        exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 2, targetReps: "8-10", rest: "90s", notes: "Sem fadiga lombar." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter padrão ativo." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Descompressão." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem esforço exaustivo." }
-                        ]
-                    },
-                    SEX: {
-                        name: "Sexta: Legs (Deload)",
-                        exercises: [
-                            { name: "Leg Press 45º", sets: 2, targetReps: "8-10", rest: "90s", notes: "Metade do volume habitual." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Ativação suave." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Volume mínimo indispensável." },
-                            { name: "Cadeira Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Regeneração celular." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação de tendão." }
-                        ]
-                    }
-                }
-            }
+            ]
         };
 
         /* ESTADO DO APP */
-        let currentWeek = 'W1';
-        let currentDay = 'SEG';
+        let currentWeekIdx = 0;
+        let currentDayIdx = 0;
         let workoutData = {};
         let isAdminMode = false;
         let saveTimeout = null;
@@ -503,8 +353,51 @@
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             await loadWorkoutData();
+            renderHeader();
             renderApp();
         });
+
+        function normalizeWorkoutData(data) {
+            if (!data) return;
+            if (!data.studentName) data.studentName = "Nome do Aluno";
+
+            if (!data.weeks) {
+                data.weeks = [];
+                const oldKeys = ['W1', 'W2', 'W3', 'W4'];
+                oldKeys.forEach((k, idx) => {
+                    if (data[k]) {
+                        data.weeks.push({
+                            id: k,
+                            shortTitle: `Semana ${idx + 1}`,
+                            targetReps: k === 'W1' ? '12-15 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-10 RM' : 'Deload',
+                            title: data[k].title || `Semana ${idx + 1}`,
+                            desc: data[k].desc || "",
+                            rirText: data[k].rirText || "RIR 1",
+                            paletteIdx: idx % WEEK_PALETTES.length,
+                            days: data[k].days || []
+                        });
+                        delete data[k];
+                    }
+                });
+            }
+
+            data.weeks.forEach((w) => {
+                if (w.days && !Array.isArray(w.days)) {
+                    const daysArr = [];
+                    const defaultLabels = { SEG: 'Seg • Upper', TER: 'Ter • Lower', QUA: 'Qua • Push', QUI: 'Qui • Pull', SEX: 'Sex • Legs' };
+                    Object.keys(w.days).forEach(dKey => {
+                        daysArr.push({
+                            id: dKey,
+                            shortName: defaultLabels[dKey] || dKey,
+                            name: w.days[dKey].name || dKey,
+                            notes: w.days[dKey].notes || '',
+                            exercises: w.days[dKey].exercises || []
+                        });
+                    });
+                    w.days = daysArr;
+                }
+            });
+        }
 
         async function loadWorkoutData() {
             if (API_URL) {
@@ -515,6 +408,7 @@
 
                     if (data && !data.error && !data.empty) {
                         workoutData = data;
+                        normalizeWorkoutData(workoutData);
                         localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
                         showToast("Treino atualizado!", "fa-circle-check", "text-emerald-400");
                         return;
@@ -534,6 +428,7 @@
             } else {
                 workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
             }
+            normalizeWorkoutData(workoutData);
         }
 
         function saveWorkoutData() {
@@ -559,18 +454,31 @@
             }, 1000);
         }
 
-        /* PARSING & STEPPER HELPERS */
-        function getTargetRepsNum(targetRepsStr) {
-            if (!targetRepsStr) return 10;
-            const match = String(targetRepsStr).match(/\d+/);
-            return match ? parseFloat(match[0]) : 10;
+        function renderHeader() {
+            const container = document.getElementById('student-name-container');
+            const studentName = workoutData.studentName || "Nome do Aluno";
+
+            if (isAdminMode) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-1 mt-0.5">
+                        <span class="text-[10px] text-slate-400 font-bold">Aluno(a):</span>
+                        <input type="text" value="${escapeHtml(studentName)}" 
+                            onchange="updateStudentName(this.value)"
+                            class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-36 sm:w-48">
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <span class="text-[10px] text-slate-400 font-medium">Aluno(a):</span>
+                    <span class="text-xs font-extrabold text-white ml-1">${escapeHtml(studentName)}</span>
+                `;
+            }
         }
 
-        function parseNum(val) {
-            if (val === null || val === undefined || val === '') return '';
-            const clean = String(val).replace(',', '.').trim();
-            const num = parseFloat(clean);
-            return isNaN(num) ? '' : num;
+        function updateStudentName(val) {
+            workoutData.studentName = val;
+            saveWorkoutData();
+            renderHeader();
         }
 
         /* ADMIN MODE TOGGLE */
@@ -617,64 +525,382 @@
                 btn.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
                 icon.className = 'fa-solid fa-lock-open text-amber-400';
                 text.textContent = 'Modo Edição';
-                addBtn.classList.remove('hidden');
+                if (addBtn) addBtn.classList.remove('hidden');
             } else {
                 btn.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
                 btn.classList.add('bg-slate-800', 'border-slate-700/80');
                 icon.className = 'fa-solid fa-lock text-slate-400';
                 text.textContent = 'Modo Aluno';
-                addBtn.classList.add('hidden');
+                if (addBtn) addBtn.classList.add('hidden');
             }
 
-            renderExercises();
-        }
-
-        /* NAVIGATION TABS */
-        function switchWeek(weekKey) {
-            currentWeek = weekKey;
+            renderHeader();
             renderApp();
         }
 
-        function switchDay(dayKey) {
-            currentDay = dayKey;
+        /* GERENCIAMENTO DE SEMANAS COM PALETA DE CORES DINÂMICA */
+        function renderWeekTabs() {
+            const container = document.getElementById('week-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const weeks = workoutData.weeks || [];
+            if (currentWeekIdx >= weeks.length) currentWeekIdx = Math.max(0, weeks.length - 1);
+
+            weeks.forEach((w, idx) => {
+                const palIdx = w.paletteIdx !== undefined ? w.paletteIdx : (idx % WEEK_PALETTES.length);
+                const palette = WEEK_PALETTES[palIdx];
+                const isActive = idx === currentWeekIdx;
+                const btn = document.createElement('button');
+                btn.onclick = () => { currentWeekIdx = idx; renderApp(); };
+                btn.className = `week-tab flex-1 min-w-[105px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
+                btn.innerHTML = `
+                    <div class="text-[9px] font-bold uppercase tracking-wider ${palette.textClass} flex items-center justify-between">
+                        ${escapeHtml(w.shortTitle || `Semana ${idx + 1}`)} <i class="fa-solid ${palette.icon} text-[8px]"></i>
+                    </div>
+                    <div class="font-extrabold text-xs text-white">${escapeHtml(w.targetReps || "8-12 RM")}</div>
+                `;
+                container.appendChild(btn);
+            });
+
+            if (isAdminMode) {
+                const addWBtn = document.createElement('button');
+                addWBtn.onclick = addNewWeek;
+                addWBtn.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition shrink-0 flex items-center gap-1';
+                addWBtn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i> Semana';
+                container.appendChild(addWBtn);
+            }
+        }
+
+        function applyWeekPreset(presetKey) {
+            const preset = WEEK_PRESETS[presetKey];
+            if (!preset) return;
+
+            const week = workoutData.weeks[currentWeekIdx];
+            if (!week) return;
+
+            const weekLabel = week.shortTitle || `Semana ${currentWeekIdx + 1}`;
+            week.targetReps = preset.targetReps;
+            week.title = `${weekLabel} — ${preset.titleSuffix}`;
+            week.desc = preset.desc;
+            week.rirText = preset.rirText;
+            week.paletteIdx = preset.paletteIdx;
+
+            // Aplica o tempo de descanso padrão e meta de reps nos exercícios da semana selecionada
+            if (week.days) {
+                week.days.forEach(day => {
+                    if (day.exercises) {
+                        day.exercises.forEach(ex => {
+                            ex.rest = preset.defaultRest;
+                        });
+                    }
+                });
+            }
+
+            saveWorkoutData();
+            renderApp();
+            showToast(`Modelo '${preset.label}' aplicado (${preset.defaultRest})!`, "fa-bolt", "text-amber-400");
+        }
+
+        function addNewWeek() {
+            const weeks = workoutData.weeks || [];
+            const newWeekNum = weeks.length + 1;
+            
+            const sampleDays = weeks.length > 0 ? weeks[0].days : [];
+            const clonedDays = JSON.parse(JSON.stringify(sampleDays));
+
+            clonedDays.forEach(day => {
+                day.exercises.forEach(ex => { ex.logs = []; });
+                day.notes = "";
+            });
+
+            weeks.push({
+                id: `W_${Date.now()}`,
+                shortTitle: `Semana ${newWeekNum}`,
+                targetReps: "8-10 RM",
+                title: `Semana ${newWeekNum} — Hipertrofia Tradicional`,
+                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
+                rirText: "RIR 0-1",
+                paletteIdx: (weeks.length) % WEEK_PALETTES.length,
+                days: clonedDays
+            });
+
+            currentWeekIdx = weeks.length - 1;
+            saveWorkoutData();
+            renderApp();
+            showToast("Nova semana adicionada!", "fa-circle-plus", "text-emerald-400");
+        }
+
+        function deleteCurrentWeek() {
+            const weeks = workoutData.weeks || [];
+            if (weeks.length <= 1) {
+                showToast("O treino deve ter pelo menos 1 semana!", "fa-triangle-exclamation", "text-amber-400");
+                return;
+            }
+
+            weeks.splice(currentWeekIdx, 1);
+            currentWeekIdx = Math.max(0, currentWeekIdx - 1);
+            saveWorkoutData();
+            renderApp();
+            showToast("Semana removida", "fa-trash-can", "text-amber-400");
+        }
+
+        function updateWeekProp(prop, val) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (currentWeek) {
+                currentWeek[prop] = val;
+                saveWorkoutData();
+                renderApp();
+            }
+        }
+
+        /* GERENCIAMENTO DE DIAS DA SEMANA */
+        function renderDayTabs() {
+            const container = document.getElementById('day-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            const days = currentWeek ? currentWeek.days : [];
+
+            if (currentDayIdx >= days.length) {
+                currentDayIdx = Math.max(0, days.length - 1);
+            }
+
+            days.forEach((day, idx) => {
+                const btn = document.createElement('button');
+                const isActive = idx === currentDayIdx;
+                btn.className = `day-tab py-2 px-3 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center flex items-center gap-1.5 shrink-0 ${isActive ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-900 text-slate-400 border-slate-800'}`;
+                
+                btn.onclick = () => {
+                    currentDayIdx = idx;
+                    renderApp();
+                };
+
+                btn.innerHTML = `<span>${escapeHtml(day.shortName)}</span>`;
+                container.appendChild(btn);
+            });
+
+            if (isAdminMode) {
+                const addDayBtn = document.createElement('button');
+                addDayBtn.className = 'py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition shrink-0 flex items-center gap-1';
+                addDayBtn.onclick = addNewDay;
+                addDayBtn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i> Dia';
+                container.appendChild(addDayBtn);
+            }
+        }
+
+        function addNewDay() {
+            const sampleWeek = workoutData.weeks[0];
+            const dayNum = (sampleWeek && sampleWeek.days) ? sampleWeek.days.length + 1 : 1;
+            const newShort = `Dia ${dayNum}`;
+            const newName = `Dia ${dayNum}: Novo Treino`;
+
+            workoutData.weeks.forEach(week => {
+                week.days.push({
+                    id: `D_${Date.now()}`,
+                    shortName: newShort,
+                    name: newName,
+                    notes: '',
+                    exercises: [
+                        { name: "Novo Exercício", sets: 3, targetReps: "10-12", rest: "60s", notes: "Observação de execução...", logs: [] }
+                    ]
+                });
+            });
+
+            currentDayIdx = workoutData.weeks[currentWeekIdx].days.length - 1;
+            saveWorkoutData();
+            renderApp();
+            showToast("Novo dia adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
+        }
+
+        function deleteCurrentDay() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (currentWeek.days.length <= 1) {
+                showToast("O treino deve ter pelo menos 1 dia!", "fa-triangle-exclamation", "text-amber-400");
+                return;
+            }
+
+            const deletedIdx = currentDayIdx;
+
+            workoutData.weeks.forEach(week => {
+                if (week.days) week.days.splice(deletedIdx, 1);
+            });
+
+            currentDayIdx = Math.max(0, deletedIdx - 1);
+            saveWorkoutData();
+            renderApp();
+            showToast("Dia removido de todas as semanas", "fa-trash-can", "text-amber-400");
+        }
+
+        function updateDayProp(prop, val) {
+            workoutData.weeks.forEach(week => {
+                if (week.days && week.days[currentDayIdx]) {
+                    week.days[currentDayIdx][prop] = val;
+                }
+            });
+
+            saveWorkoutData();
             renderApp();
         }
 
         function renderApp() {
-            document.querySelectorAll('.week-tab').forEach(tab => {
-                const w = tab.id.replace('tab-', '');
-                if (w === currentWeek) {
-                    tab.classList.add('bg-slate-800', 'border-blue-500', 'active-tab-glow');
-                    tab.classList.remove('bg-slate-900', 'border-slate-800', 'opacity-60');
-                } else {
-                    tab.classList.remove('bg-slate-800', 'border-blue-500', 'active-tab-glow');
-                    tab.classList.add('bg-slate-900', 'border-slate-800', 'opacity-60');
-                }
-            });
+            renderWeekTabs();
+            renderDayTabs();
 
-            document.querySelectorAll('.day-tab').forEach(tab => {
-                const d = tab.id.replace('day-tab-', '');
-                if (d === currentDay) {
-                    tab.classList.add('bg-blue-600', 'text-white', 'border-blue-500', 'shadow-sm');
-                    tab.classList.remove('bg-slate-900', 'text-slate-400', 'border-slate-800');
-                } else {
-                    tab.classList.remove('bg-blue-600', 'text-white', 'border-blue-500', 'shadow-sm');
-                    tab.classList.add('bg-slate-900', 'text-slate-400', 'border-slate-800');
-                }
-            });
+            const weeks = workoutData.weeks || [];
+            if (weeks.length === 0) return;
 
-            const weekInfo = workoutData[currentWeek];
-            const dayInfo = weekInfo.days[currentDay];
+            if (currentWeekIdx >= weeks.length) currentWeekIdx = weeks.length - 1;
+            const weekInfo = weeks[currentWeekIdx];
+            const days = weekInfo.days || [];
+            
+            if (days.length === 0) return;
 
-            const badgeEl = document.getElementById('badge-week-title');
-            badgeEl.className = `px-2.5 py-1 rounded-full text-[11px] font-bold border ${weekInfo.badgeClass}`;
-            badgeEl.innerHTML = `<i class="fa-solid fa-bullseye mr-1"></i> ${weekInfo.title}`;
+            if (currentDayIdx >= days.length) currentDayIdx = days.length - 1;
+            const dayInfo = days[currentDayIdx];
 
-            document.getElementById('week-desc-text').textContent = weekInfo.desc;
+            const palIdx = weekInfo.paletteIdx !== undefined ? weekInfo.paletteIdx : (currentWeekIdx % WEEK_PALETTES.length);
+            const activePalette = WEEK_PALETTES[palIdx];
 
-            document.getElementById('day-title').innerHTML = `
-                <i class="fa-solid fa-calendar-day text-blue-400"></i> ${dayInfo.name}
-            `;
+            const bannerContainer = document.getElementById('week-banner-container');
+            if (isAdminMode) {
+                bannerContainer.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sliders"></i> Configurações da Semana
+                            </span>
+                            ${weeks.length > 1 ? `
+                                <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-trash-can"></i> Excluir Semana
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <!-- SELEÇÃO RÁPIDA DE MODELO PRONTO DE SEMANA -->
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> Aplicar Modelo Pronto de Foco:
+                            </label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                                <button onclick="applyWeekPreset('metabolic')" class="py-2 px-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-bold hover:bg-amber-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-bolt text-xs"></i> Metabólico (60s)
+                                </button>
+                                <button onclick="applyWeekPreset('strength')" class="py-2 px-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-bold hover:bg-red-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-weight-hanging text-xs"></i> Força (2min)
+                                </button>
+                                <button onclick="applyWeekPreset('hypertrophy')" class="py-2 px-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-cubes text-xs"></i> Hipertrofia (90s)
+                                </button>
+                                <button onclick="applyWeekPreset('deload')" class="py-2 px-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold hover:bg-emerald-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-heart-pulse text-xs"></i> Deload (60s)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- EDIÇÃO MANUAL -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Aba (ex: Semana 1):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.shortTitle || '')}" 
+                                    onchange="updateWeekProp('shortTitle', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta Reps (ex: 4-6 RM):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.targetReps || '')}" 
+                                    onchange="updateWeekProp('targetReps', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta RIR (ex: RIR 1):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.rirText || '')}" 
+                                    onchange="updateWeekProp('rirText', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Título do Banner:</label>
+                            <input type="text" value="${escapeHtml(weekInfo.title || '')}" 
+                                onchange="updateWeekProp('title', this.value)"
+                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Descrição do Foco Estratégico:</label>
+                            <input type="text" value="${escapeHtml(weekInfo.desc || '')}" 
+                                onchange="updateWeekProp('desc', this.value)"
+                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                `;
+            } else {
+                bannerContainer.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${activePalette.badgeClass}">
+                            <i class="fa-solid ${activePalette.icon} mr-1"></i> ${escapeHtml(weekInfo.title || '')}
+                        </span>
+                        <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
+                    </div>
+
+                    <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3">${escapeHtml(weekInfo.desc || '')}</p>
+
+                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
+                        <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
+                            <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
+                        </div>
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
+                            <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
+                        </div>
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
+                            <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">${escapeHtml(weekInfo.rirText || '-')}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const dayTitleContainer = document.getElementById('day-title-container');
+            if (isAdminMode) {
+                dayTitleContainer.innerHTML = `
+                    <div class="w-full space-y-2 bg-slate-900 border border-amber-500/30 p-3 rounded-xl">
+                        <div class="text-[10px] uppercase font-bold text-amber-400 flex items-center justify-between">
+                            <span><i class="fa-solid fa-sliders mr-1"></i> Identificação do Dia</span>
+                            ${days.length > 1 ? `
+                                <button onclick="deleteCurrentDay()" class="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1 font-bold">
+                                    <i class="fa-solid fa-trash-can"></i> Excluir Dia
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Ter • Pull):</label>
+                                <input type="text" value="${escapeHtml(dayInfo.shortName)}" 
+                                    onchange="updateDayProp('shortName', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Título da Sessão (ex: Terça: Pull Geral):</label>
+                                <input type="text" value="${escapeHtml(dayInfo.name)}" 
+                                    onchange="updateDayProp('name', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                dayTitleContainer.innerHTML = `
+                    <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
+                    </h2>
+                `;
+            }
 
             const notesInput = document.getElementById('session-notes');
             notesInput.value = dayInfo.notes || "";
@@ -687,7 +913,10 @@
             const listEl = document.getElementById('exercises-list');
             listEl.innerHTML = '';
 
-            const exercises = workoutData[currentWeek].days[currentDay].exercises;
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+
+            const exercises = currentWeek.days[currentDayIdx].exercises;
 
             if (!exercises || exercises.length === 0) {
                 listEl.innerHTML = `
@@ -764,19 +993,35 @@
                             ${isAdminMode ? `
                                 <input type="text" value="${escapeHtml(ex.name)}" 
                                     onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
-                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
+                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none mb-1.5">
+                                
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
+                                        <span class="text-[10px] font-bold text-slate-400">Reps:</span>
+                                        <input type="text" value="${escapeHtml(ex.targetReps || '')}" 
+                                            onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)"
+                                            class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
+                                    </div>
+
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
+                                        <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
+                                        <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
+                                        <input type="text" value="${escapeHtml(ex.rest || '')}" 
+                                            onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
+                                            class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
+                                    </div>
+                                </div>
                             ` : `
                                 <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                        ${setsCount} séries × ${ex.targetReps} reps
+                                    </span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
+                                    </span>
+                                </div>
                             `}
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                    ${setsCount} séries × ${ex.targetReps} reps
-                                </span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                    <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
-                                </span>
-                            </div>
                         </div>
 
                         ${isAdminMode ? `
@@ -826,7 +1071,7 @@
         }
 
         function adjustSetVal(exIdx, setIdx, field, delta) {
-            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
 
             let defaultReps = getTargetRepsNum(ex.targetReps);
@@ -848,7 +1093,7 @@
         }
 
         function updateSetLog(exIdx, setIdx, field, value) {
-            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
             if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: '', done: false };
 
@@ -861,7 +1106,7 @@
         }
 
         function toggleSetDone(exIdx, setIdx) {
-            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
 
             let defaultReps = getTargetRepsNum(ex.targetReps);
@@ -883,10 +1128,10 @@
         }
 
         function updateMetrics() {
-            const weekInfo = workoutData[currentWeek];
-            if (!weekInfo || !weekInfo.days || !weekInfo.days[currentDay]) return;
+            const weekInfo = workoutData.weeks[currentWeekIdx];
+            if (!weekInfo || !weekInfo.days || !weekInfo.days[currentDayIdx]) return;
 
-            const dayInfo = weekInfo.days[currentDay];
+            const dayInfo = weekInfo.days[currentDayIdx];
             const exercises = dayInfo.exercises || [];
 
             let totalSets = 0;
@@ -936,46 +1181,76 @@
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
 
+        /* ATUALIZAÇÃO DE PROPRIEDADES DO EXERCÍCIO */
         function updateExerciseProp(exIdx, prop, value) {
-            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
-            ex[prop] = value;
+            if (prop === 'rest' || prop === 'targetReps') {
+                // Alteração de descanso ou reps individual para a semana atual
+                const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
+                if (ex) ex[prop] = value;
+            } else {
+                // Nome do exercício e dicas replicam em todo o mesociclo
+                workoutData.weeks.forEach(week => {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
+                        week.days[currentDayIdx].exercises[exIdx][prop] = value;
+                    }
+                });
+            }
             saveWorkoutData();
+            renderExercises();
         }
 
         function changeSetsCount(exIdx, delta) {
-            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
-            const newSets = Math.max(1, (ex.sets || 3) + delta);
-            ex.sets = newSets;
+            workoutData.weeks.forEach(week => {
+                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
+                    const ex = week.days[currentDayIdx].exercises[exIdx];
+                    ex.sets = Math.max(1, (ex.sets || 3) + delta);
+                }
+            });
             saveWorkoutData();
             renderExercises();
         }
 
         function addNewExercise() {
-            const exercises = workoutData[currentWeek].days[currentDay].exercises;
-            exercises.push({
-                name: "Novo Exercício",
-                sets: 3,
-                targetReps: "8-12",
-                rest: "60s",
-                notes: "Dica de execução...",
-                logs: []
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            let defaultRestTime = "60s";
+
+            if (currentWeek && currentWeek.paletteIdx !== undefined) {
+                const presetKeys = Object.keys(WEEK_PRESETS);
+                const matchedPreset = presetKeys.find(k => WEEK_PRESETS[k].paletteIdx === currentWeek.paletteIdx);
+                if (matchedPreset) defaultRestTime = WEEK_PRESETS[matchedPreset].defaultRest;
+            }
+
+            workoutData.weeks.forEach(week => {
+                if (week.days && week.days[currentDayIdx]) {
+                    week.days[currentDayIdx].exercises.push({
+                        name: "Novo Exercício",
+                        sets: 3,
+                        targetReps: "8-12",
+                        rest: defaultRestTime,
+                        notes: "Dica de execução...",
+                        logs: []
+                    });
+                }
             });
             saveWorkoutData();
             renderExercises();
-            showToast("Exercício adicionado!", "fa-circle-plus", "text-emerald-400");
+            showToast("Exercício adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
         }
 
         function deleteExercise(exIdx) {
-            const exercises = workoutData[currentWeek].days[currentDay].exercises;
-            exercises.splice(exIdx, 1);
+            workoutData.weeks.forEach(week => {
+                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
+                    week.days[currentDayIdx].exercises.splice(exIdx, 1);
+                }
+            });
             saveWorkoutData();
             renderExercises();
-            showToast("Exercício removido", "fa-trash-can", "text-amber-400");
+            showToast("Exercício removido de todas as semanas", "fa-trash-can", "text-amber-400");
         }
 
         function saveSessionNotes() {
             const notes = document.getElementById('session-notes').value;
-            workoutData[currentWeek].days[currentDay].notes = notes;
+            workoutData.weeks[currentWeekIdx].days[currentDayIdx].notes = notes;
             saveWorkoutData();
         }
 
@@ -985,7 +1260,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `ULPPL_WUP_Mobile_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.download = `TreinadorHunter_Backup_${new Date().toISOString().slice(0,10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1005,9 +1280,11 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (data && data.W1 && data.W2) {
+                    if (data) {
                         workoutData = data;
+                        normalizeWorkoutData(workoutData);
                         saveWorkoutData();
+                        renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
                     } else {
@@ -1035,7 +1312,9 @@
         function executeReset() {
             localStorage.removeItem(`WORKOUT_${currentStudent}`);
             workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+            normalizeWorkoutData(workoutData);
             closeModal('modal-reset');
+            renderHeader();
             renderApp();
             showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
         }
@@ -1055,6 +1334,19 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-24', 'opacity-0');
             }, 2500);
+        }
+
+        function getTargetRepsNum(targetRepsStr) {
+            if (!targetRepsStr) return 10;
+            const match = String(targetRepsStr).match(/\d+/);
+            return match ? parseFloat(match[0]) : 10;
+        }
+
+        function parseNum(val) {
+            if (val === null || val === undefined || val === '') return '';
+            const clean = String(val).replace(',', '.').trim();
+            const num = parseFloat(clean);
+            return isNaN(num) ? '' : num;
         }
 
         function escapeHtml(str) {
