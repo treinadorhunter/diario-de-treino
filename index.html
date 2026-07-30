@@ -272,6 +272,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
 
+    /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS */
+        const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec"; // Cole a URL gerada no Apps Script dentro das aspas
+
+        // Captura o ID do aluno da URL (?aluno=ma-8942)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
+
         /* ESTADO DO APP */
         let currentWeek = 'W1';
         let currentDay = 'SEG';
@@ -286,7 +293,7 @@
         });
 
         async function loadWorkoutData() {
-            if (API_URL && API_URL !== "COLE_SUA_URL_DO_APPS_SCRIPT_AQUI") {
+            if (API_URL && API_URL !== "SUA_URL_DO_APPS_SCRIPT_AQUI") {
                 try {
                     showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
                     const response = await fetch(`${API_URL}?aluno=${currentStudent}`);
@@ -299,11 +306,11 @@
                         return;
                     }
                 } catch (e) {
-                    console.error("Erro ao conectar à nuvem, carregando dados locais:", e);
+                    console.error("Erro ao conectar à nuvem:", e);
                 }
             }
 
-            // Fallback local caso esteja offline
+            // Caso a planilha esteja vazia ou sem dados, carrega a estrutura padrão
             const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
             if (saved) {
                 try {
@@ -317,9 +324,27 @@
         }
 
         function saveWorkoutData() {
-            // Salva no armazenamento local instantaneamente
             localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
+
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                if (!API_URL || API_URL === "SUA_URL_DO_APPS_SCRIPT_AQUI") return;
+                try {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aluno: currentStudent,
+                            data: workoutData
+                        })
+                    });
+                } catch (e) {
+                    console.error("Erro ao salvar no Google Sheets:", e);
+                }
+            }, 1000);
+        }
 
             // Envia para o Google Sheets em segundo plano (com intervalo de 1s para não sobrecarregar)
             if (saveTimeout) clearTimeout(saveTimeout);
