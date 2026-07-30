@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ULPPL WUP App - Diário de Treino</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .active-tab-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
+
+    <!-- App Bar Header -->
+    <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-40 shadow-md backdrop-blur-md bg-slate-900/90">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <i class="fa-solid fa-dumbbell text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                        ULPPL <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">WUP</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-medium">Diário Móvel • 5 Dias</p>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center gap-1.5">
+                <button onclick="toggleAdminMode()" id="btn-admin-toggle" class="px-2.5 py-1.5 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition">
+                    <i class="fa-solid fa-lock text-slate-400" id="icon-admin-lock"></i>
+                    <span id="text-admin-mode">Modo Aluno</span>
+                </button>
+
+                <button onclick="openModal('modal-menu')" class="w-9 h-9 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg flex items-center justify-center active:scale-95 transition">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Week Selector (Horizontal Swipe Tabs) -->
+        <div class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50">
+            <button onclick="switchWeek('W1')" id="tab-W1" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
+                <div class="text-[9px] font-bold uppercase tracking-wider text-amber-400 flex items-center justify-between">
+                    Semana 1 <i class="fa-solid fa-bolt text-[8px]"></i>
+                </div>
+                <div class="font-extrabold text-xs text-white">12-15 RM</div>
+            </button>
+
+            <button onclick="switchWeek('W2')" id="tab-W2" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
+                <div class="text-[9px] font-bold uppercase tracking-wider text-red-400 flex items-center justify-between">
+                    Semana 2 <i class="fa-solid fa-weight-hanging text-[8px]"></i>
+                </div>
+                <div class="font-extrabold text-xs text-white">4-6 RM</div>
+            </button>
+
+            <button onclick="switchWeek('W3')" id="tab-W3" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
+                <div class="text-[9px] font-bold uppercase tracking-wider text-purple-400 flex items-center justify-between">
+                    Semana 3 <i class="fa-solid fa-cubes text-[8px]"></i>
+                </div>
+                <div class="font-extrabold text-xs text-white">8-10 RM</div>
+            </button>
+
+            <button onclick="switchWeek('W4')" id="tab-W4" class="week-tab flex-1 min-w-[100px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden">
+                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
+                    Semana 4 <i class="fa-solid fa-heart-pulse text-[8px]"></i>
+                </div>
+                <div class="font-extrabold text-xs text-white">Deload</div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sticky Day Navigation Bar -->
+    <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[108px] z-30 shadow-sm">
+        <div class="px-2 py-2 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+            <button onclick="switchDay('SEG')" id="day-tab-SEG" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
+                Seg • Upper
+            </button>
+            <button onclick="switchDay('TER')" id="day-tab-TER" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
+                Ter • Lower
+            </button>
+            <button onclick="switchDay('QUA')" id="day-tab-QUA" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
+                Qua • Push
+            </button>
+            <button onclick="switchDay('QUI')" id="day-tab-QUI" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
+                Qui • Pull
+            </button>
+            <button onclick="switchDay('SEX')" id="day-tab-SEX" class="day-tab flex-1 py-2 px-2.5 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center">
+                Sex • Legs
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="px-3 py-4 space-y-4 flex-1">
+        
+        <!-- Strategy & Progress Banner Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+                <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border">
+                    <!-- Dynamic Week Badge -->
+                </span>
+                <span id="metric-progress-count" class="text-xs font-bold text-slate-400">
+                    0/0 séries
+                </span>
+            </div>
+
+            <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3">
+                <!-- Dynamic Week Description -->
+            </p>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
+                <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- Compact Metrics Grid -->
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                    <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
+                    <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
+                </div>
+                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                    <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
+                    <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
+                </div>
+                <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                    <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
+                    <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">RIR -</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day Title Bar & Admin Controls -->
+        <div class="flex items-center justify-between pt-1">
+            <h2 id="day-title" class="text-sm font-extrabold text-white flex items-center gap-2">
+                <!-- Dynamic Day Title -->
+            </h2>
+
+            <!-- Admin-only add exercise button -->
+            <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-plus text-xs"></i> Exercício
+            </button>
+        </div>
+
+        <!-- Exercises List Container -->
+        <div id="exercises-list" class="space-y-4">
+            <!-- Dynamic Exercises Cards -->
+        </div>
+
+        <!-- Session Notes (PSE) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+            <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
+                <i class="fa-solid fa-pen-to-square text-blue-400"></i> Anotações / Percepção de Esforço (PSE)
+            </label>
+            <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+        </div>
+
+    </main>
+
+    <!-- Modal Menu Settings -->
+    <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-3">
+            <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2 sm:hidden"></div>
+            
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
+                <i class="fa-solid fa-sliders text-blue-400"></i> Opções da Planilha
+            </h3>
+
+            <div class="space-y-2 pt-1">
+                <button onclick="exportData(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-download text-blue-400"></i> Exportar Backup (JSON)</span>
+                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+                </button>
+
+                <button onclick="triggerImport(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-upload text-emerald-400"></i> Importar Backup (JSON)</span>
+                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+                </button>
+
+                <button onclick="window.print(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir ou Gerar PDF</span>
+                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+                </button>
+
+                <button onclick="confirmReset(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-bold flex items-center justify-between transition border border-red-800/40">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para os Padrões</span>
+                    <i class="fa-solid fa-chevron-right text-red-500/60 text-xs"></i>
+                </button>
+            </div>
+
+            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Confirm Reset -->
+    <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center">
+            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
+            <p class="text-xs text-slate-400 mb-5">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
+            <div class="flex gap-2">
+                <button onclick="closeModal('modal-reset')" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
+                <button onclick="executeReset()" class="flex-1 py-3 bg-red-600 text-white rounded-xl text-xs font-bold">Sim, Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Password (Acesso Treinador) -->
+    <div id="modal-password" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-extrabold text-white mb-1">Acesso do Treinador</h3>
+                <p class="text-xs text-slate-400">Digite a senha para liberar o modo edição:</p>
+            </div>
+            <div>
+                <input type="password" id="input-admin-pass" inputmode="numeric" maxlength="6" placeholder="****" 
+                    onkeydown="if(event.key==='Enter') verifyAdminPassword()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-center text-lg font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
+                <p id="pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-2 hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeModal('modal-password')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
+                <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-import" class="hidden" accept=".json" onchange="importData(event)">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur text-white text-xs px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none w-[90%] max-w-xs justify-center">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-msg" class="font-semibold">Mensagem</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'ULPPL_WUP_WORKOUT_MOBILE_V1';
+
+        /* DEFAULT PROGRAM DATA */
+        const DEFAULT_PROGRAM = {
+            W1: {
+                title: "Semana 1 — Estresse Metabólico",
+                desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
+                badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+                rirText: "RIR 1",
+                restText: "60s",
+                days: {
+                    SEG: {
+                        name: "Segunda: Upper (Superior Geral)",
+                        exercises: [
+                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
+                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
+                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
+                            { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
+                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." }
+                        ]
+                    },
+                    TER: {
+                        name: "Terça: Lower (Inferior Geral)",
+                        exercises: [
+                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
+                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
+                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
+                            { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
+                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." }
+                        ]
+                    },
+                    QUA: {
+                        name: "Quarta: Push (Peito, Ombro, Tríceps)",
+                        exercises: [
+                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
+                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
+                            { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
+                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." }
+                        ]
+                    },
+                    QUI: {
+                        name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)",
+                        exercises: [
+                            { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
+                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
+                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
+                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." }
+                        ]
+                    },
+                    SEX: {
+                        name: "Sexta: Legs (Pernas Hipertrofia)",
+                        exercises: [
+                            { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
+                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
+                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
+                            { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
+                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." }
+                        ]
+                    }
+                }
+            },
+            W2: {
+                title: "Semana 2 — Tensão Mecânica / Força",
+                desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2-3 min).",
+                badgeClass: "bg-red-500/15 text-red-400 border-red-500/30",
+                rirText: "RIR 2",
+                restText: "2.5-3 min",
+                days: {
+                    SEG: {
+                        name: "Segunda: Upper (Força - Pesos Livres)",
+                        exercises: [
+                            { name: "Supino Reto c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Carga alta. Manter RIR 2." },
+                            { name: "Remada Curvada c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Puxada firme até o abdômen." },
+                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "4-6", rest: "2.5min", notes: "Estabilidade de ombro." },
+                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "4-6", rest: "2.5min", notes: "Subida controlada." },
+                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "6-8", rest: "2min", notes: "Preservar articulação dos cotovelos." }
+                        ]
+                    },
+                    TER: {
+                        name: "Terça: Lower (Força - Pesos Livres)",
+                        exercises: [
+                            { name: "Agachamento Livre c/ Barra", sets: 3, targetReps: "4-6", rest: "3-4min", notes: "Tensão mecânica máxima na barra." },
+                            { name: "Stiff / RDL c/ Barra", sets: 3, targetReps: "4-6", rest: "3min", notes: "Coluna neutra sob carga." },
+                            { name: "Cadeira Extensora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Isolamento de suporte." },
+                            { name: "Mesa Flexora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Fase excêntrica sob controle." },
+                            { name: "Panturrilha em Pé (Gêmeos)", sets: 3, targetReps: "6-8", rest: "90s", notes: "Carga pesada na plataforma." }
+                        ]
+                    },
+                    QUA: {
+                        name: "Quarta: Push (Força Auxiliar / Máquinas)",
+                        exercises: [
+                            { name: "Supino Inclinado c/ Halteres", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Segurança de ombro." },
+                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "6-8", rest: "2min", notes: "Sobrecarga sem estresse articular excessivo." },
+                            { name: "Elevação Lateral c/ Cabo", sets: 3, targetReps: "8-10", rest: "90s", notes: "Movimento limpo." },
+                            { name: "Tríceps Pulley c/ Corda", sets: 3, targetReps: "6-8", rest: "90s", notes: "Preservar cotovelos." }
+                        ]
+                    },
+                    QUI: {
+                        name: "Quinta: Pull (Força Auxiliar / Máquinas)",
+                        exercises: [
+                            { name: "Remada Cavalinho ou Apoiada", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Tracionar sem balançar o tronco." },
+                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquinas para aliviar lombar." },
+                            { name: "Crucifixo Invertido (Peck Deck)", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de ombro." },
+                            { name: "Rosca Inclinada c/ Halteres", sets: 3, targetReps: "6-8", rest: "90s", notes: "Execução estrita." }
+                        ]
+                    },
+                    SEX: {
+                        name: "Sexta: Legs (Força Auxiliar)",
+                        exercises: [
+                            { name: "Leg Press 45º", sets: 3, targetReps: "6-8", rest: "2.5min", notes: "Máquina com carga sólida." },
+                            { name: "Elevação Pélvica c/ Barra", sets: 3, targetReps: "6-8", rest: "2min", notes: "Quadril travado no topo." },
+                            { name: "Cadeira Extensora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Isolado com carga alta." },
+                            { name: "Cadeira Flexora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de coxa firme." },
+                            { name: "Panturrilha Sentado (Solear)", sets: 3, targetReps: "8-10", rest: "60s", notes: "Carga sem salto." }
+                        ]
+                    }
+                }
+            },
+            W3: {
+                title: "Semana 3 — Hipertrofia Tradicional",
+                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
+                badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+                rirText: "RIR 0-1",
+                restText: "90-120s",
+                days: {
+                    SEG: {
+                        name: "Segunda: Upper (Hipertrofia)",
+                        exercises: [
+                            { name: "Supino Reto c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Última série até a falha técnica." },
+                            { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Retração forte das costas." },
+                            { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "8-10", rest: "90s", notes: "Carga estrita para 8-10 reps." },
+                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "8-10", rest: "90s", notes: "Puxar no peitoral superior." },
+                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "10-12", rest: "60s", notes: "Máximo pump mecânico." }
+                        ]
+                    },
+                    TER: {
+                        name: "Terça: Lower (Hipertrofia)",
+                        exercises: [
+                            { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "8-10", rest: "2min", notes: "Profundidade máxima mantida." },
+                            { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Sentir o alongamento dos isquiotibiais." },
+                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Falha na última repetição." },
+                            { name: "Mesa Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Foco no pico de contração." },
+                            { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Pausa rápida na extensão." }
+                        ]
+                    },
+                    QUA: {
+                        name: "Quarta: Push (Hipertrofia)",
+                        exercises: [
+                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "8-10", rest: "90s", notes: "Ponto de inversão controlado." },
+                            { name: "Chest Press Articulado", sets: 3, targetReps: "8-10", rest: "90s", notes: "Próximo à falha." },
+                            { name: "Elevação Lateral c/ Cabo", sets: 4, targetReps: "10-12", rest: "60s", notes: "Ombros deprimidos." },
+                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "10-12", rest: "60s", notes: "Extensão total." }
+                        ]
+                    },
+                    QUI: {
+                        name: "Quinta: Pull (Hipertrofia)",
+                        exercises: [
+                            { name: "Remada Cavalinho ou Apoiada", sets: 4, targetReps: "8-10", rest: "90s", notes: "Esmagar as costas no final." },
+                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "8-10", rest: "90s", notes: "Amplitude total de movimento." },
+                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Isolamento limpo." },
+                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "10-12", rest: "60s", notes: "Tensão máxima no bíceps." }
+                        ]
+                    },
+                    SEX: {
+                        name: "Sexta: Legs (Hipertrofia)",
+                        exercises: [
+                            { name: "Leg Press 45º", sets: 4, targetReps: "8-10", rest: "2min", notes: "Carga sólida mantida." },
+                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "8-10", rest: "90s", notes: "Pausa no pico contraído." },
+                            { name: "Cadeira Extensora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Cadência 3-0-1-0." },
+                            { name: "Cadeira Flexora", sets: 3, targetReps: "10-12", rest: "60s", notes: "Posterior bem ativado." },
+                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Movimento cadenciado." }
+                        ]
+                    }
+                }
+            },
+            W4: {
+                title: "Semana 4 — Deload / Recuperação",
+                desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
+                badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+                rirText: "RIR 3-4",
+                restText: "90s",
+                days: {
+                    SEG: {
+                        name: "Segunda: Upper (Deload)",
+                        exercises: [
+                            { name: "Supino Reto c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Carga leve. 3-4 reps de folga." },
+                            { name: "Remada Curvada c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Lubrificação articular." },
+                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Movimento leve." },
+                            { name: "Puxada Alta Neutra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Fluido e leve." },
+                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação ativa." }
+                        ]
+                    },
+                    TER: {
+                        name: "Terça: Lower (Deload)",
+                        exercises: [
+                            { name: "Agachamento Livre c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter técnica sem peso alto." },
+                            { name: "Stiff / RDL c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Alongamento suave." },
+                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Circulação ativa." },
+                            { name: "Mesa Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Preservação articular." },
+                            { name: "Panturrilha em Pé (Gêmeos)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Carga confortável." }
+                        ]
+                    },
+                    QUA: {
+                        name: "Quarta: Push (Deload)",
+                        exercises: [
+                            { name: "Supino Inclinado c/ Halteres", sets: 2, targetReps: "8-10", rest: "90s", notes: "Leve e controlado." },
+                            { name: "Chest Press Articulado", sets: 2, targetReps: "8-10", rest: "90s", notes: "Trabalho relaxado na máquina." },
+                            { name: "Elevação Lateral c/ Cabo", sets: 2, targetReps: "10-12", rest: "60s", notes: "Bombeamento leve." },
+                            { name: "Tríceps Pulley c/ Corda", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem estresse no cotovelo." }
+                        ]
+                    },
+                    QUI: {
+                        name: "Quinta: Pull (Deload)",
+                        exercises: [
+                            { name: "Remada Cavalinho ou Apoiada", sets: 2, targetReps: "8-10", rest: "90s", notes: "Sem fadiga lombar." },
+                            { name: "Puxada Articulada ou Pulldown", sets: 2, targetReps: "8-10", rest: "90s", notes: "Manter padrão ativo." },
+                            { name: "Crucifixo Invertido (Peck Deck)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Descompressão." },
+                            { name: "Rosca Inclinada c/ Halteres", sets: 2, targetReps: "10-12", rest: "60s", notes: "Sem esforço exaustivo." }
+                        ]
+                    },
+                    SEX: {
+                        name: "Sexta: Legs (Deload)",
+                        exercises: [
+                            { name: "Leg Press 45º", sets: 2, targetReps: "8-10", rest: "90s", notes: "Metade do volume habitual." },
+                            { name: "Elevação Pélvica c/ Barra", sets: 2, targetReps: "8-10", rest: "90s", notes: "Ativação suave." },
+                            { name: "Cadeira Extensora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Volume mínimo indispensável." },
+                            { name: "Cadeira Flexora", sets: 2, targetReps: "10-12", rest: "60s", notes: "Regeneração celular." },
+                            { name: "Panturrilha Sentado (Solear)", sets: 2, targetReps: "10-12", rest: "60s", notes: "Recuperação de tendão." }
+                        ]
+                    }
+                }
+            }
+        };
+
+        /* APP STATE */
+        let currentWeek = 'W1';
+        let currentDay = 'SEG';
+        let workoutData = {};
+        let isAdminMode = false;
+
+        /* INITIALIZATION */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWorkoutData();
+            renderApp();
+        });
+
+        function loadWorkoutData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    workoutData = JSON.parse(saved);
+                } catch(e) {
+                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+                }
+            } else {
+                workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+            }
+        }
+
+        function saveWorkoutData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(workoutData));
+            updateMetrics();
+        }
+
+        /* PARSING & STEPPER HELPERS */
+        function getTargetRepsNum(targetRepsStr) {
+            if (!targetRepsStr) return 10;
+            const match = String(targetRepsStr).match(/\d+/);
+            return match ? parseFloat(match[0]) : 10;
+        }
+
+        function parseNum(val) {
+            if (val === null || val === undefined || val === '') return '';
+            const clean = String(val).replace(',', '.').trim();
+            const num = parseFloat(clean);
+            return isNaN(num) ? '' : num;
+        }
+
+        /* ADMIN MODE TOGGLE (Proteção por Senha) */
+        function toggleAdminMode() {
+            if (isAdminMode) {
+                isAdminMode = false;
+                updateAdminUI();
+                showToast("Modo Aluno (Apenas Registro de Treino)", "fa-circle-check", "text-blue-400");
+            } else {
+                document.getElementById('input-admin-pass').value = '';
+                document.getElementById('pass-error-msg').classList.add('hidden');
+                openModal('modal-password');
+                setTimeout(() => {
+                    document.getElementById('input-admin-pass').focus();
+                }, 100);
+            }
+        }
+
+        function verifyAdminPassword() {
+            const inputPass = document.getElementById('input-admin-pass').value;
+            const errorMsg = document.getElementById('pass-error-msg');
+
+            if (inputPass === '0511') {
+                isAdminMode = true;
+                closeModal('modal-password');
+                updateAdminUI();
+                showToast("Modo Edição Ativado!", "fa-lock-open", "text-amber-400");
+            } else {
+                errorMsg.classList.remove('hidden');
+                if (navigator.vibrate) {
+                    navigator.vibrate([80, 50, 80]);
+                }
+            }
+        }
+
+        function updateAdminUI() {
+            const btn = document.getElementById('btn-admin-toggle');
+            const icon = document.getElementById('icon-admin-lock');
+            const text = document.getElementById('text-admin-mode');
+            const addBtn = document.getElementById('btn-add-exercise');
+
+            if (isAdminMode) {
+                btn.classList.remove('bg-slate-800', 'border-slate-700/80');
+                btn.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+                icon.className = 'fa-solid fa-lock-open text-amber-400';
+                text.textContent = 'Modo Edição';
+                addBtn.classList.remove('hidden');
+            } else {
+                btn.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+                btn.classList.add('bg-slate-800', 'border-slate-700/80');
+                icon.className = 'fa-solid fa-lock text-slate-400';
+                text.textContent = 'Modo Aluno';
+                addBtn.classList.add('hidden');
+            }
+
+            renderExercises();
+        }
+
+        /* NAVIGATION TABS */
+        function switchWeek(weekKey) {
+            currentWeek = weekKey;
+            renderApp();
+        }
+
+        function switchDay(dayKey) {
+            currentDay = dayKey;
+            renderApp();
+        }
+
+        function renderApp() {
+            document.querySelectorAll('.week-tab').forEach(tab => {
+                const w = tab.id.replace('tab-', '');
+                if (w === currentWeek) {
+                    tab.classList.add('bg-slate-800', 'border-blue-500', 'active-tab-glow');
+                    tab.classList.remove('bg-slate-900', 'border-slate-800', 'opacity-60');
+                } else {
+                    tab.classList.remove('bg-slate-800', 'border-blue-500', 'active-tab-glow');
+                    tab.classList.add('bg-slate-900', 'border-slate-800', 'opacity-60');
+                }
+            });
+
+            document.querySelectorAll('.day-tab').forEach(tab => {
+                const d = tab.id.replace('day-tab-', '');
+                if (d === currentDay) {
+                    tab.classList.add('bg-blue-600', 'text-white', 'border-blue-500', 'shadow-sm');
+                    tab.classList.remove('bg-slate-900', 'text-slate-400', 'border-slate-800');
+                } else {
+                    tab.classList.remove('bg-blue-600', 'text-white', 'border-blue-500', 'shadow-sm');
+                    tab.classList.add('bg-slate-900', 'text-slate-400', 'border-slate-800');
+                }
+            });
+
+            const weekInfo = workoutData[currentWeek];
+            const dayInfo = weekInfo.days[currentDay];
+
+            const badgeEl = document.getElementById('badge-week-title');
+            badgeEl.className = `px-2.5 py-1 rounded-full text-[11px] font-bold border ${weekInfo.badgeClass}`;
+            badgeEl.innerHTML = `<i class="fa-solid fa-bullseye mr-1"></i> ${weekInfo.title}`;
+
+            document.getElementById('week-desc-text').textContent = weekInfo.desc;
+
+            document.getElementById('day-title').innerHTML = `
+                <i class="fa-solid fa-calendar-day text-blue-400"></i> ${dayInfo.name}
+            `;
+
+            const notesInput = document.getElementById('session-notes');
+            notesInput.value = dayInfo.notes || "";
+
+            renderExercises();
+            updateMetrics();
+        }
+
+        function renderExercises() {
+            const listEl = document.getElementById('exercises-list');
+            listEl.innerHTML = '';
+
+            const exercises = workoutData[currentWeek].days[currentDay].exercises;
+
+            if (!exercises || exercises.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+                        <i class="fa-solid fa-dumbbell text-2xl mb-2 block"></i>
+                        <p class="text-xs">Nenhum exercício cadastrado nesta sessão.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            exercises.forEach((ex, exIdx) => {
+                const exCard = document.createElement('div');
+                exCard.className = 'bg-slate-900 border border-slate-800/90 rounded-2xl p-3.5 shadow-sm space-y-3';
+
+                const setsCount = ex.sets || 3;
+                if (!ex.logs) ex.logs = [];
+
+                let setsRowsHtml = '';
+                let defaultRepsPlaceholder = getTargetRepsNum(ex.targetReps);
+
+                for (let s = 0; s < setsCount; s++) {
+                    const log = ex.logs[s] || { load: '', reps: '', done: false };
+                    const isDone = Boolean(log.done);
+
+                    setsRowsHtml += `
+                        <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-xl transition ${isDone ? 'bg-emerald-950/25 border border-emerald-800/40' : 'bg-slate-950 border border-slate-800/80'}">
+                            <!-- Set Index -->
+                            <div class="w-6 shrink-0 text-center font-extrabold text-[11px] ${isDone ? 'text-emerald-400' : 'text-slate-500'}">
+                                #${s + 1}
+                            </div>
+
+                            <!-- Carga Input + Step Controls -->
+                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    -
+                                </button>
+                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
+                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" 
+                                        oninput="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
+                                        onchange="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
+                                        class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">kg</span>
+                                </div>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    +
+                                </button>
+                            </div>
+
+                            <!-- Reps Input + Step Controls -->
+                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    -
+                                </button>
+                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
+                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined && log.reps !== '' ? log.reps : ''}" 
+                                        oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
+                                        onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
+                                        class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">rep</span>
+                                </div>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    +
+                                </button>
+                            </div>
+
+                            <!-- Done Toggle Button -->
+                            <button onclick="toggleSetDone(${exIdx}, ${s})" class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-500 text-slate-950 font-black shadow-md' : 'bg-slate-800 border border-slate-700/80 text-slate-500 active:scale-95'}">
+                                <i class="fa-solid ${isDone ? 'fa-check text-sm' : 'fa-check text-xs opacity-40'}"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                let titleHtml = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            ${isAdminMode ? `
+                                <input type="text" value="${escapeHtml(ex.name)}" 
+                                    onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
+                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
+                            ` : `
+                                <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                            `}
+
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                    ${setsCount} séries × ${ex.targetReps} reps
+                                </span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
+                                </span>
+                            </div>
+                        </div>
+
+                        ${isAdminMode ? `
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="changeSetsCount(${exIdx}, 1)" title="Adicionar Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-emerald-400 flex items-center justify-center">
+                                    +
+                                </button>
+                                <button onclick="changeSetsCount(${exIdx}, -1)" title="Remover Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center justify-center">
+                                    -
+                                </button>
+                                <button onclick="deleteExercise(${exIdx})" title="Excluir Exercício" class="w-7 h-7 bg-red-950/60 border border-red-800/60 rounded-lg text-xs text-red-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                let notesHtml = '';
+                if (ex.notes || isAdminMode) {
+                    notesHtml = `
+                        <div>
+                            ${isAdminMode ? `
+                                <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
+                                    onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
+                            ` : `
+                                <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
+                                    <span>${escapeHtml(ex.notes)}</span>
+                                </p>
+                            `}
+                        </div>
+                    `;
+                }
+
+                exCard.innerHTML = `
+                    ${titleHtml}
+                    ${notesHtml}
+                    <div class="space-y-1.5 pt-1">
+                        ${setsRowsHtml}
+                    </div>
+                `;
+
+                listEl.appendChild(exCard);
+            });
+        }
+
+        function adjustSetVal(exIdx, setIdx, field, delta) {
+            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            if (!ex.logs) ex.logs = [];
+
+            let defaultReps = getTargetRepsNum(ex.targetReps);
+
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
+
+            let currentVal = parseNum(ex.logs[setIdx][field]);
+            if (typeof currentVal !== 'number') {
+                currentVal = field === 'reps' ? defaultReps : 0;
+            }
+
+            let step = 1;
+            let newVal = Math.max(0, currentVal + (delta * step));
+            newVal = Math.round(newVal * 10) / 10;
+
+            ex.logs[setIdx][field] = newVal;
+            saveWorkoutData();
+            renderExercises();
+        }
+
+        function updateSetLog(exIdx, setIdx, field, value) {
+            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            if (!ex.logs) ex.logs = [];
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: '', done: false };
+
+            if (field === 'load' || field === 'reps') {
+                ex.logs[setIdx][field] = parseNum(value);
+            }
+
+            saveWorkoutData();
+            updateMetrics();
+        }
+
+        function toggleSetDone(exIdx, setIdx) {
+            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            if (!ex.logs) ex.logs = [];
+
+            let defaultReps = getTargetRepsNum(ex.targetReps);
+
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
+
+            if (!ex.logs[setIdx].done && (ex.logs[setIdx].reps === '' || ex.logs[setIdx].reps === undefined)) {
+                ex.logs[setIdx].reps = defaultReps;
+            }
+
+            ex.logs[setIdx].done = !ex.logs[setIdx].done;
+
+            if (navigator.vibrate) {
+                navigator.vibrate(40);
+            }
+
+            saveWorkoutData();
+            renderExercises();
+        }
+
+        function updateMetrics() {
+            const weekInfo = workoutData[currentWeek];
+            if (!weekInfo || !weekInfo.days || !weekInfo.days[currentDay]) return;
+
+            const dayInfo = weekInfo.days[currentDay];
+            const exercises = dayInfo.exercises || [];
+
+            let totalSets = 0;
+            let completedSets = 0;
+            let totalTonnage = 0;
+
+            exercises.forEach(ex => {
+                const count = ex.sets || 3;
+                totalSets += count;
+
+                let defaultReps = getTargetRepsNum(ex.targetReps);
+
+                if (ex.logs) {
+                    for (let s = 0; s < count; s++) {
+                        const log = ex.logs[s];
+                        if (log) {
+                            if (log.done) {
+                                completedSets++;
+                            }
+
+                            const loadNum = parseNum(log.load);
+                            const repsNum = parseNum(log.reps);
+
+                            const load = typeof loadNum === 'number' ? loadNum : 0;
+                            const reps = typeof repsNum === 'number' && repsNum > 0 ? repsNum : defaultReps;
+
+                            if (log.done && load > 0) {
+                                totalTonnage += (load * reps);
+                            }
+                        }
+                    }
+                }
+            });
+
+            const pct = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+
+            const elPercent = document.getElementById('metric-progress-percent');
+            const elCount = document.getElementById('metric-progress-count');
+            const elBar = document.getElementById('metric-progress-bar');
+            const elTonnage = document.getElementById('metric-tonnage');
+            const elRir = document.getElementById('metric-rir-short');
+
+            if (elPercent) elPercent.textContent = `${pct}%`;
+            if (elCount) elCount.textContent = `${completedSets}/${totalSets} séries`;
+            if (elBar) elBar.style.width = `${pct}%`;
+            if (elTonnage) elTonnage.innerHTML = `${totalTonnage.toLocaleString('pt-BR')} <span class="text-[10px] font-normal text-slate-400">kg</span>`;
+            if (elRir) elRir.textContent = weekInfo.rirText || '-';
+        }
+
+        function updateExerciseProp(exIdx, prop, value) {
+            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            ex[prop] = value;
+            saveWorkoutData();
+        }
+
+        function changeSetsCount(exIdx, delta) {
+            const ex = workoutData[currentWeek].days[currentDay].exercises[exIdx];
+            const newSets = Math.max(1, (ex.sets || 3) + delta);
+            ex.sets = newSets;
+            saveWorkoutData();
+            renderExercises();
+        }
+
+        function addNewExercise() {
+            const exercises = workoutData[currentWeek].days[currentDay].exercises;
+            exercises.push({
+                name: "Novo Exercício",
+                sets: 3,
+                targetReps: "8-12",
+                rest: "60s",
+                notes: "Dica de execução...",
+                logs: []
+            });
+            saveWorkoutData();
+            renderExercises();
+            showToast("Exercício adicionado!", "fa-circle-plus", "text-emerald-400");
+        }
+
+        function deleteExercise(exIdx) {
+            const exercises = workoutData[currentWeek].days[currentDay].exercises;
+            exercises.splice(exIdx, 1);
+            saveWorkoutData();
+            renderExercises();
+            showToast("Exercício removido", "fa-trash-can", "text-amber-400");
+        }
+
+        function saveSessionNotes() {
+            const notes = document.getElementById('session-notes').value;
+            workoutData[currentWeek].days[currentDay].notes = notes;
+            saveWorkoutData();
+        }
+
+        function exportData() {
+            const jsonStr = JSON.stringify(workoutData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ULPPL_WUP_Mobile_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Backup exportado!", "fa-circle-check", "text-emerald-400");
+        }
+
+        function triggerImport() {
+            document.getElementById('file-import').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && data.W1 && data.W2) {
+                        workoutData = data;
+                        saveWorkoutData();
+                        renderApp();
+                        showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
+                    } else {
+                        showToast("Arquivo JSON inválido!", "fa-circle-xmark", "text-red-400");
+                    }
+                } catch(err) {
+                    showToast("Erro ao importar dados!", "fa-circle-xmark", "text-red-400");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function confirmReset() {
+            openModal('modal-reset');
+        }
+
+        function executeReset() {
+            localStorage.removeItem(STORAGE_KEY);
+            workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+            closeModal('modal-reset');
+            renderApp();
+            showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
+        }
+
+        function showToast(msg, iconClass = "fa-circle-check", iconColor = "text-emerald-400") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = msg;
+            toastIcon.className = `fa-solid ${iconClass} ${iconColor}`;
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
