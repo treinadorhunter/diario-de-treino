@@ -194,8 +194,9 @@
     </div>
 
     <script>
-        /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS */
+       /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS COM SEGURANÇA */
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
+        const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; // Deve ser idêntico ao do Apps Script
 
         const urlParams = new URLSearchParams(window.location.search);
         const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
@@ -403,7 +404,7 @@
             if (API_URL) {
                 try {
                     showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
-                    const response = await fetch(`${API_URL}?aluno=${currentStudent}`);
+                    const response = await fetch(`${API_URL}?aluno=${currentStudent}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                     const data = await response.json();
 
                     if (data && !data.error && !data.empty) {
@@ -431,7 +432,7 @@
             normalizeWorkoutData(workoutData);
         }
 
-        function saveWorkoutData() {
+       function saveWorkoutData() {
             localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
 
@@ -445,6 +446,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             aluno: currentStudent,
+                            token: API_SECRET_TOKEN,
                             data: workoutData
                         })
                     });
@@ -453,7 +455,6 @@
                 }
             }, 1000);
         }
-
         function renderHeader() {
             const container = document.getElementById('student-name-container');
             const studentName = workoutData.studentName || "Nome do Aluno";
@@ -497,20 +498,28 @@
             }
         }
 
-        function verifyAdminPassword() {
+        async function verifyAdminPassword() {
             const inputPass = document.getElementById('input-admin-pass').value;
             const errorMsg = document.getElementById('pass-error-msg');
 
-            if (inputPass === '0511') {
-                isAdminMode = true;
-                closeModal('modal-password');
-                updateAdminUI();
-                showToast("Modo Edição Ativado!", "fa-lock-open", "text-amber-400");
-            } else {
-                errorMsg.classList.remove('hidden');
-                if (navigator.vibrate) {
-                    navigator.vibrate([80, 50, 80]);
+            showToast("Verificando senha...", "fa-key", "text-amber-400");
+
+            try {
+                // Valida a senha diretamente no servidor (Google Apps Script)
+                const res = await fetch(`${API_URL}?action=verifyPass&pass=${encodeURIComponent(inputPass)}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                const result = await res.json();
+
+                if (result && result.valid) {
+                    isAdminMode = true;
+                    closeModal('modal-password');
+                    updateAdminUI();
+                    showToast("Modo Edição Ativado!", "fa-lock-open", "text-amber-400");
+                } else {
+                    errorMsg.classList.remove('hidden');
+                    if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
                 }
+            } catch (e) {
+                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
             }
         }
 
