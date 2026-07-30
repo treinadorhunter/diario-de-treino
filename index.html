@@ -35,15 +35,22 @@
     <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-40 shadow-md backdrop-blur-md bg-slate-900/90">
         <div class="px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
                     <i class="fa-solid fa-dumbbell text-lg"></i>
                 </div>
                 <div>
                     <h1 class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
                         Treinador Hunter <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">PRO</span>
                     </h1>
-                    <div id="student-name-container" class="text-[11px] text-slate-300 font-medium">
-                        <!-- Dynamic Student Name -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div id="student-name-container" class="text-[11px] text-slate-300 font-medium">
+                            <!-- Dynamic Student Name -->
+                        </div>
+                        <span class="text-slate-600 text-[10px]">•</span>
+                        <div id="header-date-container" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                            <i class="fa-regular fa-calendar text-[9px]"></i>
+                            <span id="current-date-text"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,7 +113,92 @@
             <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
         </div>
 
+        <!-- Botão Treinos Anteriores (Histórico) -->
+        <div class="pt-1">
+            <button onclick="openHistoryModal()" class="w-full py-3.5 px-4 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 hover:text-blue-300 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                <span>Treinos Anteriores (Histórico)</span>
+            </button>
+        </div>
+
     </main>
+
+    <!-- Modal Calendário de Histórico -->
+    <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-blue-400"></i> Histórico de Treinos
+                </h3>
+                <button onclick="closeModal('modal-history')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Navegação do Mês no Calendário -->
+            <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize">
+                    <!-- Dynamic Month/Year -->
+                </div>
+                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Grid do Mini Calendário -->
+            <div id="calendar-grid-container" class="space-y-1">
+                <!-- Dynamic Calendar Grid Rendered Here -->
+            </div>
+
+            <!-- Lista de Históricos Recentes -->
+            <div class="pt-2 border-t border-slate-800 space-y-2">
+                <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                    <i class="fa-solid fa-list-check text-emerald-400 mr-1"></i> Registros Recentes
+                </label>
+                <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
+                    <!-- Dynamic Recent History Items -->
+                </div>
+            </div>
+
+            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes do Treino Anterior (Comparador) -->
+    <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div>
+                    <span id="detail-date-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold"></span>
+                    <h3 id="detail-day-title" class="text-sm font-extrabold text-white mt-1"></h3>
+                </div>
+                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
+
+            <!-- Lista de Exercícios Registrados naquele dia -->
+            <div id="detail-exercises-container" class="space-y-3"></div>
+
+            <!-- Anotações daquele dia -->
+            <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
+
+            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Voltar
+            </button>
+        </div>
+    </div>
 
     <!-- Modal Menu Settings -->
     <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
@@ -194,9 +286,9 @@
     </div>
 
     <script>
-       /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS COM SEGURANÇA */
+        /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS COM SEGURANÇA */
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
-        const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; // Deve ser idêntico ao do Apps Script
+        const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; 
 
         const urlParams = new URLSearchParams(window.location.search);
         const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
@@ -209,7 +301,7 @@
             { textClass: "text-emerald-400", badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: "fa-heart-pulse" }
         ];
 
-        /* MODELOS PRONTOS DE FOCO ESTRATÉGICO (PRESETS) COM TEMPOS DE DESCANSO PADRÃO */
+        /* MODELOS PRONTOS DE FOCO ESTRATÉGICO */
         const WEEK_PRESETS = {
             metabolic: {
                 label: "Estresse Metabólico",
@@ -252,6 +344,7 @@
         /* PROGRAMA PADRÃO DO TREINO */
         const DEFAULT_PROGRAM = {
             studentName: "Nome do Aluno",
+            history: {},
             weeks: [
                 {
                     id: "W1",
@@ -275,69 +368,6 @@
                             { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
                             { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
                             { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." }
-                        ]},
-                        { id: "QUA", shortName: "Qua • Push", name: "Quarta: Push (Peito, Ombro, Tríceps)", exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
-                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
-                            { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." }
-                        ]},
-                        { id: "QUI", shortName: "Qui • Pull", name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)", exercises: [
-                            { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." }
-                        ]},
-                        { id: "SEX", shortName: "Sex • Legs", name: "Sexta: Legs (Pernas Hipertrofia)", exercises: [
-                            { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." }
-                        ]}
-                    ]
-                },
-                {
-                    id: "W2",
-                    shortTitle: "Semana 2",
-                    targetReps: "4-6 RM",
-                    title: "Semana 2 — Tensão Mecânica / Força",
-                    desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2-3 min).",
-                    rirText: "RIR 2",
-                    paletteIdx: 1,
-                    days: [
-                        { id: "SEG", shortName: "Seg • Upper", name: "Segunda: Upper (Força - Pesos Livres)", exercises: [
-                            { name: "Supino Reto c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Carga alta. Manter RIR 2." },
-                            { name: "Remada Curvada c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Puxada firme até o abdômen." },
-                            { name: "Desenvolvimento c/ Halteres", sets: 2, targetReps: "4-6", rest: "2min", notes: "Estabilidade de ombro." },
-                            { name: "Puxada Alta Neutra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Subida controlada." },
-                            { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 2, targetReps: "6-8", rest: "2min", notes: "Preservar articulação dos cotovelos." }
-                        ]},
-                        { id: "TER", shortName: "Ter • Lower", name: "Terça: Lower (Força - Pesos Livres)", exercises: [
-                            { name: "Agachamento Livre c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Tensão mecânica máxima na barra." },
-                            { name: "Stiff / RDL c/ Barra", sets: 3, targetReps: "4-6", rest: "2min", notes: "Coluna neutra sob carga." },
-                            { name: "Cadeira Extensora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Isolamento de suporte." },
-                            { name: "Mesa Flexora", sets: 2, targetReps: "6-8", rest: "2min", notes: "Fase excêntrica sob controle." },
-                            { name: "Panturrilha em Pé (Gêmeos)", sets: 3, targetReps: "6-8", rest: "90s", notes: "Carga pesada na plataforma." }
-                        ]},
-                        { id: "QUA", shortName: "Qua • Push", name: "Quarta: Push (Força Auxiliar / Máquinas)", exercises: [
-                            { name: "Supino Inclinado c/ Halteres", sets: 3, targetReps: "6-8", rest: "2min", notes: "Segurança de ombro." },
-                            { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "6-8", rest: "2min", notes: "Sobrecarga sem estresse articular excessivo." },
-                            { name: "Elevação Lateral c/ Cabo", sets: 3, targetReps: "8-10", rest: "90s", notes: "Movimento limpo." },
-                            { name: "Tríceps Pulley c/ Corda", sets: 3, targetReps: "6-8", rest: "90s", notes: "Preservar cotovelos." }
-                        ]},
-                        { id: "QUI", shortName: "Qui • Pull", name: "Quinta: Pull (Força Auxiliar / Máquinas)", exercises: [
-                            { name: "Remada Cavalinho ou Apoiada", sets: 3, targetReps: "6-8", rest: "2min", notes: "Tracionar sem balançar o tronco." },
-                            { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquinas para aliviar lombar." },
-                            { name: "Crucifixo Invertido (Peck Deck)", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de ombro." },
-                            { name: "Rosca Inclinada c/ Halteres", sets: 3, targetReps: "6-8", rest: "90s", notes: "Execução estrita." }
-                        ]},
-                        { id: "SEX", shortName: "Sex • Legs", name: "Sexta: Legs (Força Auxiliar)", exercises: [
-                            { name: "Leg Press 45º", sets: 3, targetReps: "6-8", rest: "2min", notes: "Máquina com carga sólida." },
-                            { name: "Elevação Pélvica c/ Barra", sets: 3, targetReps: "6-8", rest: "2min", notes: "Quadril travado no topo." },
-                            { name: "Cadeira Extensora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Isolado com carga alta." },
-                            { name: "Cadeira Flexora", sets: 3, targetReps: "8-10", rest: "90s", notes: "Posterior de coxa firme." },
-                            { name: "Panturrilha Sentado (Solear)", sets: 3, targetReps: "8-10", rest: "60s", notes: "Carga sem salto." }
                         ]}
                     ]
                 }
@@ -351,16 +381,38 @@
         let isAdminMode = false;
         let saveTimeout = null;
 
+        // Controle do Calendário de Histórico
+        let calendarYear = new Date().getFullYear();
+        let calendarMonth = new Date().getMonth();
+
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             await loadWorkoutData();
+            renderHeaderDate();
             renderHeader();
             renderApp();
         });
 
+        function getTodayKey() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function renderHeaderDate() {
+            const container = document.getElementById('current-date-text');
+            if (container) {
+                const now = new Date();
+                container.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+        }
+
         function normalizeWorkoutData(data) {
             if (!data) return;
             if (!data.studentName) data.studentName = "Nome do Aluno";
+            if (!data.history) data.history = {};
 
             if (!data.weeks) {
                 data.weeks = [];
@@ -407,10 +459,10 @@
                     const response = await fetch(`${API_URL}?aluno=${currentStudent}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                     const data = await response.json();
 
-                    // Se o aluno não for encontrado na planilha
                     if (data && data.error === "Aluno não encontrado.") {
                         showToast("Aluno não cadastrado pelo treinador!", "fa-triangle-exclamation", "text-amber-400");
                         workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+                        normalizeWorkoutData(workoutData);
                         return;
                     }
 
@@ -439,7 +491,41 @@
             normalizeWorkoutData(workoutData);
         }
 
-       function saveWorkoutData() {
+        /* GRAVA O HISTÓRICO DO DIA ATUAL */
+        function updateTodayHistoryRecord() {
+            const todayKey = getTodayKey();
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+
+            const currentDay = currentWeek.days[currentDayIdx];
+            const exercises = currentDay.exercises || [];
+
+            let hasActivity = false;
+            exercises.forEach(ex => {
+                if (ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
+                    hasActivity = true;
+                }
+            });
+
+            if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
+                if (!workoutData.history) workoutData.history = {};
+                
+                const now = new Date();
+                workoutData.history[todayKey] = {
+                    dateKey: todayKey,
+                    dateFormatted: now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                    weekTitle: currentWeek.title || '',
+                    dayName: currentDay.name || '',
+                    dayShortName: currentDay.shortName || '',
+                    notes: currentDay.notes || '',
+                    exercises: JSON.parse(JSON.stringify(exercises)),
+                    updatedAt: now.toISOString()
+                };
+            }
+        }
+
+        function saveWorkoutData() {
+            updateTodayHistoryRecord();
             localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
 
@@ -462,17 +548,18 @@
                 }
             }, 1000);
         }
+
         function renderHeader() {
             const container = document.getElementById('student-name-container');
             const studentName = workoutData.studentName || "Nome do Aluno";
 
             if (isAdminMode) {
                 container.innerHTML = `
-                    <div class="flex items-center gap-1 mt-0.5">
+                    <div class="flex items-center gap-1">
                         <span class="text-[10px] text-slate-400 font-bold">Aluno(a):</span>
                         <input type="text" value="${escapeHtml(studentName)}" 
                             onchange="updateStudentName(this.value)"
-                            class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-36 sm:w-48">
+                            class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-32 sm:w-44">
                     </div>
                 `;
             } else {
@@ -512,7 +599,6 @@
             showToast("Verificando senha...", "fa-key", "text-amber-400");
 
             try {
-                // Valida a senha diretamente no servidor (Google Apps Script)
                 const res = await fetch(`${API_URL}?action=verifyPass&pass=${encodeURIComponent(inputPass)}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                 const result = await res.json();
 
@@ -602,7 +688,6 @@
             week.rirText = preset.rirText;
             week.paletteIdx = preset.paletteIdx;
 
-            // Aplica o tempo de descanso padrão e meta de reps nos exercícios da semana selecionada
             if (week.days) {
                 week.days.forEach(day => {
                     if (day.exercises) {
@@ -794,7 +879,6 @@
                             ` : ''}
                         </div>
 
-                        <!-- SELEÇÃO RÁPIDA DE MODELO PRONTO DE SEMANA -->
                         <div>
                             <label class="text-[10px] text-slate-400 font-bold block mb-1.5">
                                 <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> Aplicar Modelo Pronto de Foco:
@@ -815,7 +899,6 @@
                             </div>
                         </div>
 
-                        <!-- EDIÇÃO MANUAL -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold block mb-1">Aba (ex: Semana 1):</label>
@@ -1200,11 +1283,9 @@
         /* ATUALIZAÇÃO DE PROPRIEDADES DO EXERCÍCIO */
         function updateExerciseProp(exIdx, prop, value) {
             if (prop === 'rest' || prop === 'targetReps') {
-                // Alteração de descanso ou reps individual para a semana atual
                 const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
                 if (ex) ex[prop] = value;
             } else {
-                // Nome do exercício e dicas replicam em todo o mesociclo
                 workoutData.weeks.forEach(week => {
                     if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
                         week.days[currentDayIdx].exercises[exIdx][prop] = value;
@@ -1270,6 +1351,167 @@
             saveWorkoutData();
         }
 
+        /* LÓGICA DO MÓDULO DE HISTÓRICO DE TREINOS E CALENDÁRIO */
+        function openHistoryModal() {
+            renderHistoryCalendar();
+            renderHistoryRecentList();
+            openModal('modal-history');
+        }
+
+        function changeHistoryMonth(delta) {
+            calendarMonth += delta;
+            if (calendarMonth < 0) {
+                calendarMonth = 11;
+                calendarYear--;
+            } else if (calendarMonth > 11) {
+                calendarMonth = 0;
+                calendarYear++;
+            }
+            renderHistoryCalendar();
+        }
+
+        function renderHistoryCalendar() {
+            const monthYearEl = document.getElementById('calendar-month-year');
+            const gridContainer = document.getElementById('calendar-grid-container');
+            if (!gridContainer || !monthYearEl) return;
+
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            monthYearEl.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            let html = `
+                <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-500 mb-1">
+                    <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center">
+            `;
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="p-2"></div>`;
+            }
+
+            const history = workoutData.history || {};
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = String(d).padStart(2, '0');
+                const monthStr = String(calendarMonth + 1).padStart(2, '0');
+                const dateKey = `${calendarYear}-${monthStr}-${dayStr}`;
+
+                const hasRecord = Boolean(history[dateKey]);
+
+                if (hasRecord) {
+                    html += `
+                        <button onclick="viewHistoryDetail('${dateKey}')" class="p-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold text-xs hover:bg-emerald-500/30 transition flex flex-col items-center justify-center gap-0.5 shadow-sm">
+                            <span>${d}</span>
+                            <i class="fa-solid fa-circle-check text-[8px]"></i>
+                        </button>
+                    `;
+                } else {
+                    html += `
+                        <div class="p-2 rounded-xl bg-slate-950/40 text-slate-600 text-xs font-semibold">
+                            ${d}
+                        </div>
+                    `;
+                }
+            }
+
+            html += `</div>`;
+            gridContainer.innerHTML = html;
+        }
+
+        function renderHistoryRecentList() {
+            const listEl = document.getElementById('history-recent-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            const history = workoutData.history || {};
+            const keys = Object.keys(history).sort().reverse();
+
+            if (keys.length === 0) {
+                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino concluído registrado ainda.</div>`;
+                return;
+            }
+
+            keys.forEach(dateKey => {
+                const item = history[dateKey];
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer hover:border-blue-500/50 transition";
+                card.onclick = () => viewHistoryDetail(dateKey);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs font-extrabold text-white">${escapeHtml(item.dayName || item.dayShortName || 'Treino')}</div>
+                        <div class="text-[10px] text-slate-400">${escapeHtml(item.weekTitle || '')}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">${item.dateFormatted}</span>
+                        <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function viewHistoryDetail(dateKey) {
+            const history = workoutData.history || {};
+            const item = history[dateKey];
+            if (!item) return;
+
+            document.getElementById('detail-date-badge').textContent = item.dateFormatted;
+            document.getElementById('detail-day-title').textContent = item.dayName || 'Treino Realizado';
+            document.getElementById('detail-week-title').textContent = item.weekTitle || '';
+
+            const exContainer = document.getElementById('detail-exercises-container');
+            exContainer.innerHTML = '';
+
+            const exercises = item.exercises || [];
+            exercises.forEach(ex => {
+                const exCard = document.createElement('div');
+                exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
+
+                let setsHtml = '';
+                if (ex.logs && ex.logs.length > 0) {
+                    ex.logs.forEach((log, sIdx) => {
+                        if (log && log.done) {
+                            setsHtml += `
+                                <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
+                                    <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
+                                    <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                if (!setsHtml) {
+                    setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
+                }
+
+                exCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-extrabold text-white">${escapeHtml(ex.name)}</h4>
+                        <span class="text-[10px] font-bold text-blue-400">${ex.sets || 3} séries</span>
+                    </div>
+                    <div class="space-y-0.5 pt-1">
+                        ${setsHtml}
+                    </div>
+                `;
+                exContainer.appendChild(exCard);
+            });
+
+            const notesEl = document.getElementById('detail-notes-container');
+            if (item.notes && item.notes.trim() !== '') {
+                notesEl.innerHTML = `<span class="font-bold text-slate-400 block mb-1">Anotações da sessão:</span>${escapeHtml(item.notes)}`;
+                notesEl.classList.remove('hidden');
+            } else {
+                notesEl.classList.add('hidden');
+            }
+
+            openModal('modal-history-detail');
+        }
+
         function exportData() {
             const jsonStr = JSON.stringify(workoutData, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1300,6 +1542,7 @@
                         workoutData = data;
                         normalizeWorkoutData(workoutData);
                         saveWorkoutData();
+                        renderHeaderDate();
                         renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
@@ -1330,6 +1573,7 @@
             workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
             normalizeWorkoutData(workoutData);
             closeModal('modal-reset');
+            renderHeaderDate();
             renderHeader();
             renderApp();
             showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
