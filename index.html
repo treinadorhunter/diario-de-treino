@@ -407,6 +407,13 @@
                     const response = await fetch(`${API_URL}?aluno=${currentStudent}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                     const data = await response.json();
 
+                    // Se o aluno não for encontrado na planilha
+                    if (data && data.error === "Aluno não encontrado.") {
+                        showToast("Aluno não cadastrado pelo treinador!", "fa-triangle-exclamation", "text-amber-400");
+                        workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+                        return;
+                    }
+
                     if (data && !data.error && !data.empty) {
                         workoutData = data;
                         normalizeWorkoutData(workoutData);
