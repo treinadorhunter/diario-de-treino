@@ -123,6 +123,25 @@
 
     </main>
 
+    <!-- Modal Mesociclo Concluído -->
+    <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-extrabold text-white mb-1">Parabéns!</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Parabéns, mesociclo concluído, você poderá ver esse treino na aba "Treinos anteriores".
+                </p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="cancelMesocycleComplete()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold active:scale-95 transition">Voltar</button>
+                <button onclick="confirmMesocycleReset()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Calendário de Histórico -->
     <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
@@ -235,17 +254,28 @@
         </div>
     </div>
 
-    <!-- Modal Confirm Reset -->
+    <!-- Modal Confirm Reset com Senha -->
     <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center">
-            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
-            <p class="text-xs text-slate-400 mb-5">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
+            <div>
+                <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
+                <p class="text-xs text-slate-400">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Digite a senha do Treinador:</label>
+                <input type="password" id="input-reset-pass" inputmode="numeric" maxlength="6" placeholder="****" 
+                    onkeydown="if(event.key==='Enter') executeReset()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-base font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
+                <p id="reset-pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-1.5 hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!
+                </p>
+            </div>
             <div class="flex gap-2">
-                <button onclick="closeModal('modal-reset')" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
-                <button onclick="executeReset()" class="flex-1 py-3 bg-red-600 text-white rounded-xl text-xs font-bold">Sim, Apagar</button>
+                <button onclick="closeModal('modal-reset')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
+                <button onclick="executeReset()" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold">Sim, Apagar</button>
             </div>
         </div>
     </div>
@@ -431,6 +461,7 @@
         let workoutData = {};
         let isAdminMode = false;
         let saveTimeout = null;
+        let pendingMesocycleToggle = null;
 
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
@@ -1264,6 +1295,30 @@
             updateMetrics();
         }
 
+        function isMesocycleFullyDone() {
+            const weeks = workoutData.weeks || [];
+            if (weeks.length === 0) return false;
+            for (let w = 0; w < weeks.length; w++) {
+                const days = weeks[w].days || [];
+                if (days.length === 0) return false;
+                for (let d = 0; d < days.length; d++) {
+                    const exercises = days[d].exercises || [];
+                    if (exercises.length === 0) return false;
+                    for (let e = 0; e < exercises.length; e++) {
+                        const ex = exercises[e];
+                        const count = ex.sets || 3;
+                        const logs = ex.logs || [];
+                        for (let s = 0; s < count; s++) {
+                            if (!logs[s] || !logs[s].done) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
         function toggleSetDone(exIdx, setIdx) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
@@ -1276,14 +1331,65 @@
                 ex.logs[setIdx].reps = defaultReps;
             }
 
-            ex.logs[setIdx].done = !ex.logs[setIdx].done;
+            const wasDone = ex.logs[setIdx].done;
+            ex.logs[setIdx].done = !wasDone;
 
             if (navigator.vibrate) {
                 navigator.vibrate(40);
             }
 
+            if (!wasDone && isMesocycleFullyDone()) {
+                pendingMesocycleToggle = { exIdx, setIdx };
+                saveWorkoutData();
+                renderExercises();
+                openModal('modal-mesocycle');
+                return;
+            }
+
             saveWorkoutData();
             renderExercises();
+        }
+
+        function cancelMesocycleComplete() {
+            if (pendingMesocycleToggle) {
+                const { exIdx, setIdx } = pendingMesocycleToggle;
+                const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
+                if (ex && ex.logs && ex.logs[setIdx]) {
+                    ex.logs[setIdx].done = false;
+                }
+                pendingMesocycleToggle = null;
+            }
+            saveWorkoutData();
+            renderExercises();
+            closeModal('modal-mesocycle');
+        }
+
+        function confirmMesocycleReset() {
+            updateTodayHistoryRecord();
+
+            if (workoutData.weeks) {
+                workoutData.weeks.forEach(w => {
+                    if (w.days) {
+                        w.days.forEach(d => {
+                            if (d.exercises) {
+                                d.exercises.forEach(ex => {
+                                    ex.logs = [];
+                                });
+                            }
+                            d.notes = "";
+                        });
+                    }
+                });
+            }
+
+            currentWeekIdx = 0;
+            currentDayIdx = 0;
+            pendingMesocycleToggle = null;
+
+            saveWorkoutData();
+            closeModal('modal-mesocycle');
+            renderApp();
+            showToast("Novo mesociclo iniciado!", "fa-rotate-left", "text-emerald-400");
         }
 
         function updateMetrics() {
@@ -1625,18 +1731,46 @@
         }
 
         function confirmReset() {
+            const passInput = document.getElementById('input-reset-pass');
+            const errorMsg = document.getElementById('reset-pass-error-msg');
+            if (passInput) passInput.value = '';
+            if (errorMsg) errorMsg.classList.add('hidden');
             openModal('modal-reset');
         }
 
-        function executeReset() {
-            localStorage.removeItem(`WORKOUT_${currentStudent}`);
-            workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-            normalizeWorkoutData(workoutData);
-            closeModal('modal-reset');
-            renderHeaderDate();
-            renderHeader();
-            renderApp();
-            showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
+        async function executeReset() {
+            const inputPass = document.getElementById('input-reset-pass').value;
+            const errorMsg = document.getElementById('reset-pass-error-msg');
+
+            if (!inputPass) {
+                errorMsg.textContent = "Digite a senha do Treinador!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            showToast("Verificando senha...", "fa-key", "text-amber-400");
+
+            try {
+                const res = await fetch(`${API_URL}?action=verifyPass&pass=${encodeURIComponent(inputPass)}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                const result = await res.json();
+
+                if (result && result.valid) {
+                    localStorage.removeItem(`WORKOUT_${currentStudent}`);
+                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+                    normalizeWorkoutData(workoutData);
+                    closeModal('modal-reset');
+                    renderHeaderDate();
+                    renderHeader();
+                    renderApp();
+                    showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
+                } else {
+                    errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!';
+                    errorMsg.classList.remove('hidden');
+                    if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
+                }
+            } catch (e) {
+                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
+            }
         }
 
         function showToast(msg, iconClass = "fa-circle-check", iconColor = "text-emerald-400") {
