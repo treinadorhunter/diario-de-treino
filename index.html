@@ -304,6 +304,7 @@
             metabolic: {
                 label: "Estresse Metabólico",
                 targetReps: "12-15 RM",
+                exerciseReps: "12-15",
                 titleSuffix: "Estresse Metabólico",
                 desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
                 rirText: "RIR 1",
@@ -313,6 +314,7 @@
             strength: {
                 label: "Tensão Mecânica / Força",
                 targetReps: "4-6 RM",
+                exerciseReps: "4-6",
                 titleSuffix: "Tensão Mecânica / Força",
                 desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2 min).",
                 rirText: "RIR 2",
@@ -322,6 +324,7 @@
             hypertrophy: {
                 label: "Hipertrofia Tradicional",
                 targetReps: "8-10 RM",
+                exerciseReps: "8-10",
                 titleSuffix: "Hipertrofia Tradicional",
                 desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
@@ -330,7 +333,8 @@
             },
             deload: {
                 label: "Deload / Recuperação",
-                targetReps: "Deload",
+                targetReps: "10-12 RM",
+                exerciseReps: "10-12",
                 titleSuffix: "Deload / Recuperação",
                 desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
                 rirText: "RIR 3-4",
@@ -748,6 +752,7 @@
                     if (day.exercises) {
                         day.exercises.forEach(ex => {
                             ex.rest = preset.defaultRest;
+                            ex.targetReps = preset.exerciseReps;
                         });
                     }
                 });
