@@ -469,17 +469,30 @@
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             await loadWorkoutData();
-            renderHeaderDate();
             renderHeader();
             renderApp();
         });
 
-        function getTodayKey() {
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+        /* CÁLCULO DE DATA DINÂMICA DA SEMANA */
+        function getCalculatedDateForDay(dayIdx) {
+            const now = new Date();
+            const currentDayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg, ..., 4 = Qui, etc.
+            const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + mondayOffset);
+            
+            const targetDate = new Date(monday);
+            targetDate.setDate(monday.getDate() + dayIdx);
+            
+            const year = targetDate.getFullYear();
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            
+            return {
+                dateKey: `${year}-${month}-${day}`,
+                dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            };
         }
 
         function getTodayMonthKey() {
@@ -492,8 +505,8 @@
         function renderHeaderDate() {
             const container = document.getElementById('current-date-text');
             if (container) {
-                const now = new Date();
-                container.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const dayInfo = getCalculatedDateForDay(currentDayIdx);
+                container.textContent = dayInfo.dateFormatted;
             }
         }
 
@@ -580,75 +593,34 @@
             normalizeWorkoutData(workoutData);
         }
 
-        function getDayDateKey(dayIdx) {
-    const d = new Date();
-    const dayOfWeek = d.getDay(); // 0 = Domingo, 1 = Segunda, ..., 4 = Quinta
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    
-    // Calcula a data de Segunda-feira da semana atual
-    const monday = new Date(d);
-    monday.setDate(d.getDate() + mondayOffset);
-    
-    // Calcula a data do dia selecionado na aba (0 = Seg, 1 = Ter, 2 = Qua, etc.)
-    const targetDate = new Date(monday);
-    targetDate.setDate(monday.getDate() + dayIdx);
-    
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const day = String(targetDate.getDate()).padStart(2, '0');
-    
-    return {
-        dateKey: `${year}-${month}-${day}`,
-        dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    };
-}
+        function updateTodayHistoryRecord() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
 
-function updateTodayHistoryRecord() {
-    const currentWeek = workoutData.weeks[currentWeekIdx];
-    if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const currentDay = currentWeek.days[currentDayIdx];
+            const exercises = currentDay.exercises || [];
 
-    const currentDay = currentWeek.days[currentDayIdx];
-    const exercises = currentDay.exercises || [];
-
-    let hasActivity = false;
-    exercises.forEach(ex => {
-        if (ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
-            hasActivity = true;
-        }
-    });
-
-    if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
-        if (!workoutData.history) workoutData.history = {};
-        
-        // Obtém a data exata correspondente ao dia da aba selecionada
-        const dayInfo = getDayDateKey(currentDayIdx);
-        
-        workoutData.history[dayInfo.dateKey] = {
-            dateKey: dayInfo.dateKey,
-            dateFormatted: dayInfo.dateFormatted,
-            weekTitle: currentWeek.title || '',
-            dayName: currentDay.name || '',
-            dayShortName: currentDay.shortName || '',
-            notes: currentDay.notes || '',
-            exercises: JSON.parse(JSON.stringify(exercises)),
-            updatedAt: new Date().toISOString()
-        };
-    }
-}
+            let hasActivity = false;
+            exercises.forEach(ex => {
+                if (ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
+                    hasActivity = true;
+                }
+            });
 
             if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
                 if (!workoutData.history) workoutData.history = {};
                 
-                const now = new Date();
-                workoutData.history[todayKey] = {
-                    dateKey: todayKey,
-                    dateFormatted: now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                const dayInfo = getCalculatedDateForDay(currentDayIdx);
+                
+                workoutData.history[dayInfo.dateKey] = {
+                    dateKey: dayInfo.dateKey,
+                    dateFormatted: dayInfo.dateFormatted,
                     weekTitle: currentWeek.title || '',
                     dayName: currentDay.name || '',
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes || '',
                     exercises: JSON.parse(JSON.stringify(exercises)),
-                    updatedAt: now.toISOString()
+                    updatedAt: new Date().toISOString()
                 };
             }
         }
@@ -980,6 +952,7 @@ function updateTodayHistoryRecord() {
         function renderApp() {
             renderWeekTabs();
             renderDayTabs();
+            renderHeaderDate();
 
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return;
@@ -1749,7 +1722,6 @@ function updateTodayHistoryRecord() {
                         workoutData = data;
                         normalizeWorkoutData(workoutData);
                         saveWorkoutData();
-                        renderHeaderDate();
                         renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
@@ -1800,7 +1772,6 @@ function updateTodayHistoryRecord() {
                     workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
                     normalizeWorkoutData(workoutData);
                     closeModal('modal-reset');
-                    renderHeaderDate();
                     renderHeader();
                     renderApp();
                     showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
