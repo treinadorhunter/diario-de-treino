@@ -333,10 +333,10 @@
         const WEEK_PRESETS = {
             metabolic: {
                 label: "Estresse Metabólico",
-                targetReps: "12-15 RM",
-                exerciseReps: "12-15",
+                targetReps: "15-20 RM",
+                exerciseReps: "15-20",
                 titleSuffix: "Estresse Metabólico",
-                desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
+                desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
                 rirText: "RIR 1",
                 paletteIdx: 0,
                 defaultRest: "60s"
@@ -353,20 +353,21 @@
             },
             hypertrophy: {
                 label: "Hipertrofia Tradicional",
-                targetReps: "8-10 RM",
-                exerciseReps: "8-10",
+                targetReps: "8-12 RM",
+                exerciseReps: "8-12",
                 titleSuffix: "Hipertrofia Tradicional",
-                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
+                desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
                 paletteIdx: 2,
                 defaultRest: "90s"
             },
             deload: {
                 label: "Deload / Recuperação",
-                targetReps: "10-12 RM",
-                exerciseReps: "10-12",
+                targetReps: "8-12 RM",
+                exerciseReps: "8-12",
+                defaultSets: 2,
                 titleSuffix: "Deload / Recuperação",
-                desc: "Corte de 50% no volume, carga leve-moderada e longe da falha (RIR 3-4).",
+                desc: "Corte de 20% na carga, apenas 2 séries por exercício e longe da falha (RIR 3-4).",
                 rirText: "RIR 3-4",
                 paletteIdx: 3,
                 defaultRest: "60s"
@@ -381,9 +382,9 @@
                 {
                     id: "W1",
                     shortTitle: "Semana 1",
-                    targetReps: "12-15 RM",
+                    targetReps: "15-20 RM",
                     title: "Semana 1 — Estresse Metabólico",
-                    desc: "Cargas moderadas a leves (12-15 RM), descansos curtos (60s) e RIR 1.",
+                    desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
                     rirText: "RIR 1",
                     paletteIdx: 0,
                     days: [
@@ -392,12 +393,12 @@
                             shortName: "Seg • Upper", 
                             name: "Segunda: Upper (Superior Geral)", 
                             exercises: [
-                                { name: "Supino Reto c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Controle na fase excêntrica." },
-                                { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
-                                { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "12-15", rest: "60s", notes: "Escápulas travadas no banco." },
-                                { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
-                                { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem pausa longa entre os dois." },
-                                { name: "Abdominal Infra no Banco Inclinado", sets: 3, targetReps: "12-15", rest: "45s", notes: "Elevação controlada do quadril, focando na porção inferior do reto abdominal." }
+                                { name: "Supino Reto c/ Barra", sets: 4, targetReps: "15-20", rest: "60s", notes: "Controle na fase excêntrica." },
+                                { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "15-20", rest: "60s", notes: "Tronco estável e cotovelos firmes." },
+                                { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "15-20", rest: "60s", notes: "Escápulas travadas no banco." },
+                                { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "15-20", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
+                                { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "15-20", rest: "60s", notes: "Sem pausa longa entre os dois." },
+                                { name: "Abdominal Infra no Banco Inclinado", sets: 3, targetReps: "15-20", rest: "45s", notes: "Elevação controlada do quadril, focando na porção inferior do reto abdominal." }
                             ]
                         },
                         { 
@@ -405,11 +406,11 @@
                             shortName: "Ter • Lower", 
                             name: "Terça: Lower (Inferior Geral)", 
                             exercises: [
-                                { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "12-15", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
-                                { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Quadril para trás, alongando posterior." },
-                                { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Pausa de 1s no topo contraído." },
-                                { name: "Mesa Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Sem compensação na lombar." },
-                                { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." },
+                                { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "15-20", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
+                                { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "15-20", rest: "60s", notes: "Quadril para trás, alongando posterior." },
+                                { name: "Cadeira Extensora", sets: 3, targetReps: "15-20", rest: "60s", notes: "Pausa de 1s no topo contraído." },
+                                { name: "Mesa Flexora", sets: 3, targetReps: "15-20", rest: "60s", notes: "Sem compensação na lombar." },
+                                { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "15-20", rest: "45s", notes: "Amplitude total com pausa estrita." },
                                 { name: "Prancha Lateral", sets: 3, targetReps: "30-45s", rest: "45s", notes: "Sustentação isométrica focada nos oblíquos, alinhando quadril e ombros." }
                             ]
                         },
@@ -418,11 +419,11 @@
                             shortName: "Qua • Push", 
                             name: "Quarta: Push (Peito, Ombro, Tríceps)", 
                             exercises: [
-                                { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "12-15", rest: "60s", notes: "Banco em 30º para porção superior." },
-                                { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "12-15", rest: "60s", notes: "Tensão constante no peitoral." },
-                                { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
-                                { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "12-15", rest: "45s", notes: "Abrir a corda no ponto final." },
-                                { name: "Abdominal Supra (Solo ou Puxada)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Expiração completa na flexão do tronco, esmagando o abdômen." }
+                                { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "15-20", rest: "60s", notes: "Banco em 30º para porção superior." },
+                                { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "15-20", rest: "60s", notes: "Tensão constante no peitoral." },
+                                { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "15-20", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
+                                { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "15-20", rest: "45s", notes: "Abrir a corda no ponto final." },
+                                { name: "Abdominal Supra (Solo ou Puxada)", sets: 3, targetReps: "15-20", rest: "45s", notes: "Expiração completa na flexão do tronco, esmagando o abdômen." }
                             ]
                         },
                         { 
@@ -430,10 +431,10 @@
                             shortName: "Qui • Pull", 
                             name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)", 
                             exercises: [
-                                { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "12-15", rest: "60s", notes: "Protração e retração escapular." },
-                                { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "12-15", rest: "60s", notes: "Expandir o dorsal ao subir." },
-                                { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
-                                { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "12-15", rest: "45s", notes: "Bíceps em posição de alongamento." },
+                                { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "15-20", rest: "60s", notes: "Protração e retração escapular." },
+                                { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "15-20", rest: "60s", notes: "Expandir o dorsal ao subir." },
+                                { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "15-20", rest: "45s", notes: "Isolar deltoide posterior." },
+                                { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "15-20", rest: "45s", notes: "Bíceps em posição de alongamento." },
                                 { name: "Prancha Isométrica (Frontal)", sets: 3, targetReps: "45-60s", rest: "45s", notes: "Estabilidade do core, mantendo glúteos e abdômen bem contraídos." }
                             ]
                         },
@@ -442,12 +443,12 @@
                             shortName: "Sex • Legs", 
                             name: "Sexta: Legs (Pernas Hipertrofia)", 
                             exercises: [
-                                { name: "Leg Press 45º", sets: 4, targetReps: "12-15", rest: "90s", notes: "Controle firme na descida." },
-                                { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "12-15", rest: "60s", notes: "Contração de 2s no topo do quadril." },
-                                { name: "Cadeira Extensora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Cadência fluida e contínua." },
-                                { name: "Cadeira Flexora", sets: 3, targetReps: "12-15", rest: "60s", notes: "Rolo posicionado no calcanhar." },
-                                { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." },
-                                { name: "Hiperextensão Lombar (Banco Romano)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Movimento cadenciado focado nos eretores da espinha e glúteos." }
+                                { name: "Leg Press 45º", sets: 4, targetReps: "15-20", rest: "90s", notes: "Controle firme na descida." },
+                                { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "15-20", rest: "60s", notes: "Contração de 2s no topo do quadril." },
+                                { name: "Cadeira Extensora", sets: 3, targetReps: "15-20", rest: "60s", notes: "Cadência fluida e contínua." },
+                                { name: "Cadeira Flexora", sets: 3, targetReps: "15-20", rest: "60s", notes: "Rolo posicionado no calcanhar." },
+                                { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "15-20", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." },
+                                { name: "Hiperextensão Lombar (Banco Romano)", sets: 3, targetReps: "15-20", rest: "45s", notes: "Movimento cadenciado focado nos eretores da espinha e glúteos." }
                             ]
                         }
                     ]
@@ -523,7 +524,7 @@
                         data.weeks.push({
                             id: k,
                             shortTitle: `Semana ${idx + 1}`,
-                            targetReps: k === 'W1' ? '12-15 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-10 RM' : 'Deload',
+                            targetReps: k === 'W1' ? '15-20 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-12 RM' : 'Deload',
                             title: data[k].title || `Semana ${idx + 1}`,
                             desc: data[k].desc || "",
                             rirText: data[k].rirText || "RIR 1",
@@ -797,6 +798,9 @@
                         day.exercises.forEach(ex => {
                             ex.rest = preset.defaultRest;
                             ex.targetReps = preset.exerciseReps;
+                            if (preset.defaultSets !== undefined) {
+                                ex.sets = preset.defaultSets;
+                            }
                         });
                     }
                 });
@@ -822,9 +826,9 @@
             weeks.push({
                 id: `W_${Date.now()}`,
                 shortTitle: `Semana ${newWeekNum}`,
-                targetReps: "8-10 RM",
+                targetReps: "8-12 RM",
                 title: `Semana ${newWeekNum} — Hipertrofia Tradicional`,
-                desc: "Cargas moderadas-altas (8-10 RM), volume completo e falha próxima (RIR 0-1).",
+                desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
                 paletteIdx: (weeks.length) % WEEK_PALETTES.length,
                 days: clonedDays
@@ -1191,6 +1195,8 @@
                     `;
                 }
 
+                const hasRecLoad = ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null;
+
                 let titleHtml = `
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1">
@@ -1214,6 +1220,15 @@
                                             onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
                                             class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
                                     </div>
+
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-emerald-500/40 rounded-md px-2 py-0.5">
+                                        <i class="fa-solid fa-weight-hanging text-[10px] text-emerald-400"></i>
+                                        <span class="text-[10px] font-bold text-slate-400">Carga Rec.:</span>
+                                        <input type="number" step="0.5" inputmode="decimal" placeholder="Off" 
+                                            value="${hasRecLoad ? ex.recommendedLoad : ''}" 
+                                            onchange="updateRecommendedLoad(${exIdx}, this.value)"
+                                            class="w-12 bg-transparent text-[10px] font-extrabold text-emerald-400 focus:outline-none p-0">
+                                    </div>
                                 </div>
                             ` : `
                                 <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
@@ -1224,6 +1239,11 @@
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                         <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
                                     </span>
+                                    ${hasRecLoad ? `
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                            <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
+                                        </span>
+                                    ` : ''}
                                 </div>
                             `}
                         </div>
@@ -1272,6 +1292,35 @@
 
                 listEl.appendChild(exCard);
             });
+        }
+
+        /* CARGA RECOMENDADA PELO TREINADOR */
+        function updateRecommendedLoad(exIdx, val) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx]) {
+                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+                if (ex) {
+                    const parsedVal = parseNum(val);
+                    ex.recommendedLoad = parsedVal;
+
+                    if (parsedVal !== '') {
+                        if (!ex.logs) ex.logs = [];
+                        const count = ex.sets || 3;
+                        for (let s = 0; s < count; s++) {
+                            if (!ex.logs[s]) {
+                                ex.logs[s] = { load: parsedVal, reps: getTargetRepsNum(ex.targetReps), done: false };
+                            } else {
+                                ex.logs[s].load = parsedVal;
+                            }
+                        }
+                    }
+                }
+            }
+            saveWorkoutData();
+            renderExercises();
+            if (val !== '') {
+                showToast(`Carga recomendada de ${val}kg aplicada!`, "fa-weight-hanging", "text-emerald-400");
+            }
         }
 
         function adjustSetVal(exIdx, setIdx, field, delta) {
