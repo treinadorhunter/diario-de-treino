@@ -47,6 +47,10 @@
                             <!-- Dynamic Student Name -->
                         </div>
                         <span class="text-slate-600 text-[10px]">•</span>
+                        <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                            <!-- Dynamic Cycle Badge -->
+                        </div>
+                        <span class="text-slate-600 text-[10px]">•</span>
                         <div id="header-date-container" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
                             <i class="fa-regular fa-calendar text-[9px]"></i>
                             <span id="current-date-text"></span>
@@ -105,12 +109,19 @@
         <!-- Exercises List Container -->
         <div id="exercises-list" class="space-y-4"></div>
 
-        <!-- Session Notes (PSE) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
-            <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
-                <i class="fa-solid fa-pen-to-square text-blue-400"></i> Anotações / Percepção de Esforço (PSE)
-            </label>
-            <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+        <!-- Session Notes (PSE) & Missed Workout Action -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+            <div>
+                <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Anotações / Percepção de Esforço (PSE)
+                </label>
+                <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+            </div>
+
+            <!-- Botão Faltar Treino -->
+            <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80">
+                <!-- Dynamic Missed Workout Button -->
+            </div>
         </div>
 
         <!-- Botão Treinos Anteriores (Histórico) -->
@@ -123,7 +134,7 @@
 
     </main>
 
-    <!-- Modal Mesociclo Concluído -->
+    <!-- Modal Ciclo Concluído -->
     <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -131,13 +142,13 @@
             </div>
             <div>
                 <h3 class="text-base font-extrabold text-white mb-1">Parabéns!</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                    Parabéns, mesociclo concluído, você poderá ver esse treino na aba "Treinos anteriores".
+                <p id="modal-mesocycle-msg" class="text-xs text-slate-300 leading-relaxed">
+                    Você concluiu todos os dias previstos para este ciclo. O treino foi registrado e o próximo ciclo será iniciado.
                 </p>
             </div>
             <div class="flex gap-2 pt-2">
                 <button onclick="cancelMesocycleComplete()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold active:scale-95 transition">Voltar</button>
-                <button onclick="confirmMesocycleReset()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">OK</button>
+                <button onclick="confirmMesocycleReset()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">Iniciar Próximo Ciclo</button>
             </div>
         </div>
     </div>
@@ -190,7 +201,7 @@
         </div>
     </div>
 
-    <!-- Modal Detalhes do Treino Anterior (Comparador) -->
+    <!-- Modal Detalhes do Treino Anterior -->
     <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
@@ -332,58 +343,67 @@
         /* MODELOS PRONTOS DE FOCO ESTRATÉGICO */
         const WEEK_PRESETS = {
             metabolic: {
-                label: "Estresse Metabólico",
+                label: "Metabólica",
+                shortTitle: "Semana Metabólica",
                 targetReps: "15-20 RM",
                 exerciseReps: "15-20",
                 titleSuffix: "Estresse Metabólico",
+                title: "Semana Metabólica — Estresse Metabólico",
                 desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
                 rirText: "RIR 1",
                 paletteIdx: 0,
                 defaultRest: "60s"
             },
             strength: {
-                label: "Tensão Mecânica / Força",
+                label: "Força",
+                shortTitle: "Semana de Força",
                 targetReps: "4-6 RM",
                 exerciseReps: "4-6",
                 titleSuffix: "Tensão Mecânica / Força",
+                title: "Semana de Força — Tensão Mecânica / Força",
                 desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2 min).",
                 rirText: "RIR 2",
                 paletteIdx: 1,
                 defaultRest: "2min"
             },
             hypertrophy: {
-                label: "Hipertrofia Tradicional",
+                label: "Hipertrofia",
+                shortTitle: "Semana Hipertrofia",
                 targetReps: "8-12 RM",
                 exerciseReps: "8-12",
                 titleSuffix: "Hipertrofia Tradicional",
+                title: "Semana Hipertrofia — Hipertrofia Tradicional",
                 desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
                 paletteIdx: 2,
                 defaultRest: "90s"
             },
             deload: {
-                label: "Deload / Recuperação",
+                label: "Deload",
+                shortTitle: "Semana Deload",
                 targetReps: "8-12 RM",
                 exerciseReps: "8-12",
                 defaultSets: 2,
                 titleSuffix: "Deload / Recuperação",
-                desc: "Corte de 20% na carga, apenas 2 séries por exercício e longe da falha (RIR 3-4).",
+                title: "Semana Deload — Recuperação Ativa",
+                desc: "Corte de 30% a 50% na carga, apenas 2 séries por exercício e longe da falha (RIR 3-4).",
                 rirText: "RIR 3-4",
                 paletteIdx: 3,
                 defaultRest: "60s"
             }
         };
 
-        /* PROGRAMA PADRÃO DO TREINO (PRÉ-PREENCHIDO COM O MODELO COMPLETO) */
+        /* PROGRAMA PADRÃO DO TREINO */
         const DEFAULT_PROGRAM = {
             studentName: "Nome do Aluno",
+            cycleCount: 1,
             history: {},
             weeks: [
                 {
                     id: "W1",
-                    shortTitle: "Semana 1",
+                    shortTitle: "Semana Metabólica",
                     targetReps: "15-20 RM",
-                    title: "Semana 1 — Estresse Metabólico",
+                    title: "Semana Metabólica — Estresse Metabólico",
                     desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
                     rirText: "RIR 1",
                     paletteIdx: 0,
@@ -469,15 +489,63 @@
 
         /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
-            await loadWorkoutData();
+            loadFromLocalStorageFirst();
+            autoSelectActiveDay();
             renderHeader();
             renderApp();
+            await fetchFromSheetsAndUpdate();
         });
+
+        window.addEventListener('beforeunload', () => {
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+                sendDataToSheetsDirect(workoutData);
+            }
+        });
+
+        function loadFromLocalStorageFirst() {
+            const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
+            if (saved) {
+                try {
+                    workoutData = JSON.parse(saved);
+                } catch(e) {
+                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+                }
+            } else {
+                workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+            }
+            normalizeWorkoutData(workoutData);
+        }
+
+        async function fetchFromSheetsAndUpdate() {
+            if (!API_URL) return;
+            try {
+                const currentMonth = getTodayMonthKey();
+                const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                const data = await response.json();
+
+                if (data && data.error === "Aluno não encontrado.") {
+                    showToast("Aluno não cadastrado na planilha!", "fa-triangle-exclamation", "text-amber-400");
+                    return;
+                }
+
+                if (data && !data.error && !data.empty) {
+                    workoutData = data;
+                    normalizeWorkoutData(workoutData);
+                    localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
+                    renderHeader();
+                    renderApp();
+                    showToast("Sincronizado com a planilha!", "fa-circle-check", "text-emerald-400");
+                }
+            } catch (e) {
+                console.error("Erro ao puxar dados da planilha:", e);
+            }
+        }
 
         /* CÁLCULO DE DATA DINÂMICA DA SEMANA */
         function getCalculatedDateForDay(dayIdx) {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg, ..., 4 = Qui, etc.
+            const currentDayOfWeek = now.getDay();
             const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
             
             const monday = new Date(now);
@@ -514,6 +582,7 @@
         function normalizeWorkoutData(data) {
             if (!data) return;
             if (!data.studentName) data.studentName = "Nome do Aluno";
+            if (!data.cycleCount) data.cycleCount = 1;
             if (!data.history) data.history = {};
 
             if (!data.weeks) {
@@ -523,8 +592,8 @@
                     if (data[k]) {
                         data.weeks.push({
                             id: k,
-                            shortTitle: `Semana ${idx + 1}`,
-                            targetReps: k === 'W1' ? '15-20 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-12 RM' : 'Deload',
+                            shortTitle: k === 'W1' ? 'Semana Metabólica' : k === 'W2' ? 'Semana de Força' : k === 'W3' ? 'Semana Hipertrofia' : 'Semana Deload',
+                            targetReps: k === 'W1' ? '15-20 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-12 RM' : '8-12 RM',
                             title: data[k].title || `Semana ${idx + 1}`,
                             desc: data[k].desc || "",
                             rirText: data[k].rirText || "RIR 1",
@@ -546,52 +615,81 @@
                             shortName: defaultLabels[dKey] || dKey,
                             name: w.days[dKey].name || dKey,
                             notes: w.days[dKey].notes || '',
+                            missed: Boolean(w.days[dKey].missed),
                             exercises: w.days[dKey].exercises || []
                         });
                     });
                     w.days = daysArr;
+                } else if (w.days && Array.isArray(w.days)) {
+                    w.days.forEach(d => {
+                        if (d.missed === undefined) d.missed = false;
+                    });
                 }
             });
         }
 
-        async function loadWorkoutData() {
-            if (API_URL) {
-                try {
-                    showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
-                    const currentMonth = getTodayMonthKey();
-                    const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                    const data = await response.json();
+        /* AUTO-AVANÇO PARA O PRÓXIMO DIA PENDENTE */
+        function isDayCompleted(weekIdx, dayIdx) {
+            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
+            if (!week || !week.days || !week.days[dayIdx]) return false;
+            const day = week.days[dayIdx];
+            if (day.missed) return true;
+            const exercises = day.exercises || [];
+            if (exercises.length === 0) return false;
+            return exercises.every(ex => {
+                const count = ex.sets || 3;
+                const logs = ex.logs || [];
+                for (let s = 0; s < count; s++) {
+                    if (!logs[s] || !logs[s].done) return false;
+                }
+                return true;
+            });
+        }
 
-                    if (data && data.error === "Aluno não encontrado.") {
-                        showToast("Aluno não cadastrado pelo treinador!", "fa-triangle-exclamation", "text-amber-400");
-                        workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-                        normalizeWorkoutData(workoutData);
+        function autoSelectActiveDay() {
+            const weeks = workoutData.weeks || [];
+            for (let w = 0; w < weeks.length; w++) {
+                const days = weeks[w].days || [];
+                for (let d = 0; d < days.length; d++) {
+                    if (!isDayCompleted(w, d)) {
+                        currentWeekIdx = w;
+                        currentDayIdx = d;
                         return;
                     }
-
-                    if (data && !data.error && !data.empty) {
-                        workoutData = data;
-                        normalizeWorkoutData(workoutData);
-                        localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
-                        showToast("Treino atualizado!", "fa-circle-check", "text-emerald-400");
-                        return;
-                    }
-                } catch (e) {
-                    console.error("Erro ao conectar à nuvem:", e);
                 }
             }
+            currentWeekIdx = 0;
+            currentDayIdx = 0;
+        }
 
-            const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
-            if (saved) {
-                try {
-                    workoutData = JSON.parse(saved);
-                } catch(e) {
-                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-                }
-            } else {
-                workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+        /* CÁLCULO DE MÉTRICAS PREVISTAS (MODO TREINADOR) */
+        function calculateDayPlannedMetrics(day) {
+            let totalSets = 0;
+            let totalRepsEst = 0;
+            if (day && day.exercises) {
+                day.exercises.forEach(ex => {
+                    const sets = Number(ex.sets) || 0;
+                    const reps = getTargetRepsNum(ex.targetReps);
+                    totalSets += sets;
+                    totalRepsEst += (sets * reps);
+                });
             }
-            normalizeWorkoutData(workoutData);
+            return { totalSets, totalRepsEst, totalExercises: day && day.exercises ? day.exercises.length : 0 };
+        }
+
+        function calculateWeekPlannedMetrics(week) {
+            let totalSets = 0;
+            let totalRepsEst = 0;
+            let totalExercises = 0;
+            if (week && week.days) {
+                week.days.forEach(day => {
+                    const m = calculateDayPlannedMetrics(day);
+                    totalSets += m.totalSets;
+                    totalRepsEst += m.totalRepsEst;
+                    totalExercises += m.totalExercises;
+                });
+            }
+            return { totalSets, totalRepsEst, totalExercises };
         }
 
         function updateTodayHistoryRecord() {
@@ -600,6 +698,7 @@
 
             const currentDay = currentWeek.days[currentDayIdx];
             const exercises = currentDay.exercises || [];
+            const cycleNum = workoutData.cycleCount || 1;
 
             let hasActivity = false;
             exercises.forEach(ex => {
@@ -608,21 +707,65 @@
                 }
             });
 
-            if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
+            if (currentDay.missed) {
                 if (!workoutData.history) workoutData.history = {};
-                
                 const dayInfo = getCalculatedDateForDay(currentDayIdx);
                 
                 workoutData.history[dayInfo.dateKey] = {
                     dateKey: dayInfo.dateKey,
                     dateFormatted: dayInfo.dateFormatted,
-                    weekTitle: currentWeek.title || '',
+                    weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
+                    dayName: currentDay.name || '',
+                    dayShortName: currentDay.shortName || '',
+                    notes: currentDay.notes ? `[FALTOU TREINO] ${currentDay.notes}` : "Faltou Treino",
+                    missed: true,
+                    exercises: [
+                        {
+                            name: "FALTOU TREINO",
+                            sets: 0,
+                            targetReps: "-",
+                            rest: "-",
+                            notes: "Faltou Treino",
+                            logs: [{ load: 0, reps: 0, done: true }]
+                        }
+                    ],
+                    updatedAt: new Date().toISOString()
+                };
+            } else if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
+                if (!workoutData.history) workoutData.history = {};
+                const dayInfo = getCalculatedDateForDay(currentDayIdx);
+                
+                workoutData.history[dayInfo.dateKey] = {
+                    dateKey: dayInfo.dateKey,
+                    dateFormatted: dayInfo.dateFormatted,
+                    weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
                     dayName: currentDay.name || '',
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes || '',
+                    missed: false,
                     exercises: JSON.parse(JSON.stringify(exercises)),
                     updatedAt: new Date().toISOString()
                 };
+            }
+        }
+
+        function sendDataToSheetsDirect(dataToSync) {
+            if (!API_URL) return;
+            try {
+                const currentMonth = getTodayMonthKey();
+                fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aluno: currentStudent,
+                        mes: currentMonth,
+                        token: API_SECRET_TOKEN,
+                        data: dataToSync
+                    })
+                });
+            } catch (e) {
+                console.error("Erro ao salvar no Sheets:", e);
             }
         }
 
@@ -632,30 +775,20 @@
             updateMetrics();
 
             if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                if (!API_URL) return;
-                try {
-                    const currentMonth = getTodayMonthKey();
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            aluno: currentStudent,
-                            mes: currentMonth,
-                            token: API_SECRET_TOKEN,
-                            data: workoutData
-                        })
-                    });
-                } catch (e) {
-                    console.error("Erro ao salvar no Google Sheets:", e);
-                }
-            }, 1000);
+            saveTimeout = setTimeout(() => {
+                sendDataToSheetsDirect(workoutData);
+            }, 800);
         }
 
         function renderHeader() {
             const container = document.getElementById('student-name-container');
+            const cycleBadge = document.getElementById('header-cycle-badge');
             const studentName = workoutData.studentName || "Nome do Aluno";
+            const cycleNum = workoutData.cycleCount || 1;
+
+            if (cycleBadge) {
+                cycleBadge.innerHTML = `<i class="fa-solid fa-repeat text-[9px]"></i><span>Ciclo #${cycleNum}</span>`;
+            }
 
             if (isAdminMode) {
                 container.innerHTML = `
@@ -744,7 +877,7 @@
             renderApp();
         }
 
-        /* GERENCIAMENTO DE SEMANAS COM PALETA DE CORES DINÂMICA */
+        /* GERENCIAMENTO DE SEMANAS COM PALETA E NOMENCLATURA */
         function renderWeekTabs() {
             const container = document.getElementById('week-tabs-container');
             if (!container) return;
@@ -759,7 +892,7 @@
                 const isActive = idx === currentWeekIdx;
                 const btn = document.createElement('button');
                 btn.onclick = () => { currentWeekIdx = idx; renderApp(); };
-                btn.className = `week-tab flex-1 min-w-[105px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
+                btn.className = `week-tab flex-1 min-w-[110px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
                 btn.innerHTML = `
                     <div class="text-[9px] font-bold uppercase tracking-wider ${palette.textClass} flex items-center justify-between">
                         ${escapeHtml(w.shortTitle || `Semana ${idx + 1}`)} <i class="fa-solid ${palette.icon} text-[8px]"></i>
@@ -785,9 +918,9 @@
             const week = workoutData.weeks[currentWeekIdx];
             if (!week) return;
 
-            const weekLabel = week.shortTitle || `Semana ${currentWeekIdx + 1}`;
+            week.shortTitle = preset.shortTitle;
             week.targetReps = preset.targetReps;
-            week.title = `${weekLabel} — ${preset.titleSuffix}`;
+            week.title = preset.title;
             week.desc = preset.desc;
             week.rirText = preset.rirText;
             week.paletteIdx = preset.paletteIdx;
@@ -808,26 +941,25 @@
 
             saveWorkoutData();
             renderApp();
-            showToast(`Modelo '${preset.label}' aplicado (${preset.defaultRest})!`, "fa-bolt", "text-amber-400");
+            showToast(`Modelo '${preset.label}' aplicado!`, "fa-bolt", "text-amber-400");
         }
 
         function addNewWeek() {
             const weeks = workoutData.weeks || [];
-            const newWeekNum = weeks.length + 1;
-            
             const sampleDays = weeks.length > 0 ? weeks[0].days : [];
             const clonedDays = JSON.parse(JSON.stringify(sampleDays));
 
             clonedDays.forEach(day => {
                 day.exercises.forEach(ex => { ex.logs = []; });
                 day.notes = "";
+                day.missed = false;
             });
 
             weeks.push({
                 id: `W_${Date.now()}`,
-                shortTitle: `Semana ${newWeekNum}`,
+                shortTitle: "Semana Hipertrofia",
                 targetReps: "8-12 RM",
-                title: `Semana ${newWeekNum} — Hipertrofia Tradicional`,
+                title: "Semana Hipertrofia — Hipertrofia Tradicional",
                 desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
                 paletteIdx: (weeks.length) % WEEK_PALETTES.length,
@@ -863,7 +995,7 @@
             }
         }
 
-        /* GERENCIAMENTO DE DIAS DA SEMANA */
+        /* GERENCIAMENTO DE DIAS COM STATUS DE CONCLUSÃO */
         function renderDayTabs() {
             const container = document.getElementById('day-tabs-container');
             if (!container) return;
@@ -879,14 +1011,26 @@
             days.forEach((day, idx) => {
                 const btn = document.createElement('button');
                 const isActive = idx === currentDayIdx;
-                btn.className = `day-tab py-2 px-3 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center flex items-center gap-1.5 shrink-0 ${isActive ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-900 text-slate-400 border-slate-800'}`;
+                const isComplete = isDayCompleted(currentWeekIdx, idx);
+
+                let btnClass = '';
+                if (isActive) {
+                    btnClass = isComplete ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm' : 'bg-blue-600 text-white border-blue-500 shadow-sm';
+                } else {
+                    btnClass = isComplete ? 'bg-emerald-950/30 text-emerald-400 border-emerald-800/60' : 'bg-slate-900 text-slate-400 border-slate-800';
+                }
+
+                btn.className = `day-tab py-2 px-3 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center flex items-center gap-1.5 shrink-0 ${btnClass}`;
                 
                 btn.onclick = () => {
                     currentDayIdx = idx;
                     renderApp();
                 };
 
-                btn.innerHTML = `<span>${escapeHtml(day.shortName)}</span>`;
+                btn.innerHTML = `
+                    <span>${escapeHtml(day.shortName)}</span>
+                    ${isComplete ? '<i class="fa-solid fa-circle-check text-[10px] text-emerald-300"></i>' : ''}
+                `;
                 container.appendChild(btn);
             });
 
@@ -911,8 +1055,9 @@
                     shortName: newShort,
                     name: newName,
                     notes: '',
+                    missed: false,
                     exercises: [
-                        { name: "Novo Exercício", sets: 3, targetReps: "10-12", rest: "60s", notes: "Observação de execução...", logs: [] }
+                        { name: "Novo Exercício", sets: 3, targetReps: "8-12", rest: "60s", notes: "Observação de execução...", logs: [] }
                     ]
                 });
             });
@@ -973,6 +1118,9 @@
             const palIdx = weekInfo.paletteIdx !== undefined ? weekInfo.paletteIdx : (currentWeekIdx % WEEK_PALETTES.length);
             const activePalette = WEEK_PALETTES[palIdx];
 
+            const weekPlanned = calculateWeekPlannedMetrics(weekInfo);
+            const dayPlanned = calculateDayPlannedMetrics(dayInfo);
+
             const bannerContainer = document.getElementById('week-banner-container');
             if (isAdminMode) {
                 bannerContainer.innerHTML = `
@@ -1010,7 +1158,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
                             <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Aba (ex: Semana 1):</label>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Semana Força):</label>
                                 <input type="text" value="${escapeHtml(weekInfo.shortTitle || '')}" 
                                     onchange="updateWeekProp('shortTitle', this.value)"
                                     class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
@@ -1039,6 +1187,22 @@
                             <input type="text" value="${escapeHtml(weekInfo.desc || '')}" 
                                 onchange="updateWeekProp('desc', this.value)"
                                 class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <!-- Card de Volume Total Previsto para o Microciclo (Treinador) -->
+                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center">
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Séries Semana (Micro)</div>
+                                <div class="text-sm font-extrabold text-amber-400 mt-0.5">${weekPlanned.totalSets} séries</div>
+                            </div>
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Reps Previstas (Micro)</div>
+                                <div class="text-sm font-extrabold text-blue-400 mt-0.5">~${weekPlanned.totalRepsEst} reps</div>
+                            </div>
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Total Exercícios</div>
+                                <div class="text-sm font-extrabold text-emerald-400 mt-0.5">${weekPlanned.totalExercises} ex.</div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1100,21 +1264,84 @@
                                     class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
                             </div>
                         </div>
+
+                        <!-- Resumo do Planejamento da Sessão do Dia -->
+                        <div class="flex items-center justify-between bg-slate-950/70 p-2 rounded-lg border border-slate-800 mt-2">
+                            <span class="text-[10px] font-bold text-slate-400">Volume Previsto do Dia:</span>
+                            <div class="flex items-center gap-3 text-xs font-extrabold">
+                                <span class="text-amber-400"><i class="fa-solid fa-layer-group text-[10px] mr-1"></i>${dayPlanned.totalSets} séries</span>
+                                <span class="text-blue-400"><i class="fa-solid fa-arrows-rotate text-[10px] mr-1"></i>~${dayPlanned.totalRepsEst} reps</span>
+                                <span class="text-emerald-400"><i class="fa-solid fa-dumbbell text-[10px] mr-1"></i>${dayPlanned.totalExercises} ex.</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else {
                 dayTitleContainer.innerHTML = `
-                    <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
-                    </h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
+                        </h2>
+                        ${dayInfo.missed ? `
+                            <span class="text-[10px] font-extrabold text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-user-xmark"></i> Falta Registrada
+                            </span>
+                        ` : ''}
+                    </div>
                 `;
             }
 
             const notesInput = document.getElementById('session-notes');
             notesInput.value = dayInfo.notes || "";
 
+            renderMissedButton(dayInfo);
             renderExercises();
             updateMetrics();
+        }
+
+        /* BOTÃO FALTAR TREINO */
+        function renderMissedButton(dayInfo) {
+            const container = document.getElementById('missed-workout-container');
+            if (!container) return;
+
+            if (dayInfo.missed) {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-red-950/40 border border-red-800/50 hover:bg-red-900/40 text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Treino Marcado como Falta (Clique para Desmarcar)</span>
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-red-950/30 border border-slate-800 hover:border-red-800/40 text-slate-400 hover:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98">
+                        <i class="fa-solid fa-user-xmark text-slate-500"></i>
+                        <span>Faltar Treino</span>
+                    </button>
+                `;
+            }
+        }
+
+        function toggleMissedWorkout() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            
+            const currentDay = currentWeek.days[currentDayIdx];
+            currentDay.missed = !currentDay.missed;
+
+            if (currentDay.missed) {
+                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
+                if (isMesocycleFullyDone()) {
+                    saveWorkoutData();
+                    renderApp();
+                    openModal('modal-mesocycle');
+                    return;
+                }
+            } else {
+                showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
+            }
+
+            saveWorkoutData();
+            renderApp();
         }
 
         function renderExercises() {
@@ -1124,7 +1351,19 @@
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
 
-            const exercises = currentWeek.days[currentDayIdx].exercises;
+            const currentDay = currentWeek.days[currentDayIdx];
+            const exercises = currentDay.exercises;
+
+            if (currentDay.missed) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-red-400/80 border border-dashed border-red-900/50 rounded-2xl bg-red-950/20 space-y-1">
+                        <i class="fa-solid fa-user-xmark text-2xl mb-1 block"></i>
+                        <p class="text-xs font-bold">Falta registrada para esta sessão.</p>
+                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão da semana com 0 kg e 0 reps.</p>
+                    </div>
+                `;
+                return;
+            }
 
             if (!exercises || exercises.length === 0) {
                 listEl.innerHTML = `
@@ -1365,17 +1604,8 @@
                 const days = weeks[w].days || [];
                 if (days.length === 0) return false;
                 for (let d = 0; d < days.length; d++) {
-                    const exercises = days[d].exercises || [];
-                    if (exercises.length === 0) return false;
-                    for (let e = 0; e < exercises.length; e++) {
-                        const ex = exercises[e];
-                        const count = ex.sets || 3;
-                        const logs = ex.logs || [];
-                        for (let s = 0; s < count; s++) {
-                            if (!logs[s] || !logs[s].done) {
-                                return false;
-                            }
-                        }
+                    if (!isDayCompleted(w, d)) {
+                        return false;
                     }
                 }
             }
@@ -1405,12 +1635,14 @@
                 pendingMesocycleToggle = { exIdx, setIdx };
                 saveWorkoutData();
                 renderExercises();
+                renderDayTabs();
                 openModal('modal-mesocycle');
                 return;
             }
 
             saveWorkoutData();
             renderExercises();
+            renderDayTabs();
         }
 
         function cancelMesocycleComplete() {
@@ -1424,22 +1656,25 @@
             }
             saveWorkoutData();
             renderExercises();
+            renderDayTabs();
             closeModal('modal-mesocycle');
         }
 
         function confirmMesocycleReset() {
             updateTodayHistoryRecord();
+            workoutData.cycleCount = (workoutData.cycleCount || 1) + 1;
 
             if (workoutData.weeks) {
                 workoutData.weeks.forEach(w => {
                     if (w.days) {
                         w.days.forEach(d => {
+                            d.missed = false;
+                            d.notes = "";
                             if (d.exercises) {
                                 d.exercises.forEach(ex => {
                                     ex.logs = [];
                                 });
                             }
-                            d.notes = "";
                         });
                     }
                 });
@@ -1451,8 +1686,9 @@
 
             saveWorkoutData();
             closeModal('modal-mesocycle');
+            renderHeader();
             renderApp();
-            showToast("Novo mesociclo iniciado!", "fa-rotate-left", "text-emerald-400");
+            showToast(`Ciclo #${workoutData.cycleCount} iniciado!`, "fa-rotate-left", "text-emerald-400");
         }
 
         function updateMetrics() {
@@ -1466,34 +1702,39 @@
             let completedSets = 0;
             let totalTonnage = 0;
 
-            exercises.forEach(ex => {
-                const count = ex.sets || 3;
-                totalSets += count;
+            if (dayInfo.missed) {
+                completedSets = 0;
+            } else {
+                exercises.forEach(ex => {
+                    const count = ex.sets || 3;
+                    totalSets += count;
 
-                let defaultReps = getTargetRepsNum(ex.targetReps);
+                    let defaultReps = getTargetRepsNum(ex.targetReps);
 
-                if (ex.logs) {
-                    for (let s = 0; s < count; s++) {
-                        const log = ex.logs[s];
-                        if (log) {
-                            if (log.done) {
-                                completedSets++;
-                            }
+                    if (ex.logs) {
+                        for (let s = 0; s < count; s++) {
+                            const log = ex.logs[s];
+                            if (log) {
+                                if (log.done) {
+                                    completedSets++;
+                                }
 
-                            const loadNum = parseNum(log.load);
-                            const repsNum = parseNum(log.reps);
+                                const loadNum = parseNum(log.load);
+                                const repsNum = parseNum(log.reps);
 
-                            const load = typeof loadNum === 'number' ? loadNum : 0;
-                            const reps = typeof repsNum === 'number' && repsNum > 0 ? repsNum : defaultReps;
+                                const load = typeof loadNum === 'number' ? loadNum : 0;
+                                const reps = typeof repsNum === 'number' && repsNum > 0 ? repsNum : defaultReps;
 
-                            if (log.done && load > 0) {
-                                totalTonnage += (load * reps);
+                                if (log.done && load > 0) {
+                                    totalTonnage += (load * reps);
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
 
+            if (totalSets === 0 && dayInfo.missed) totalSets = exercises.reduce((acc, ex) => acc + (ex.sets || 3), 0);
             const pct = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
             const elPercent = document.getElementById('metric-progress-percent');
@@ -1502,9 +1743,11 @@
             const elTonnage = document.getElementById('metric-tonnage');
             const elRir = document.getElementById('metric-rir-short');
 
-            if (elPercent) elPercent.textContent = `${pct}%`;
-            if (elCount) elCount.textContent = `${completedSets}/${totalSets} séries`;
-            if (elBar) elBar.style.width = `${pct}%`;
+            if (elPercent) elPercent.textContent = dayInfo.missed ? 'FALTA' : `${pct}%`;
+            if (elCount) elCount.textContent = dayInfo.missed ? 'Treino Faltado' : `${completedSets}/${totalSets} séries`;
+            if (elBar) elBar.style.width = dayInfo.missed ? '100%' : `${pct}%`;
+            if (elBar && dayInfo.missed) elBar.className = "bg-red-500/80 h-full transition-all duration-300";
+            if (elBar && !dayInfo.missed) elBar.className = "bg-blue-500 h-full transition-all duration-300";
             if (elTonnage) elTonnage.innerHTML = `${totalTonnage.toLocaleString('pt-BR')} <span class="text-[10px] font-normal text-slate-400">kg</span>`;
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
@@ -1522,7 +1765,7 @@
                 });
             }
             saveWorkoutData();
-            renderExercises();
+            renderApp();
         }
 
         /* ALTERAÇÃO DE SÉRIES INDIVIDUAL POR SEMANA */
@@ -1533,7 +1776,7 @@
                 ex.sets = Math.max(1, (ex.sets || 3) + delta);
             }
             saveWorkoutData();
-            renderExercises();
+            renderApp();
         }
 
         function addNewExercise() {
@@ -1559,7 +1802,7 @@
                 }
             });
             saveWorkoutData();
-            renderExercises();
+            renderApp();
             showToast("Exercício adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
         }
 
@@ -1570,7 +1813,7 @@
                 }
             });
             saveWorkoutData();
-            renderExercises();
+            renderApp();
             showToast("Exercício removido de todas as semanas", "fa-trash-can", "text-amber-400");
         }
 
@@ -1580,7 +1823,7 @@
             saveWorkoutData();
         }
 
-        /* LÓGICA DO MÓDULO DE HISTÓRICO DE TREINOS E CALENDÁRIO */
+        /* HISTÓRICO DE TREINOS E CALENDÁRIO */
         function openHistoryModal() {
             renderHistoryCalendar();
             renderHistoryRecentList();
@@ -1628,13 +1871,14 @@
                 const monthStr = String(calendarMonth + 1).padStart(2, '0');
                 const dateKey = `${calendarYear}-${monthStr}-${dayStr}`;
 
-                const hasRecord = Boolean(history[dateKey]);
+                const record = history[dateKey];
 
-                if (hasRecord) {
+                if (record) {
+                    const isMissed = Boolean(record.missed);
                     html += `
-                        <button onclick="viewHistoryDetail('${dateKey}')" class="p-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold text-xs hover:bg-emerald-500/30 transition flex flex-col items-center justify-center gap-0.5 shadow-sm">
+                        <button onclick="viewHistoryDetail('${dateKey}')" class="p-1.5 rounded-xl ${isMissed ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'} font-extrabold text-xs hover:scale-105 transition flex flex-col items-center justify-center gap-0.5 shadow-sm">
                             <span>${d}</span>
-                            <i class="fa-solid fa-circle-check text-[8px]"></i>
+                            <i class="fa-solid ${isMissed ? 'fa-user-xmark' : 'fa-circle-check'} text-[8px]"></i>
                         </button>
                     `;
                 } else {
@@ -1659,23 +1903,28 @@
             const keys = Object.keys(history).sort().reverse();
 
             if (keys.length === 0) {
-                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino concluído registrado ainda.</div>`;
+                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino registrado ainda.</div>`;
                 return;
             }
 
             keys.forEach(dateKey => {
                 const item = history[dateKey];
                 const card = document.createElement('div');
+                const isMissed = Boolean(item.missed);
+
                 card.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer hover:border-blue-500/50 transition";
                 card.onclick = () => viewHistoryDetail(dateKey);
 
                 card.innerHTML = `
                     <div>
-                        <div class="text-xs font-extrabold text-white">${escapeHtml(item.dayName || item.dayShortName || 'Treino')}</div>
+                        <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
+                            <span>${escapeHtml(item.dayName || item.dayShortName || 'Treino')}</span>
+                            ${isMissed ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 font-bold border border-red-500/30">Falta</span>' : ''}
+                        </div>
                         <div class="text-[10px] text-slate-400">${escapeHtml(item.weekTitle || '')}</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">${item.dateFormatted}</span>
+                        <span class="text-[10px] font-bold ${isMissed ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'} px-2 py-0.5 rounded-md border">${item.dateFormatted}</span>
                         <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
                     </div>
                 `;
@@ -1688,47 +1937,60 @@
             const item = history[dateKey];
             if (!item) return;
 
-            document.getElementById('detail-date-badge').textContent = item.dateFormatted;
+            const isMissed = Boolean(item.missed);
+            const badgeEl = document.getElementById('detail-date-badge');
+            badgeEl.textContent = item.dateFormatted;
+            badgeEl.className = isMissed ? "px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold" : "px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold";
+
             document.getElementById('detail-day-title').textContent = item.dayName || 'Treino Realizado';
             document.getElementById('detail-week-title').textContent = item.weekTitle || '';
 
             const exContainer = document.getElementById('detail-exercises-container');
             exContainer.innerHTML = '';
 
-            const exercises = item.exercises || [];
-            exercises.forEach(ex => {
-                const exCard = document.createElement('div');
-                exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
-
-                let setsHtml = '';
-                if (ex.logs && ex.logs.length > 0) {
-                    ex.logs.forEach((log, sIdx) => {
-                        if (log && log.done) {
-                            setsHtml += `
-                                <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
-                                    <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
-                                    <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-
-                if (!setsHtml) {
-                    setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
-                }
-
-                exCard.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-extrabold text-white">${escapeHtml(ex.name)}</h4>
-                        <span class="text-[10px] font-bold text-blue-400">${ex.sets || 3} séries</span>
-                    </div>
-                    <div class="space-y-0.5 pt-1">
-                        ${setsHtml}
+            if (isMissed) {
+                exContainer.innerHTML = `
+                    <div class="bg-slate-950 border border-red-900/40 p-3 rounded-xl text-center text-xs text-red-400 font-bold">
+                        <i class="fa-solid fa-user-xmark text-lg mb-1 block"></i>
+                        Treino registrado como Falta (sem volume de cargas/repetições).
                     </div>
                 `;
-                exContainer.appendChild(exCard);
-            });
+            } else {
+                const exercises = item.exercises || [];
+                exercises.forEach(ex => {
+                    const exCard = document.createElement('div');
+                    exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
+
+                    let setsHtml = '';
+                    if (ex.logs && ex.logs.length > 0) {
+                        ex.logs.forEach((log, sIdx) => {
+                            if (log && log.done) {
+                                setsHtml += `
+                                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
+                                        <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
+                                        <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+
+                    if (!setsHtml) {
+                        setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
+                    }
+
+                    exCard.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-extrabold text-white">${escapeHtml(ex.name)}</h4>
+                            <span class="text-[10px] font-bold text-blue-400">${ex.sets || 3} séries</span>
+                        </div>
+                        <div class="space-y-0.5 pt-1">
+                            ${setsHtml}
+                        </div>
+                    `;
+                    exContainer.appendChild(exCard);
+                });
+            }
 
             const notesEl = document.getElementById('detail-notes-container');
             if (item.notes && item.notes.trim() !== '') {
@@ -1771,6 +2033,7 @@
                         workoutData = data;
                         normalizeWorkoutData(workoutData);
                         saveWorkoutData();
+                        autoSelectActiveDay();
                         renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
@@ -1821,6 +2084,7 @@
                     workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
                     normalizeWorkoutData(workoutData);
                     closeModal('modal-reset');
+                    autoSelectActiveDay();
                     renderHeader();
                     renderApp();
                     showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
