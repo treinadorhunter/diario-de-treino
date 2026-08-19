@@ -543,72 +543,90 @@
             }
         }
 
-        /* IDENTIFICAÇÃO DO DIA DA SEMANA ATUAL */
-        function getTodayDayIndex(totalDays) {
-            const now = new Date();
-            const dayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sáb
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                return Math.min(4, totalDays - 1); // Fim de semana fixa na Sexta-feira
-            }
-            const mappedIdx = dayOfWeek - 1; // Seg = 0, Ter = 1, Qua = 2, Qui = 3, Sex = 4
-            return Math.min(Math.max(0, mappedIdx), totalDays - 1);
+        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA (SEG=0, TER=1, QUA=2, QUI=3, SEX=4, SÁB=5, DOM=6) */
+        function getDayWeekdayOffset(day, fallbackIdx) {
+            if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
+            const text = ((day.id || '') + ' ' + (day.shortName || '') + ' ' + (day.name || '')).toLowerCase();
+            if (text.includes('seg')) return 0;
+            if (text.includes('ter')) return 1;
+            if (text.includes('qua')) return 2;
+            if (text.includes('qui')) return 3;
+            if (text.includes('sex')) return 4;
+            if (text.includes('sáb') || text.includes('sab')) return 5;
+            if (text.includes('dom')) return 6;
+            return fallbackIdx !== undefined ? fallbackIdx : 0;
         }
 
-        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E SELEÇÃO DE DIA */
+        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E SELEÇÃO DO DIA ATUAL */
         function processDateAndAutoMissedDays() {
             const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
             if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
 
-            const totalDays = currentWeek.days.length;
-            const todayDayIdx = getTodayDayIndex(totalDays);
+            const now = new Date();
+            const currentDayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sáb
+            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
+
+            let bestMatchingIdx = -1;
+            let firstFutureOrTodayIdx = -1;
             let hasChanged = false;
 
-            // Percorre os dias anteriores ao dia atual da semana
-            for (let d = 0; d < todayDayIdx; d++) {
-                const day = currentWeek.days[d];
-                const isCompleted = isDayCompleted(currentWeekIdx, d);
+            currentWeek.days.forEach((day, dIdx) => {
+                const dayOffset = getDayWeekdayOffset(day, dIdx);
 
-                // Se o dia anterior não teve treino concluído e não estava marcado como falta:
-                if (!isCompleted && !day.missed) {
-                    day.missed = true;
-                    hasChanged = true;
+                // Dias que já passaram nesta mesma semana:
+                if (dayOffset < todayWeekdayOffset) {
+                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
+                    if (!isCompleted && !day.missed) {
+                        day.missed = true;
+                        hasChanged = true;
 
-                    const dayInfo = getCalculatedDateForDay(d);
-                    const cycleNum = workoutData.cycleCount || 1;
-                    if (!workoutData.history) workoutData.history = {};
+                        const dayInfo = getCalculatedDateForDay(dIdx);
+                        const cycleNum = workoutData.cycleCount || 1;
+                        if (!workoutData.history) workoutData.history = {};
 
-                    workoutData.history[dayInfo.dateKey] = {
-                        dateKey: dayInfo.dateKey,
-                        dateFormatted: dayInfo.dateFormatted,
-                        weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                        dayName: day.name || '',
-                        dayShortName: day.shortName || '',
-                        notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
-                        missed: true,
-                        exercises: [
-                            {
-                                name: "FALTOU TREINO",
-                                sets: 0,
-                                targetReps: "-",
-                                rest: "-",
-                                notes: "Faltou Treino",
-                                logs: [{ load: 0, reps: 0, done: true }]
-                            }
-                        ],
-                        updatedAt: new Date().toISOString()
-                    };
+                        workoutData.history[dayInfo.dateKey] = {
+                            dateKey: dayInfo.dateKey,
+                            dateFormatted: dayInfo.dateFormatted,
+                            weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
+                            dayName: day.name || '',
+                            dayShortName: day.shortName || '',
+                            notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
+                            missed: true,
+                            exercises: [
+                                {
+                                    name: "FALTOU TREINO",
+                                    sets: 0,
+                                    targetReps: "-",
+                                    rest: "-",
+                                    notes: "Faltou Treino",
+                                    logs: [{ load: 0, reps: 0, done: true }]
+                                }
+                            ],
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                } else if (dayOffset === todayWeekdayOffset) {
+                    bestMatchingIdx = dIdx;
+                } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
+                    firstFutureOrTodayIdx = dIdx;
                 }
-            }
+            });
 
-            // Seleciona o dia de hoje automaticamente
-            currentDayIdx = todayDayIdx;
+            // Seleciona o dia de hoje ou o próximo dia de treino da semana
+            if (bestMatchingIdx !== -1) {
+                currentDayIdx = bestMatchingIdx;
+            } else if (firstFutureOrTodayIdx !== -1) {
+                currentDayIdx = firstFutureOrTodayIdx;
+            } else {
+                currentDayIdx = Math.max(0, currentWeek.days.length - 1);
+            }
 
             if (hasChanged) {
                 saveWorkoutData();
             }
         }
 
-        /* CÁLCULO DE DATA DINÂMICA DA SEMANA */
+        /* CÁLCULO DE DATA DINÂMICA BASEADA NO DIA REAL */
         function getCalculatedDateForDay(dayIdx) {
             const now = new Date();
             const currentDayOfWeek = now.getDay();
@@ -617,8 +635,12 @@
             const monday = new Date(now);
             monday.setDate(now.getDate() + mondayOffset);
             
+            const currentWeek = (workoutData.weeks && workoutData.weeks[currentWeekIdx]) ? workoutData.weeks[currentWeekIdx] : null;
+            const dayObj = (currentWeek && currentWeek.days) ? currentWeek.days[dayIdx] : null;
+            const weekdayOffset = getDayWeekdayOffset(dayObj, dayIdx);
+            
             const targetDate = new Date(monday);
-            targetDate.setDate(monday.getDate() + dayIdx);
+            targetDate.setDate(monday.getDate() + weekdayOffset);
             
             const year = targetDate.getFullYear();
             const month = String(targetDate.getMonth() + 1).padStart(2, '0');
