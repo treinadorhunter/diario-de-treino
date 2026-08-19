@@ -543,17 +543,30 @@
             }
         }
 
-        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA (SEG=0, TER=1, QUA=2, QUI=3, SEX=4, SÁB=5, DOM=6) */
+        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA */
         function getDayWeekdayOffset(day, fallbackIdx) {
             if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
-            const text = ((day.id || '') + ' ' + (day.shortName || '') + ' ' + (day.name || '')).toLowerCase();
-            if (text.includes('seg')) return 0;
-            if (text.includes('ter')) return 1;
-            if (text.includes('qua')) return 2;
-            if (text.includes('qui')) return 3;
-            if (text.includes('sex')) return 4;
-            if (text.includes('sáb') || text.includes('sab')) return 5;
-            if (text.includes('dom')) return 6;
+            const sName = (day.shortName || '').toLowerCase();
+            const name = (day.name || '').toLowerCase();
+            const text = `${sName} ${name}`;
+
+            if (/\b(seg|segunda)\b/i.test(text)) return 0;
+            if (/\b(ter|terça|terca)\b/i.test(text)) return 1;
+            if (/\b(qua|quarta)\b/i.test(text)) return 2;
+            if (/\b(qui|quinta)\b/i.test(text)) return 3;
+            if (/\b(sex|sexta)\b/i.test(text)) return 4;
+            if (/\b(sáb|sab|sábado|sabado)\b/i.test(text)) return 5;
+            if (/\b(dom|domingo)\b/i.test(text)) return 6;
+
+            const id = (day.id || '').toLowerCase();
+            if (id === 'seg') return 0;
+            if (id === 'ter') return 1;
+            if (id === 'qua') return 2;
+            if (id === 'qui') return 3;
+            if (id === 'sex') return 4;
+            if (id === 'sab' || id === 'sáb') return 5;
+            if (id === 'dom') return 6;
+
             return fallbackIdx !== undefined ? fallbackIdx : 0;
         }
 
@@ -563,8 +576,8 @@
             if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
 
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sáb
-            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
+            const currentDayOfWeek = now.getDay();
+            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
 
             let bestMatchingIdx = -1;
             let firstFutureOrTodayIdx = -1;
@@ -605,14 +618,21 @@
                             updatedAt: new Date().toISOString()
                         };
                     }
-                } else if (dayOffset === todayWeekdayOffset) {
-                    bestMatchingIdx = dIdx;
-                } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
-                    firstFutureOrTodayIdx = dIdx;
+                } else {
+                    // Dia de hoje ou futuro: desfaz marcação indevida de falta se foi gerada pelo erro anterior
+                    if (day.missed && (!day.notes || day.notes === "Faltou Treino" || day.notes.includes("[FALTOU TREINO]"))) {
+                        day.missed = false;
+                        hasChanged = true;
+                    }
+
+                    if (dayOffset === todayWeekdayOffset && bestMatchingIdx === -1) {
+                        bestMatchingIdx = dIdx;
+                    } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
+                        firstFutureOrTodayIdx = dIdx;
+                    }
                 }
             });
 
-            // Seleciona o dia de hoje ou o próximo dia de treino da semana
             if (bestMatchingIdx !== -1) {
                 currentDayIdx = bestMatchingIdx;
             } else if (firstFutureOrTodayIdx !== -1) {
@@ -731,6 +751,22 @@
                 }
                 return true;
             });
+        }
+
+        /* FUNÇÕES DE GERENCIAMENTO DE CICLO (MODO TREINADOR) */
+        function resetCycleCount() {
+            workoutData.cycleCount = 1;
+            saveWorkoutData();
+            renderHeader();
+            renderApp();
+            showToast("Contagem de ciclos zerada para Ciclo #1!", "fa-rotate-left", "text-amber-400");
+        }
+
+        function updateCycleCount(val) {
+            const num = parseInt(val, 10);
+            workoutData.cycleCount = isNaN(num) || num < 1 ? 1 : num;
+            saveWorkoutData();
+            renderHeader();
         }
 
         /* CÁLCULO DE MÉTRICAS PREVISTAS (MODO TREINADOR) */
@@ -858,7 +894,18 @@
             const cycleNum = workoutData.cycleCount || 1;
 
             if (cycleBadge) {
-                cycleBadge.innerHTML = `<i class="fa-solid fa-repeat text-[9px]"></i><span>Ciclo #${cycleNum}</span>`;
+                if (isAdminMode) {
+                    cycleBadge.innerHTML = `
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-repeat text-[9px]"></i>
+                            <span>Ciclo #</span>
+                            <input type="number" min="1" value="${cycleNum}" onchange="updateCycleCount(this.value)" class="w-8 bg-slate-950 text-amber-400 border border-amber-500/40 rounded px-1 py-0.2 text-[10px] font-extrabold text-center focus:outline-none">
+                            <button onclick="resetCycleCount()" title="Zerar Ciclo para #1" class="text-slate-400 hover:text-white ml-0.5"><i class="fa-solid fa-rotate-left text-[9px]"></i></button>
+                        </div>
+                    `;
+                } else {
+                    cycleBadge.innerHTML = `<i class="fa-solid fa-repeat text-[9px]"></i><span>Ciclo #${cycleNum}</span>`;
+                }
             }
 
             if (isAdminMode) {
@@ -1200,11 +1247,16 @@
                             <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
                                 <i class="fa-solid fa-sliders"></i> Configurações da Semana
                             </span>
-                            ${weeks.length > 1 ? `
-                                <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
-                                    <i class="fa-solid fa-trash-can"></i> Excluir Semana
+                            <div class="flex items-center gap-2">
+                                <button onclick="resetCycleCount()" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
+                                    <i class="fa-solid fa-rotate-left text-xs"></i> Zerar Ciclo (#1)
                                 </button>
-                            ` : ''}
+                                ${weeks.length > 1 ? `
+                                    <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-trash-can"></i> Excluir Semana
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
 
                         <div>
