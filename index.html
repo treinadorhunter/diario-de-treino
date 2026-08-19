@@ -570,33 +570,52 @@
             return fallbackIdx !== undefined ? fallbackIdx : 0;
         }
 
-        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E SELEÇÃO DO DIA ATUAL */
+        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E LIMPEZA DE DATAS INVÁLIDAS */
         function processDateAndAutoMissedDays() {
             const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
             if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
 
             const now = new Date();
             const currentDayOfWeek = now.getDay();
-            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
 
             let bestMatchingIdx = -1;
             let firstFutureOrTodayIdx = -1;
             let hasChanged = false;
 
+            if (!workoutData.history) workoutData.history = {};
+
+            // 1. Mapeia as datas oficiais dos dias de treino programados desta semana
+            const validWeekDateKeys = [];
+            currentWeek.days.forEach((day, dIdx) => {
+                const dayInfo = getCalculatedDateForDay(dIdx);
+                validWeekDateKeys.push(dayInfo.dateKey);
+            });
+
+            // 2. LIMPEZA AUTOMÁTICA: Remove registros fantasmas de falta gerados em dias sem treino (ex: terça 18/08)
+            Object.keys(workoutData.history).forEach(dateKey => {
+                const item = workoutData.history[dateKey];
+                if (item && item.missed) {
+                    // Se for falta em dia sem treino ou falta gravada no dia de hoje/futuro, remove do histórico
+                    if (!validWeekDateKeys.includes(dateKey) || dateKey >= getCalculatedDateForDay(currentWeek.days.length - 1).dateKey) {
+                        delete workoutData.history[dateKey];
+                        hasChanged = true;
+                    }
+                }
+            });
+
+            // 3. Processa apenas faltas reais de dias de treino que já ficaram para trás
             currentWeek.days.forEach((day, dIdx) => {
                 const dayOffset = getDayWeekdayOffset(day, dIdx);
+                const dayInfo = getCalculatedDateForDay(dIdx);
 
-                // Dias que já passaram nesta mesma semana:
                 if (dayOffset < todayWeekdayOffset) {
                     const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
                     if (!isCompleted && !day.missed) {
                         day.missed = true;
                         hasChanged = true;
 
-                        const dayInfo = getCalculatedDateForDay(dIdx);
                         const cycleNum = workoutData.cycleCount || 1;
-                        if (!workoutData.history) workoutData.history = {};
-
                         workoutData.history[dayInfo.dateKey] = {
                             dateKey: dayInfo.dateKey,
                             dateFormatted: dayInfo.dateFormatted,
@@ -619,8 +638,8 @@
                         };
                     }
                 } else {
-                    // Dia de hoje ou futuro: desfaz marcação indevida de falta se foi gerada pelo erro anterior
-                    if (day.missed && (!day.notes || day.notes === "Faltou Treino" || day.notes.includes("[FALTOU TREINO]"))) {
+                    // Se for dia de hoje ou futuro, remove qualquer marcação indevida de falta
+                    if (day.missed) {
                         day.missed = false;
                         hasChanged = true;
                     }
@@ -633,6 +652,7 @@
                 }
             });
 
+            // 4. Seleciona o dia de hoje ou o próximo dia útil de treino
             if (bestMatchingIdx !== -1) {
                 currentDayIdx = bestMatchingIdx;
             } else if (firstFutureOrTodayIdx !== -1) {
