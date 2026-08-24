@@ -622,7 +622,7 @@
 
             if (allSetsDone) return true;
 
-            // 3. Verificação para dias passados salvos no histórico (exige todas as séries feitas)
+            // 3. Verificação para dias passados salvos no histórico
             if (histRecord && !histRecord.missed && Array.isArray(histRecord.exercises) && histRecord.exercises.length > 0) {
                 return histRecord.exercises.every(ex => {
                     const count = ex.sets || 3;
@@ -666,8 +666,7 @@
                         hasChanged = true;
                     }
                 } else if (targetTimestamp < todayMidnight) {
-                    // DIA PASSADO: marca falta se não completado
-                    const isCompleted = (currentWeekIdx, dIdx);
+                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
                     if (!isCompleted && !day.missed) {
                         day.missed = true;
                         hasChanged = true;
@@ -695,7 +694,6 @@
                         };
                     }
                 } else {
-                    // DIA DE HOJE OU FUTURO: remove falta indevida
                     if (day.missed && (!day.notes || day.notes === "Faltou Treino" || day.notes.includes("[FALTOU TREINO]"))) {
                         day.missed = false;
                         if (histRecord && histRecord.missed) {
@@ -1270,7 +1268,7 @@
             days.forEach((day, idx) => {
                 const btn = document.createElement('button');
                 const isActive = idx === currentDayIdx;
-                const isComplete = (currentWeekIdx, idx);
+                const isComplete = isDayCompleted(currentWeekIdx, idx);
 
                 let btnClass = '';
                 if (isActive) {
@@ -1350,456 +1348,7 @@
             renderApp();
         }
 
-        function renderApp() {
-            renderWeekTabs();
-            renderDayTabs();
-            renderHeaderDate();
-
-            const weeks = workoutData.weeks || [];
-            if (weeks.length === 0) return;
-
-            if (currentWeekIdx >= weeks.length) currentWeekIdx = weeks.length - 1;
-            const weekInfo = weeks[currentWeekIdx];
-            const days = weekInfo.days || [];
-            
-            if (days.length === 0) return;
-
-            if (currentDayIdx >= days.length) currentDayIdx = days.length - 1;
-            const dayInfo = days[currentDayIdx];
-
-            const palIdx = weekInfo.paletteIdx !== undefined ? weekInfo.paletteIdx : (currentWeekIdx % WEEK_PALETTES.length);
-            const activePalette = WEEK_PALETTES[palIdx];
-
-            const weekPlanned = calculateWeekPlannedMetrics(weekInfo);
-            const dayPlanned = calculateDayPlannedMetrics(dayInfo);
-
-            const bannerContainer = document.getElementById('week-banner-container');
-            if (isAdminMode) {
-                bannerContainer.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                            <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
-                                <i class="fa-solid fa-sliders"></i> Configurações da Semana
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="resetCycleCount()" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
-                                    <i class="fa-solid fa-rotate-left text-xs"></i> Zerar Ciclo (#1)
-                                </button>
-                                ${weeks.length > 1 ? `
-                                    <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-trash-can"></i> Excluir Semana
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1.5">
-                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> Aplicar Modelo Pronto de Foco:
-                            </label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                                <button onclick="applyWeekPreset('metabolic')" class="py-2 px-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-bold hover:bg-amber-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-bolt text-xs"></i> Metabólico (60s)
-                                </button>
-                                <button onclick="applyWeekPreset('strength')" class="py-2 px-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-bold hover:bg-red-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-weight-hanging text-xs"></i> Força (2min)
-                                </button>
-                                <button onclick="applyWeekPreset('hypertrophy')" class="py-2 px-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-cubes text-xs"></i> Hipertrofia (90s)
-                                </button>
-                                <button onclick="applyWeekPreset('deload')" class="py-2 px-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold hover:bg-emerald-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-heart-pulse text-xs"></i> Deload (60s)
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Semana Força):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.shortTitle || '')}" onchange="updateWeekProp('shortTitle', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta Reps (ex: 4-6 RM):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.targetReps || '')}" onchange="updateWeekProp('targetReps', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta RIR (ex: RIR 1):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.rirText || '')}" onchange="updateWeekProp('rirText', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Título do Banner:</label>
-                            <input type="text" value="${escapeHtml(weekInfo.title || '')}" onchange="updateWeekProp('title', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Descrição do Foco Estratégico:</label>
-                            <input type="text" value="${escapeHtml(weekInfo.desc || '')}" onchange="updateWeekProp('desc', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center">
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Séries Semana (Micro)</div>
-                                <div class="text-sm font-extrabold text-amber-400 mt-0.5">${weekPlanned.totalSets} séries</div>
-                            </div>
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Reps Previstas (Micro)</div>
-                                <div class="text-sm font-extrabold text-blue-400 mt-0.5">~${weekPlanned.totalRepsEst} reps</div>
-                            </div>
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Total Exercícios</div>
-                                <div class="text-sm font-extrabold text-emerald-400 mt-0.5">${weekPlanned.totalExercises} ex.</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                bannerContainer.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${activePalette.badgeClass}">
-                            <i class="fa-solid ${activePalette.icon} mr-1"></i> ${escapeHtml(weekInfo.title || '')}
-                        </span>
-                        <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
-                    </div>
-
-                    <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3">${escapeHtml(weekInfo.desc || '')}</p>
-
-                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
-                        <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
-                            <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
-                        </div>
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
-                            <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
-                        </div>
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
-                            <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">${escapeHtml(weekInfo.rirText || '-')}</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            const dayTitleContainer = document.getElementById('day-title-container');
-            if (isAdminMode) {
-                dayTitleContainer.innerHTML = `
-                    <div class="w-full space-y-2 bg-slate-900 border border-amber-500/30 p-3 rounded-xl">
-                        <div class="text-[10px] uppercase font-bold text-amber-400 flex items-center justify-between">
-                            <span><i class="fa-solid fa-sliders mr-1"></i> Identificação do Dia</span>
-                            ${days.length > 1 ? `
-                                <button onclick="deleteCurrentDay()" class="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1 font-bold">
-                                    <i class="fa-solid fa-trash-can"></i> Excluir Dia
-                                </button>
-                            ` : ''}
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Ter • Pull):</label>
-                                <input type="text" value="${escapeHtml(dayInfo.shortName)}" onchange="updateDayProp('shortName', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Título da Sessão (ex: Terça: Pull Geral):</label>
-                                <input type="text" value="${escapeHtml(dayInfo.name)}" onchange="updateDayProp('name', this.value)" class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between bg-slate-950/70 p-2 rounded-lg border border-slate-800 mt-2">
-                            <span class="text-[10px] font-bold text-slate-400">Volume Previsto do Dia:</span>
-                            <div class="flex items-center gap-3 text-xs font-extrabold">
-                                <span class="text-amber-400"><i class="fa-solid fa-layer-group text-[10px] mr-1"></i>${dayPlanned.totalSets} séries</span>
-                                <span class="text-blue-400"><i class="fa-solid fa-arrows-rotate text-[10px] mr-1"></i>~${dayPlanned.totalRepsEst} reps</span>
-                                <span class="text-emerald-400"><i class="fa-solid fa-dumbbell text-[10px] mr-1"></i>${dayPlanned.totalExercises} ex.</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                dayTitleContainer.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
-                        </h2>
-                        ${dayInfo.missed ? `
-                            <span class="text-[10px] font-extrabold text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                <i class="fa-solid fa-user-xmark"></i> Falta Registrada
-                            </span>
-                        ` : ''}
-                    </div>
-                `;
-            }
-
-            const notesInput = document.getElementById('session-notes');
-            notesInput.value = dayInfo.notes || "";
-
-            renderMissedButton(dayInfo);
-            renderExercises();
-            updateMetrics();
-        }
-
-        function renderMissedButton(dayInfo) {
-            const container = document.getElementById('missed-workout-container');
-            if (!container) return;
-
-            if (dayInfo.missed) {
-                container.innerHTML = `
-                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-red-950/40 border border-red-800/50 hover:bg-red-900/40 text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        <span>Treino Marcado como Falta (Clique para Desmarcar)</span>
-                    </button>
-                `;
-            } else {
-                container.innerHTML = `
-                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-red-950/30 border border-slate-800 hover:border-red-800/40 text-slate-400 hover:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98">
-                        <i class="fa-solid fa-user-xmark text-slate-500"></i>
-                        <span>Faltar Treino</span>
-                    </button>
-                `;
-            }
-        }
-
-        function toggleMissedWorkout() {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-            
-            const currentDay = currentWeek.days[currentDayIdx];
-            currentDay.missed = !currentDay.missed;
-
-            if (currentDay.missed) {
-                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
-                if (isMesocycleFullyDone()) {
-                    saveWorkoutData();
-                    renderApp();
-                    openModal('modal-mesocycle');
-                    return;
-                }
-            } else {
-                showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
-            }
-
-            saveWorkoutData();
-            renderApp();
-        }
-
-        function renderExercises() {
-            const listEl = document.getElementById('exercises-list');
-            listEl.innerHTML = '';
-
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-
-            const currentDay = currentWeek.days[currentDayIdx];
-            const exercises = currentDay.exercises;
-
-            if (currentDay.missed) {
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-red-400/80 border border-dashed border-red-900/50 rounded-2xl bg-red-950/20 space-y-1">
-                        <i class="fa-solid fa-user-xmark text-2xl mb-1 block"></i>
-                        <p class="text-xs font-bold">Falta registrada para esta sessão.</p>
-                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão da semana com 0 kg e 0 reps.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            if (!exercises || exercises.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
-                        <i class="fa-solid fa-dumbbell text-2xl mb-2 block"></i>
-                        <p class="text-xs">Nenhum exercício cadastrado nesta sessão.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            exercises.forEach((ex, exIdx) => {
-                const exCard = document.createElement('div');
-                exCard.className = 'bg-slate-900 border border-slate-800/90 rounded-2xl p-3.5 shadow-sm space-y-3';
-
-                const setsCount = ex.sets || 3;
-                if (!ex.logs) ex.logs = [];
-
-                let setsRowsHtml = '';
-                let defaultRepsPlaceholder = parseNum(ex.targetReps) || 10;
-
-                for (let s = 0; s < setsCount; s++) {
-                    const log = ex.logs[s] || { load: '', reps: '', done: false };
-                    const isDone = Boolean(log.done);
-
-                    setsRowsHtml += `
-                        <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-xl transition ${isDone ? 'bg-emerald-950/25 border border-emerald-800/40' : 'bg-slate-950 border border-slate-800/80'}">
-                            <div class="w-6 shrink-0 text-center font-extrabold text-[11px] ${isDone ? 'text-emerald-400' : 'text-slate-500'}">
-                                #${s + 1}
-                            </div>
-
-                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
-                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" oninput="updateSetLog(${exIdx}, ${s}, 'load', this.value)" onchange="updateSetLog(${exIdx}, ${s}, 'load', this.value)" class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
-                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">kg</span>
-                                </div>
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
-                            </div>
-
-                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
-                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined && log.reps !== '' ? log.reps : ''}" oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)" onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)" class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
-                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">rep</span>
-                                </div>
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
-                            </div>
-
-                            <button onclick="toggleSetDone(${exIdx}, ${s})" class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-500 text-slate-950 font-black shadow-md' : 'bg-slate-800 border border-slate-700/80 text-slate-500 active:scale-95'}">
-                                <i class="fa-solid ${isDone ? 'fa-check text-sm' : 'fa-check text-xs opacity-40'}"></i>
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const hasRecLoad = ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null;
-
-                let titleHtml = `
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="flex-1">
-                            ${isAdminMode ? `
-                                <input type="text" value="${escapeHtml(ex.name)}" onchange="updateExerciseProp(${exIdx}, 'name', this.value)" class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none mb-1.5">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
-                                        <span class="text-[10px] font-bold text-slate-400">Reps:</span>
-                                        <input type="text" value="${escapeHtml(ex.targetReps || '')}" onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)" class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
-                                    </div>
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
-                                        <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
-                                        <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
-                                        <input type="text" value="${escapeHtml(ex.rest || '')}" onchange="updateExerciseProp(${exIdx}, 'rest', this.value)" class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
-                                    </div>
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-emerald-500/40 rounded-md px-2 py-0.5">
-                                        <i class="fa-solid fa-weight-hanging text-[10px] text-emerald-400"></i>
-                                        <span class="text-[10px] font-bold text-slate-400">Carga Rec.:</span>
-                                        <input type="number" step="0.5" inputmode="decimal" placeholder="Off" value="${hasRecLoad ? ex.recommendedLoad : ''}" onchange="updateRecommendedLoad(${exIdx}, this.value)" class="w-12 bg-transparent text-[10px] font-extrabold text-emerald-400 focus:outline-none p-0">
-                                    </div>
-                                </div>
-                            ` : `
-                                <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
-                                <div class="flex items-center justify-between gap-2 mt-1">
-                                    <div class="flex flex-wrap items-center gap-1.5">
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                            ${setsCount} séries × ${ex.targetReps} reps
-                                        </span>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                            <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
-                                        </span>
-                                        ${hasRecLoad ? `
-                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                                <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
-                                            </span>
-                                        ` : ''}
-                                    </div>
-                                    <div id="rest-timer-container-${exIdx}" class="shrink-0"></div>
-                                </div>
-                            `}
-                        </div>
-
-                        ${isAdminMode ? `
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button onclick="changeSetsCount(${exIdx}, 1)" title="Adicionar Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-emerald-400 flex items-center justify-center">+</button>
-                                <button onclick="changeSetsCount(${exIdx}, -1)" title="Remover Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center justify-center">-</button>
-                                <button onclick="deleteExercise(${exIdx})" title="Excluir Exercício" class="w-7 h-7 bg-red-950/60 border border-red-800/60 rounded-lg text-xs text-red-400 flex items-center justify-center"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-
-                let notesHtml = '';
-                if (ex.notes || isAdminMode) {
-                    notesHtml = `
-                        <div>
-                            ${isAdminMode ? `
-                                <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução..." onchange="updateExerciseProp(${exIdx}, 'notes', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
-                            ` : `
-                                <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
-                                    <span>${escapeHtml(ex.notes)}</span>
-                                </p>
-                            `}
-                        </div>
-                    `;
-                }
-
-                exCard.innerHTML = `
-                    ${titleHtml}
-                    ${notesHtml}
-                    <div class="space-y-1.5 pt-1">
-                        ${setsRowsHtml}
-                    </div>
-                `;
-
-                listEl.appendChild(exCard);
-            });
-
-            updateRestTimerBadgeUI();
-        }
-
-        function updateRecommendedLoad(exIdx, val) {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx]) {
-                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-                if (ex) {
-                    const parsedVal = parseNum(val);
-                    ex.recommendedLoad = parsedVal;
-                    if (parsedVal !== '') {
-                        if (!ex.logs) ex.logs = [];
-                        const count = ex.sets || 3;
-                        for (let s = 0; s < count; s++) {
-                            if (!ex.logs[s]) {
-                                ex.logs[s] = { load: parsedVal, reps: parseNum(ex.targetReps) || 10, done: false };
-                            } else {
-                                ex.logs[s].load = parsedVal;
-                            }
-                        }
-                    }
-                }
-            }
-            saveWorkoutData();
-            renderExercises();
-            if (val !== '') showToast(`Carga recomendada de ${val}kg aplicada!`, "fa-weight-hanging", "text-emerald-400");
-        }
-
-        function adjustSetVal(exIdx, setIdx, field, delta) {
-            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
-            if (!ex.logs) ex.logs = [];
-
-            let defaultReps = parseNum(ex.targetReps) || 10;
-            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
-
-            let currentVal = parseNum(ex.logs[setIdx][field]);
-            if (typeof currentVal !== 'number') currentVal = field === 'reps' ? defaultReps : 0;
-
-            let newVal = Math.max(0, currentVal + delta);
-            newVal = Math.round(newVal * 10) / 10;
-
-            ex.logs[setIdx][field] = newVal;
-            saveWorkoutData();
-            renderExercises();
-        }
-
-        function updateSetLog(exIdx, setIdx, field, value) {
-            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
-            if (!ex.logs) ex.logs = [];
-            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: '', done: false };
-
-            if (field === 'load' || field === 'reps') {
-                ex.logs[setIdx][field] = parseNum(value);
-            }
-
-            saveWorkoutData();
-            updateMetrics();
-        }
-
-       /* VERIFICAÇÃO DE CICLO COMPLETO */
+        /* VERIFICAÇÃO DE CICLO COMPLETO */
         function isMesocycleFullyDone() {
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return false;
@@ -1830,23 +1379,16 @@
 
             if (navigator.vibrate) navigator.vibrate(40);
 
-            // Inicia o timer de descanso se acabou de marcar a série
             if (!wasDone) startRestTimer(exIdx);
 
             saveWorkoutData();
             renderExercises();
             renderDayTabs();
 
-            // Só dispara a mensagem se foi marcado (não desmarcado) e se TODAS as séries de todos os dias estiverem concluídas
             if (!wasDone && isMesocycleFullyDone()) {
                 pendingMesocycleToggle = { exIdx, setIdx };
                 openModal('modal-mesocycle');
             }
-        }
-
-            saveWorkoutData();
-            renderExercises();
-            renderDayTabs();
         }
 
         function cancelMesocycleComplete() {
@@ -2229,6 +1771,8 @@
                         renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
+                    } else {
+                        showToast("Arquivo JSON inválido!", "fa-circle-xmark", "text-red-400");
                     }
                 } catch(err) {
                     showToast("Erro ao importar dados!", "fa-circle-xmark", "text-red-400");
