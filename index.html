@@ -31,7 +31,7 @@
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
 
-    <!-- Tela de Bloqueio de Segurança: Treino Não Cadastrado -->
+    <!-- Tela de Bloqueio de Segurança -->
     <div id="unauthorized-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 hidden">
         <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-2xl shadow-lg">
             <i class="fa-solid fa-lock"></i>
@@ -86,16 +86,15 @@
             </div>
         </div>
 
-        <!-- Dynamic Week Selector Bar -->
         <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50"></div>
     </header>
 
-    <!-- Sticky Day Navigation Bar -->
+    <!-- Navigation Bar -->
     <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[68px] z-30 shadow-sm">
         <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar"></div>
     </nav>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main class="px-3 py-4 space-y-4 flex-1">
         <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden"></div>
 
@@ -128,7 +127,7 @@
         </div>
     </main>
 
-    <!-- Modal Ciclo Concluído -->
+    <!-- Modais -->
     <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -147,11 +146,9 @@
         </div>
     </div>
 
-    <!-- Modal Calendário de Histórico -->
     <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
-            
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h3 class="text-base font-extrabold text-white flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-blue-400"></i> Histórico de Treinos
@@ -160,27 +157,22 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-
             <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                 <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-left"></i></button>
                 <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize"></div>
                 <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-
             <div id="calendar-grid-container" class="space-y-1"></div>
-
             <div class="pt-2 border-t border-slate-800 space-y-2">
                 <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     <i class="fa-solid fa-list-check text-emerald-400 mr-1"></i> Registros Recentes
                 </label>
                 <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar"></div>
             </div>
-
             <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
         </div>
     </div>
 
-    <!-- Modal Detalhes do Treino Anterior -->
     <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
@@ -198,7 +190,6 @@
         </div>
     </div>
 
-    <!-- Modal Menu Settings -->
     <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-3">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2 sm:hidden"></div>
@@ -227,7 +218,6 @@
         </div>
     </div>
 
-    <!-- Modal Confirm Reset com Senha -->
     <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -253,7 +243,6 @@
         </div>
     </div>
 
-    <!-- Modal Password (Acesso Treinador) -->
     <div id="modal-password" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -767,6 +756,50 @@
                 });
             }
             return { totalSets, totalRepsEst, totalExercises };
+        }
+
+        function renderMissedButton(dayInfo) {
+            const container = document.getElementById('missed-workout-container');
+            if (!container) return;
+
+            if (dayInfo.missed) {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-red-950/40 border border-red-800/50 hover:bg-red-900/40 text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Treino Marcado como Falta (Clique para Desmarcar)</span>
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-red-950/30 border border-slate-800 hover:border-red-800/40 text-slate-400 hover:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98">
+                        <i class="fa-solid fa-user-xmark text-slate-500"></i>
+                        <span>Faltar Treino</span>
+                    </button>
+                `;
+            }
+        }
+
+        function toggleMissedWorkout() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            
+            const currentDay = currentWeek.days[currentDayIdx];
+            currentDay.missed = !currentDay.missed;
+
+            if (currentDay.missed) {
+                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
+                if (isMesocycleFullyDone()) {
+                    saveWorkoutData();
+                    renderApp();
+                    openModal('modal-mesocycle');
+                    return;
+                }
+            } else {
+                showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
+            }
+
+            saveWorkoutData();
+            renderApp();
         }
 
         function updateTodayHistoryRecord() {
@@ -1446,7 +1479,7 @@
                             <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
                                 <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
                                 <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined && log.reps !== '' ? log.reps : ''}" 
+                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined ? log.reps : ''}" 
                                         oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
                                         onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
                                         class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
