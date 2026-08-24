@@ -27,42 +27,12 @@
         .active-tab-glow {
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
-
-        /* ESTILOS DE IMPRESSÃO / PDF */
-        @media print {
-            body {
-                background: #ffffff !important;
-                color: #000000 !important;
-                padding: 0 !important;
-            }
-            .no-print, header, nav, #toast, #modal-menu, #modal-reset, #modal-password, #modal-history, #modal-history-detail, #modal-mesocycle {
-                display: none !important;
-            }
-            #print-area {
-                display: block !important;
-                visibility: visible !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 10px !important;
-            }
-            main {
-                display: none !important;
-            }
-        }
-        @media screen {
-            #print-area {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
 
-    <!-- ÁREA EXCLUSIVA DE IMPRESSÃO (PDF) -->
-    <div id="print-area" class="text-black bg-white"></div>
-
     <!-- App Bar Header -->
-    <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-40 shadow-md backdrop-blur-md bg-slate-900/90 no-print">
+    <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-40 shadow-md backdrop-blur-md bg-slate-900/90">
         <div class="px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
@@ -73,9 +43,13 @@
                         Treinador Hunter <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">PRO</span>
                     </h1>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <div id="student-name-container" class="text-[11px] text-slate-300 font-medium"></div>
+                        <div id="student-name-container" class="text-[11px] text-slate-300 font-medium">
+                            <!-- Dynamic Student Name -->
+                        </div>
                         <span class="text-slate-600 text-[10px]">•</span>
-                        <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"></div>
+                        <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                            <!-- Dynamic Cycle Badge -->
+                        </div>
                         <span class="text-slate-600 text-[10px]">•</span>
                         <div id="header-date-container" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
                             <i class="fa-regular fa-calendar text-[9px]"></i>
@@ -99,23 +73,32 @@
         </div>
 
         <!-- Dynamic Week Selector Bar -->
-        <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50"></div>
+        <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50">
+            <!-- Dynamic Weeks Rendered Here -->
+        </div>
     </header>
 
     <!-- Sticky Day Navigation Bar -->
-    <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[108px] z-30 shadow-sm no-print">
-        <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar"></div>
+    <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[108px] z-30 shadow-sm">
+        <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar">
+            <!-- Dynamic Day Tabs Rendered Here -->
+        </div>
     </nav>
 
     <!-- Main Content Area -->
-    <main class="px-3 py-4 space-y-4 flex-1 no-print">
+    <main class="px-3 py-4 space-y-4 flex-1">
         
-        <!-- Strategy & Progress Banner Card -->
-        <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden"></div>
+        <!-- Strategy & Progress Banner Card / Week Admin Config -->
+        <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <!-- Dynamic Content -->
+        </div>
 
-        <!-- Day Title Bar -->
+        <!-- Day Title Bar & Admin Controls -->
         <div class="flex flex-col gap-2 pt-1">
-            <div id="day-title-container" class="w-full"></div>
+            <div id="day-title-container" class="w-full">
+                <!-- Dynamic Day Title / Admin Form -->
+            </div>
+
             <div class="flex justify-end">
                 <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus text-xs"></i> Exercício
@@ -126,7 +109,7 @@
         <!-- Exercises List Container -->
         <div id="exercises-list" class="space-y-4"></div>
 
-        <!-- Session Notes (PSE) -->
+        <!-- Session Notes (PSE) & Missed Workout Action -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
             <div>
                 <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
@@ -134,41 +117,47 @@
                 </label>
                 <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
             </div>
-            <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80"></div>
+
+            <!-- Botão Faltar Treino -->
+            <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80">
+                <!-- Dynamic Missed Workout Button -->
+            </div>
         </div>
 
-        <!-- Botão Treinos Anteriores -->
+        <!-- Botão Treinos Anteriores (Histórico) -->
         <div class="pt-1">
             <button onclick="openHistoryModal()" class="w-full py-3.5 px-4 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 hover:text-blue-300 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition">
                 <i class="fa-solid fa-clock-rotate-left text-sm"></i>
                 <span>Treinos Anteriores (Histórico)</span>
             </button>
         </div>
+
     </main>
 
     <!-- Modal Ciclo Concluído -->
-    <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-trophy"></i>
             </div>
             <div>
-                <h3 class="text-base font-extrabold text-white mb-1">Ciclo Concluído!</h3>
+                <h3 class="text-base font-extrabold text-white mb-1">Parabéns!</h3>
                 <p id="modal-mesocycle-msg" class="text-xs text-slate-300 leading-relaxed">
-                    Você finalizou todos os dias programados. Ao prosseguir, o próximo ciclo da próxima semana será iniciado com as séries limpas.
+                    Você concluiu todos os dias previstos para este ciclo. O treino foi registrado e o próximo ciclo será iniciado.
                 </p>
             </div>
             <div class="flex gap-2 pt-2">
                 <button onclick="cancelMesocycleComplete()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold active:scale-95 transition">Voltar</button>
-                <button onclick="confirmMesocycleReset()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">Avançar Semana</button>
+                <button onclick="confirmMesocycleReset()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">Iniciar Próximo Ciclo</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Calendário de Histórico -->
-    <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden no-print">
+    <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
+            
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h3 class="text-base font-extrabold text-white flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-blue-400"></i> Histórico de Treinos
@@ -177,100 +166,123 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
+
+            <!-- Navegação do Mês no Calendário -->
             <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-left"></i></button>
-                <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize"></div>
-                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize">
+                    <!-- Dynamic Month/Year -->
+                </div>
+                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
-            <div id="calendar-grid-container" class="space-y-1"></div>
+
+            <!-- Grid do Mini Calendário -->
+            <div id="calendar-grid-container" class="space-y-1">
+                <!-- Dynamic Calendar Grid Rendered Here -->
+            </div>
+
+            <!-- Lista de Históricos Recentes -->
             <div class="pt-2 border-t border-slate-800 space-y-2">
                 <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     <i class="fa-solid fa-list-check text-emerald-400 mr-1"></i> Registros Recentes
                 </label>
-                <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar"></div>
+                <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
+                    <!-- Dynamic Recent History Items -->
+                </div>
             </div>
-            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
+
+            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Fechar
+            </button>
         </div>
     </div>
 
     <!-- Modal Detalhes do Treino Anterior -->
-    <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden no-print">
+    <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
+
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div>
                     <span id="detail-date-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold"></span>
                     <h3 id="detail-day-title" class="text-sm font-extrabold text-white mt-1"></h3>
                 </div>
-                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
+
             <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
+
             <div id="detail-exercises-container" class="space-y-3"></div>
+
             <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
-            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Voltar</button>
+
+            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Voltar
+            </button>
         </div>
     </div>
 
     <!-- Modal Menu Settings -->
-    <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden no-print">
+    <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-3">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2 sm:hidden"></div>
+            
             <h3 class="text-base font-extrabold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
                 <i class="fa-solid fa-sliders text-blue-400"></i> Opções da Planilha
             </h3>
+
             <div class="space-y-2 pt-1">
                 <button onclick="exportData(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-download text-blue-400"></i> Exportar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
+
                 <button onclick="triggerImport(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-upload text-emerald-400"></i> Importar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-                <button onclick="prepareAndPrintWorkout(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
+
+                <button onclick="window.print(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir ou Gerar PDF</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
+
                 <button onclick="confirmReset(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-bold flex items-center justify-between transition border border-red-800/40">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para os Padrões</span>
                     <i class="fa-solid fa-chevron-right text-red-500/60 text-xs"></i>
                 </button>
             </div>
-            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
+
+            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
+                Fechar
+            </button>
         </div>
     </div>
 
-    <!-- Modal Password -->
-    <div id="modal-password" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
-            <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-key"></i></div>
-            <div>
-                <h3 class="text-base font-extrabold text-white mb-1">Acesso do Treinador</h3>
-                <p class="text-xs text-slate-400">Digite a senha para liberar o modo edição:</p>
-            </div>
-            <div>
-                <input type="password" id="input-admin-pass" inputmode="numeric" maxlength="6" placeholder="****" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-center text-lg font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
-                <p id="pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-2 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="closeModal('modal-password')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
-                <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition">Entrar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Reset -->
-    <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <!-- Modal Confirm Reset com Senha -->
+    <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
-            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
             <div>
                 <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
-                <p class="text-xs text-slate-400">Todas as cargas, repetições e dados serão apagados permanentemente.</p>
+                <p class="text-xs text-slate-400">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
             </div>
             <div>
                 <label class="text-[10px] text-slate-400 font-bold block mb-1">Digite a senha do Treinador:</label>
-                <input type="password" id="input-reset-pass" inputmode="numeric" maxlength="6" placeholder="****" onkeydown="if(event.key==='Enter') executeReset()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-base font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
-                <p id="reset-pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-1.5 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!</p>
+                <input type="password" id="input-reset-pass" inputmode="numeric" maxlength="6" placeholder="****" 
+                    onkeydown="if(event.key==='Enter') executeReset()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-base font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
+                <p id="reset-pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-1.5 hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!
+                </p>
             </div>
             <div class="flex gap-2">
                 <button onclick="closeModal('modal-reset')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
@@ -279,22 +291,48 @@
         </div>
     </div>
 
+    <!-- Modal Password (Acesso Treinador) -->
+    <div id="modal-password" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-extrabold text-white mb-1">Acesso do Treinador</h3>
+                <p class="text-xs text-slate-400">Digite a senha para liberar o modo edição:</p>
+            </div>
+            <div>
+                <input type="password" id="input-admin-pass" inputmode="numeric" maxlength="6" placeholder="****" 
+                    onkeydown="if(event.key==='Enter') verifyAdminPassword()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-center text-lg font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
+                <p id="pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-2 hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeModal('modal-password')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
+                <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-extrabold transition">Entrar</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="file-import" class="hidden" accept=".json" onchange="importData(event)">
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur text-white text-xs px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none w-[90%] max-w-xs justify-center no-print">
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur text-white text-xs px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none w-[90%] max-w-xs justify-center">
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
         <span id="toast-msg" class="font-semibold">Mensagem</span>
     </div>
 
     <script>
-        /* CONFIGURAÇÕES GERAIS */
+        /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS COM SEGURANÇA */
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
         const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; 
 
         const urlParams = new URLSearchParams(window.location.search);
         const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
 
+        /* PALETA DE CORES E ÍCONES DAS SEMANAS */
         const WEEK_PALETTES = [
             { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
             { textClass: "text-red-400", badgeClass: "bg-red-500/15 text-red-400 border-red-500/30", icon: "fa-weight-hanging" },
@@ -302,12 +340,14 @@
             { textClass: "text-emerald-400", badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: "fa-heart-pulse" }
         ];
 
+        /* MODELOS PRONTOS DE FOCO ESTRATÉGICO */
         const WEEK_PRESETS = {
             metabolic: {
                 label: "Metabólica",
                 shortTitle: "Semana Metabólica",
                 targetReps: "15-20 RM",
                 exerciseReps: "15-20",
+                titleSuffix: "Estresse Metabólico",
                 title: "Semana Metabólica — Estresse Metabólico",
                 desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
                 rirText: "RIR 1",
@@ -319,6 +359,7 @@
                 shortTitle: "Semana de Força",
                 targetReps: "4-6 RM",
                 exerciseReps: "4-6",
+                titleSuffix: "Tensão Mecânica / Força",
                 title: "Semana de Força — Tensão Mecânica / Força",
                 desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2 min).",
                 rirText: "RIR 2",
@@ -330,6 +371,7 @@
                 shortTitle: "Semana Hipertrofia",
                 targetReps: "8-12 RM",
                 exerciseReps: "8-12",
+                titleSuffix: "Hipertrofia Tradicional",
                 title: "Semana Hipertrofia — Hipertrofia Tradicional",
                 desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
                 rirText: "RIR 0-1",
@@ -342,6 +384,7 @@
                 targetReps: "8-12 RM",
                 exerciseReps: "8-12",
                 defaultSets: 2,
+                titleSuffix: "Deload / Recuperação",
                 title: "Semana Deload — Recuperação Ativa",
                 desc: "Corte de 30% a 50% na carga, apenas 2 séries por exercício e longe da falha (RIR 3-4).",
                 rirText: "RIR 3-4",
@@ -350,10 +393,10 @@
             }
         };
 
+        /* PROGRAMA PADRÃO DO TREINO */
         const DEFAULT_PROGRAM = {
             studentName: "Nome do Aluno",
             cycleCount: 1,
-            weekOffset: 0,
             history: {},
             weeks: [
                 {
@@ -440,27 +483,21 @@
         let isAdminMode = false;
         let saveTimeout = null;
         let pendingMesocycleToggle = null;
-        let isDataLoaded = false; // TRAVA DE SEGURANÇA: impede salvar antes de carregar da nuvem
-
-        let restTimer = {
-            exIdx: null,
-            remaining: 0,
-            intervalId: null
-        };
 
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
 
-        /* INICIALIZAÇÃO BLINDADA */
+        /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             loadFromLocalStorageFirst();
+            processDateAndAutoMissedDays();
             renderHeader();
             renderApp();
             await fetchFromSheetsAndUpdate();
         });
 
         window.addEventListener('beforeunload', () => {
-            if (saveTimeout && isDataLoaded) {
+            if (saveTimeout) {
                 clearTimeout(saveTimeout);
                 sendDataToSheetsDirect(workoutData);
             }
@@ -481,20 +518,14 @@
         }
 
         async function fetchFromSheetsAndUpdate() {
-            if (!API_URL) {
-                isDataLoaded = true;
-                processDateAndAutoMissedDays();
-                return;
-            }
+            if (!API_URL) return;
             try {
-                showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
                 const currentMonth = getTodayMonthKey();
                 const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                 const data = await response.json();
 
                 if (data && data.error === "Aluno não encontrado.") {
                     showToast("Aluno não cadastrado na planilha!", "fa-triangle-exclamation", "text-amber-400");
-                    isDataLoaded = true;
                     return;
                 }
 
@@ -502,15 +533,177 @@
                     workoutData = data;
                     normalizeWorkoutData(workoutData);
                     localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
-                    showToast("Treino sincronizado!", "fa-circle-check", "text-emerald-400");
+                    processDateAndAutoMissedDays();
+                    renderHeader();
+                    renderApp();
+                    showToast("Sincronizado com a planilha!", "fa-circle-check", "text-emerald-400");
                 }
             } catch (e) {
                 console.error("Erro ao puxar dados da planilha:", e);
-            } finally {
-                isDataLoaded = true;
-                processDateAndAutoMissedDays();
-                renderHeader();
-                renderApp();
+            }
+        }
+
+        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA */
+        function getDayWeekdayOffset(day, fallbackIdx) {
+            if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
+            const sName = (day.shortName || '').toLowerCase();
+            const name = (day.name || '').toLowerCase();
+            const text = `${sName} ${name}`;
+
+            if (/\b(seg|segunda)\b/i.test(text)) return 0;
+            if (/\b(ter|terça|terca)\b/i.test(text)) return 1;
+            if (/\b(qua|quarta)\b/i.test(text)) return 2;
+            if (/\b(qui|quinta)\b/i.test(text)) return 3;
+            if (/\b(sex|sexta)\b/i.test(text)) return 4;
+            if (/\b(sáb|sab|sábado|sabado)\b/i.test(text)) return 5;
+            if (/\b(dom|domingo)\b/i.test(text)) return 6;
+
+            const id = (day.id || '').toLowerCase();
+            if (id === 'seg') return 0;
+            if (id === 'ter') return 1;
+            if (id === 'qua') return 2;
+            if (id === 'qui') return 3;
+            if (id === 'sex') return 4;
+            if (id === 'sab' || id === 'sáb') return 5;
+            if (id === 'dom') return 6;
+
+            return fallbackIdx !== undefined ? fallbackIdx : 0;
+        }
+
+        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E LIMPEZA DE DATAS INVÁLIDAS */
+        function processDateAndAutoMissedDays() {
+            const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
+            if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
+
+            const now = new Date();
+            const currentDayOfWeek = now.getDay();
+            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
+
+            let bestMatchingIdx = -1;
+            let firstFutureOrTodayIdx = -1;
+            let hasChanged = false;
+
+            if (!workoutData.history) workoutData.history = {};
+
+            // 1. Mapeia as datas oficiais dos dias de treino programados desta semana
+            const validWeekDateKeys = [];
+            currentWeek.days.forEach((day, dIdx) => {
+                const dayInfo = getCalculatedDateForDay(dIdx);
+                validWeekDateKeys.push(dayInfo.dateKey);
+            });
+
+            // 2. LIMPEZA AUTOMÁTICA: Remove registros fantasmas de falta gerados em dias sem treino (ex: terça 18/08)
+            Object.keys(workoutData.history).forEach(dateKey => {
+                const item = workoutData.history[dateKey];
+                if (item && item.missed) {
+                    // Se for falta em dia sem treino ou falta gravada no dia de hoje/futuro, remove do histórico
+                    if (!validWeekDateKeys.includes(dateKey) || dateKey >= getCalculatedDateForDay(currentWeek.days.length - 1).dateKey) {
+                        delete workoutData.history[dateKey];
+                        hasChanged = true;
+                    }
+                }
+            });
+
+            // 3. Processa apenas faltas reais de dias de treino que já ficaram para trás
+            currentWeek.days.forEach((day, dIdx) => {
+                const dayOffset = getDayWeekdayOffset(day, dIdx);
+                const dayInfo = getCalculatedDateForDay(dIdx);
+
+                if (dayOffset < todayWeekdayOffset) {
+                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
+                    if (!isCompleted && !day.missed) {
+                        day.missed = true;
+                        hasChanged = true;
+
+                        const cycleNum = workoutData.cycleCount || 1;
+                        workoutData.history[dayInfo.dateKey] = {
+                            dateKey: dayInfo.dateKey,
+                            dateFormatted: dayInfo.dateFormatted,
+                            weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
+                            dayName: day.name || '',
+                            dayShortName: day.shortName || '',
+                            notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
+                            missed: true,
+                            exercises: [
+                                {
+                                    name: "FALTOU TREINO",
+                                    sets: 0,
+                                    targetReps: "-",
+                                    rest: "-",
+                                    notes: "Faltou Treino",
+                                    logs: [{ load: 0, reps: 0, done: true }]
+                                }
+                            ],
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                } else {
+                    // Se for dia de hoje ou futuro, remove qualquer marcação indevida de falta
+                    if (day.missed) {
+                        day.missed = false;
+                        hasChanged = true;
+                    }
+
+                    if (dayOffset === todayWeekdayOffset && bestMatchingIdx === -1) {
+                        bestMatchingIdx = dIdx;
+                    } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
+                        firstFutureOrTodayIdx = dIdx;
+                    }
+                }
+            });
+
+            // 4. Seleciona o dia de hoje ou o próximo dia útil de treino
+            if (bestMatchingIdx !== -1) {
+                currentDayIdx = bestMatchingIdx;
+            } else if (firstFutureOrTodayIdx !== -1) {
+                currentDayIdx = firstFutureOrTodayIdx;
+            } else {
+                currentDayIdx = Math.max(0, currentWeek.days.length - 1);
+            }
+
+            if (hasChanged) {
+                saveWorkoutData();
+            }
+        }
+
+        /* CÁLCULO DE DATA DINÂMICA BASEADA NO DIA REAL */
+        function getCalculatedDateForDay(dayIdx) {
+            const now = new Date();
+            const currentDayOfWeek = now.getDay();
+            const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + mondayOffset);
+            
+            const currentWeek = (workoutData.weeks && workoutData.weeks[currentWeekIdx]) ? workoutData.weeks[currentWeekIdx] : null;
+            const dayObj = (currentWeek && currentWeek.days) ? currentWeek.days[dayIdx] : null;
+            const weekdayOffset = getDayWeekdayOffset(dayObj, dayIdx);
+            
+            const targetDate = new Date(monday);
+            targetDate.setDate(monday.getDate() + weekdayOffset);
+            
+            const year = targetDate.getFullYear();
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            
+            return {
+                dateKey: `${year}-${month}-${day}`,
+                dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            };
+        }
+
+        function getTodayMonthKey() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${year}-${month}`;
+        }
+
+        function renderHeaderDate() {
+            const container = document.getElementById('current-date-text');
+            if (container) {
+                const dayInfo = getCalculatedDateForDay(currentDayIdx);
+                container.textContent = dayInfo.dateFormatted;
             }
         }
 
@@ -518,7 +711,6 @@
             if (!data) return;
             if (!data.studentName) data.studentName = "Nome do Aluno";
             if (!data.cycleCount) data.cycleCount = 1;
-            if (data.weekOffset === undefined) data.weekOffset = 0;
             if (!data.history) data.history = {};
 
             if (!data.weeks) {
@@ -528,8 +720,8 @@
                     if (data[k]) {
                         data.weeks.push({
                             id: k,
-                            shortTitle: data[k].shortTitle || `Semana ${idx + 1}`,
-                            targetReps: data[k].targetReps || "8-12 RM",
+                            shortTitle: k === 'W1' ? 'Semana Metabólica' : k === 'W2' ? 'Semana de Força' : k === 'W3' ? 'Semana Hipertrofia' : 'Semana Deload',
+                            targetReps: k === 'W1' ? '15-20 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-12 RM' : '8-12 RM',
                             title: data[k].title || `Semana ${idx + 1}`,
                             desc: data[k].desc || "",
                             rirText: data[k].rirText || "RIR 1",
@@ -564,210 +756,27 @@
             });
         }
 
-        /* IDENTIFICAÇÃO PRECISA DO DIA DA SEMANA */
-        function getDayWeekdayOffset(day, fallbackIdx) {
-            if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
-            const sName = (day.shortName || '').toLowerCase();
-            const name = (day.name || '').toLowerCase();
-            const text = `${sName} ${name}`;
-
-            if (/\b(seg|segunda)\b/i.test(text)) return 0;
-            if (/\b(ter|terça|terca)\b/i.test(text)) return 1;
-            if (/\b(qua|quarta)\b/i.test(text)) return 2;
-            if (/\b(qui|quinta)\b/i.test(text)) return 3;
-            if (/\b(sex|sexta)\b/i.test(text)) return 4;
-            if (/\b(sáb|sab|sábado|sabado)\b/i.test(text)) return 5;
-            if (/\b(dom|domingo)\b/i.test(text)) return 6;
-
-            const id = (day.id || '').toLowerCase();
-            if (id === 'seg') return 0;
-            if (id === 'ter') return 1;
-            if (id === 'qua') return 2;
-            if (id === 'qui') return 3;
-            if (id === 'sex') return 4;
-            if (id === 'sab' || id === 'sáb') return 5;
-            if (id === 'dom') return 6;
-
-            return fallbackIdx !== undefined ? fallbackIdx : 0;
-        }
-
-        /* CÁLCULO DE DATA DINÂMICA DA SEMANA */
-        function getCalculatedDateForDay(dayIdx) {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-            
-            const monday = new Date(now);
-            const totalWeekShift = ((workoutData.weekOffset || 0) * 7);
-            monday.setDate(now.getDate() + mondayOffset + totalWeekShift);
-            
-            const currentWeek = (workoutData.weeks && workoutData.weeks[currentWeekIdx]) ? workoutData.weeks[currentWeekIdx] : null;
-            const dayObj = (currentWeek && currentWeek.days) ? currentWeek.days[dayIdx] : null;
-            const weekdayOffset = getDayWeekdayOffset(dayObj, dayIdx);
-            
-            const targetDate = new Date(monday);
-            targetDate.setDate(monday.getDate() + weekdayOffset);
-            
-            const year = targetDate.getFullYear();
-            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-            const day = String(targetDate.getDate()).padStart(2, '0');
-            
-            return {
-                dateKey: `${year}-${month}-${day}`,
-                dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-            };
-        }
-
-        function getTodayMonthKey() {
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            return `${year}-${month}`;
-        }
-
-        function renderHeaderDate() {
-            const container = document.getElementById('current-date-text');
-            if (container) {
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                container.textContent = dayInfo.dateFormatted;
-            }
-        }
-
-        /* VERIFICAÇÃO EXATA DE DIA COMPLETO */
         function isDayCompleted(weekIdx, dayIdx) {
             const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
             if (!week || !week.days || !week.days[dayIdx]) return false;
             const day = week.days[dayIdx];
-
             if (day.missed) return true;
-
-            const dayInfo = getCalculatedDateForDay(dayIdx);
-            const histRecord = (workoutData.history && workoutData.history[dayInfo.dateKey]) ? workoutData.history[dayInfo.dateKey] : null;
-            if (histRecord && histRecord.missed) return true;
-
             const exercises = day.exercises || [];
             if (exercises.length === 0) return false;
-
-            const allSetsDone = exercises.every(ex => {
+            return exercises.every(ex => {
                 const count = ex.sets || 3;
                 const logs = ex.logs || [];
-                if (logs.length < count) return false;
                 for (let s = 0; s < count; s++) {
                     if (!logs[s] || !logs[s].done) return false;
                 }
                 return true;
             });
-
-            if (allSetsDone) return true;
-
-            if (histRecord && !histRecord.missed && Array.isArray(histRecord.exercises) && histRecord.exercises.length > 0) {
-                return histRecord.exercises.every(ex => {
-                    const count = ex.sets || 3;
-                    const logs = ex.logs || [];
-                    if (logs.length < count) return false;
-                    for (let s = 0; s < count; s++) {
-                        if (!logs[s] || !logs[s].done) return false;
-                    }
-                    return true;
-                });
-            }
-
-            return false;
         }
 
-        /* AUTO-PREENCHIMENTO COM TIMESTAMP DE CALENDÁRIO */
-        function processDateAndAutoMissedDays() {
-            if (!isDataLoaded) return;
-
-            const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
-            if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
-
-            const now = new Date();
-            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-
-            let bestMatchingIdx = -1;
-            let firstFutureOrTodayIdx = -1;
-            let hasChanged = false;
-
-            if (!workoutData.history) workoutData.history = {};
-
-            currentWeek.days.forEach((day, dIdx) => {
-                const dayInfo = getCalculatedDateForDay(dIdx);
-                const [y, m, d] = dayInfo.dateKey.split('-').map(Number);
-                const targetTimestamp = new Date(y, m - 1, d).getTime();
-                const histRecord = workoutData.history[dayInfo.dateKey];
-
-                const isRealWorkoutSaved = histRecord && !histRecord.missed && (histRecord.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
-
-                if (isRealWorkoutSaved) {
-                    if (day.missed) {
-                        day.missed = false;
-                        hasChanged = true;
-                    }
-                } else if (targetTimestamp < todayMidnight) {
-                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
-                    if (!isCompleted && !day.missed) {
-                        day.missed = true;
-                        hasChanged = true;
-
-                        const cycleNum = workoutData.cycleCount || 1;
-                        workoutData.history[dayInfo.dateKey] = {
-                            dateKey: dayInfo.dateKey,
-                            dateFormatted: dayInfo.dateFormatted,
-                            weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                            dayName: day.name || '',
-                            dayShortName: day.shortName || '',
-                            notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
-                            missed: true,
-                            exercises: [
-                                {
-                                    name: "FALTOU TREINO",
-                                    sets: 0,
-                                    targetReps: "-",
-                                    rest: "-",
-                                    notes: "Faltou Treino",
-                                    logs: [{ load: 0, reps: 0, done: true }]
-                                }
-                            ],
-                            updatedAt: new Date().toISOString()
-                        };
-                    }
-                } else {
-                    if (day.missed && (!day.notes || day.notes === "Faltou Treino" || day.notes.includes("[FALTOU TREINO]"))) {
-                        day.missed = false;
-                        if (histRecord && histRecord.missed) {
-                            delete workoutData.history[dayInfo.dateKey];
-                        }
-                        hasChanged = true;
-                    }
-
-                    if (targetTimestamp === todayMidnight && bestMatchingIdx === -1) {
-                        bestMatchingIdx = dIdx;
-                    } else if (targetTimestamp > todayMidnight && firstFutureOrTodayIdx === -1) {
-                        firstFutureOrTodayIdx = dIdx;
-                    }
-                }
-            });
-
-            if (bestMatchingIdx !== -1) {
-                currentDayIdx = bestMatchingIdx;
-            } else if (firstFutureOrTodayIdx !== -1) {
-                currentDayIdx = firstFutureOrTodayIdx;
-            } else {
-                currentDayIdx = Math.max(0, currentWeek.days.length - 1);
-            }
-
-            if (hasChanged) {
-                saveWorkoutData();
-            }
-        }
-
-        /* GERENCIAMENTO DE CICLO */
+        /* FUNÇÕES DE GERENCIAMENTO DE CICLO (MODO TREINADOR) */
         function resetCycleCount() {
             workoutData.cycleCount = 1;
-            workoutData.weekOffset = 0;
             saveWorkoutData();
-            processDateAndAutoMissedDays();
             renderHeader();
             renderApp();
             showToast("Contagem de ciclos zerada para Ciclo #1!", "fa-rotate-left", "text-amber-400");
@@ -776,197 +785,18 @@
         function updateCycleCount(val) {
             const num = parseInt(val, 10);
             workoutData.cycleCount = isNaN(num) || num < 1 ? 1 : num;
-            workoutData.weekOffset = Math.max(0, workoutData.cycleCount - 1);
             saveWorkoutData();
-            processDateAndAutoMissedDays();
             renderHeader();
-            renderApp();
         }
 
-        /* TIMER DE DESCANSO REGRESSIVO */
-        function parseRestTimeSeconds(str) {
-            if (!str) return 60;
-            const clean = String(str).toLowerCase().trim();
-            if (clean.includes('min') || clean.includes('m')) {
-                const match = clean.match(/(\d+(?:[.,]\d+)?)/);
-                if (match) return Math.round(parseFloat(match[1].replace(',', '.')) * 60);
-            }
-            const matchSec = clean.match(/(\d+)/);
-            if (matchSec) return parseInt(matchSec[1], 10);
-            return 60;
-        }
-
-        function formatTimerSeconds(sec) {
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-
-        function playBeepSound() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                gain.gain.setValueAtTime(0.25, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } catch (e) {
-                console.log("Audio error:", e);
-            }
-        }
-
-        function startRestTimer(exIdx) {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-            if (!ex) return;
-
-            const seconds = parseRestTimeSeconds(ex.rest || "60s");
-
-            if (restTimer.intervalId) {
-                clearInterval(restTimer.intervalId);
-            }
-
-            restTimer.exIdx = exIdx;
-            restTimer.remaining = seconds;
-
-            updateRestTimerBadgeUI();
-
-            restTimer.intervalId = setInterval(() => {
-                restTimer.remaining--;
-                if (restTimer.remaining <= 0) {
-                    clearInterval(restTimer.intervalId);
-                    restTimer.intervalId = null;
-                    updateRestTimerBadgeUI();
-                    playBeepSound();
-                    if (navigator.vibrate) {
-                        navigator.vibrate([200, 100, 200, 100, 300]);
-                    }
-                    showToast("Descanso finalizado! Próxima série!", "fa-bell", "text-emerald-400");
-                } else {
-                    updateRestTimerBadgeUI();
-                }
-            }, 1000);
-        }
-
-        function cancelRestTimer() {
-            if (restTimer.intervalId) {
-                clearInterval(restTimer.intervalId);
-                restTimer.intervalId = null;
-            }
-            restTimer.exIdx = null;
-            restTimer.remaining = 0;
-            updateRestTimerBadgeUI();
-            showToast("Cronômetro cancelado", "fa-stop", "text-slate-400");
-        }
-
-        function updateRestTimerBadgeUI() {
-            const allBadges = document.querySelectorAll('[id^="rest-timer-container-"]');
-            allBadges.forEach(el => { el.innerHTML = ''; });
-
-            if (restTimer.exIdx !== null && restTimer.remaining > 0) {
-                const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
-                if (targetContainer) {
-                    targetContainer.innerHTML = `
-                        <button onclick="cancelRestTimer()" title="Clique para cancelar o descanso" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm active:scale-95 transition animate-pulse">
-                            <i class="fa-solid fa-stopwatch text-[9px] text-emerald-300"></i>
-                            <span>Descanso: ${formatTimerSeconds(restTimer.remaining)}</span>
-                            <i class="fa-solid fa-xmark text-[8px] text-slate-400 hover:text-white ml-0.5"></i>
-                        </button>
-                    `;
-                }
-            }
-        }
-
-        /* GERAÇÃO DA FOLHA DE TREINO PARA IMPRESSÃO (PDF) */
-        function prepareAndPrintWorkout() {
-            const printArea = document.getElementById('print-area');
-            if (!printArea) return;
-
-            const week = workoutData.weeks[currentWeekIdx] || workoutData.weeks[0];
-            const studentName = workoutData.studentName || "Aluno";
-            const cycleNum = workoutData.cycleCount || 1;
-
-            let daysHtml = '';
-            (week.days || []).forEach((day, dIdx) => {
-                const dayDate = getCalculatedDateForDay(dIdx);
-                let exRows = '';
-
-                (day.exercises || []).forEach((ex, idx) => {
-                    exRows += `
-                        <tr style="border-bottom: 1px solid #e2e8f0;">
-                            <td style="padding: 6px 8px; font-weight: bold; font-size: 11px;">${idx + 1}. ${escapeHtml(ex.name)}</td>
-                            <td style="padding: 6px 8px; text-align: center; font-size: 11px;">${ex.sets || 3}</td>
-                            <td style="padding: 6px 8px; text-align: center; font-size: 11px;">${escapeHtml(ex.targetReps || '8-12')}</td>
-                            <td style="padding: 6px 8px; text-align: center; font-size: 11px;">${escapeHtml(ex.rest || '60s')}</td>
-                            <td style="padding: 6px 8px; font-size: 10px; color: #475569;">${escapeHtml(ex.notes || '-')}</td>
-                            <td style="padding: 6px 8px; border-left: 1px dashed #cbd5e1; width: 100px;"></td>
-                        </tr>
-                    `;
-                });
-
-                daysHtml += `
-                    <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                        <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; border: 1px solid #cbd5e1;">
-                            <span>${escapeHtml(day.name)}</span>
-                            <span style="color: #0f766e;">Data Prevista: ${dayDate.dateFormatted}</span>
-                        </div>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 6px;">
-                            <thead>
-                                <tr style="background: #e2e8f0; font-size: 10px; text-transform: uppercase;">
-                                    <th style="padding: 5px 8px; text-align: left;">Exercício</th>
-                                    <th style="padding: 5px 8px; text-align: center;">Séries</th>
-                                    <th style="padding: 5px 8px; text-align: center;">Reps</th>
-                                    <th style="padding: 5px 8px; text-align: center;">Descanso</th>
-                                    <th style="padding: 5px 8px; text-align: left;">Observações / Execução</th>
-                                    <th style="padding: 5px 8px; text-align: center; border-left: 1px dashed #cbd5e1;">Cargas (kg)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${exRows}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            });
-
-            printArea.innerHTML = `
-                <div style="font-family: sans-serif; padding: 10px;">
-                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div>
-                            <h1 style="font-size: 18px; font-weight: 900; margin: 0; color: #0f172a;">TREINADOR HUNTER PRO</h1>
-                            <div style="font-size: 12px; margin-top: 2px;"><strong>Aluno(a):</strong> ${escapeHtml(studentName)} | <strong>Ciclo:</strong> #${cycleNum}</div>
-                        </div>
-                        <div style="text-align: right; font-size: 11px; color: #475569;">
-                            <div><strong>${escapeHtml(week.title || '')}</strong></div>
-                            <div>Foco: ${escapeHtml(week.targetReps || '')} | ${escapeHtml(week.rirText || '')}</div>
-                        </div>
-                    </div>
-                    ${daysHtml}
-                    <div style="margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 10px; color: #64748b; text-align: center;">
-                        Ficha de Treino Oficial • Treinador Hunter • Gerado em ${new Date().toLocaleDateString('pt-BR')}
-                    </div>
-                </div>
-            `;
-
-            window.print();
-        }
-
-        /* CÁLCULO DE MÉTRICAS */
+        /* CÁLCULO DE MÉTRICAS PREVISTAS (MODO TREINADOR) */
         function calculateDayPlannedMetrics(day) {
             let totalSets = 0;
             let totalRepsEst = 0;
             if (day && day.exercises) {
                 day.exercises.forEach(ex => {
                     const sets = Number(ex.sets) || 0;
-                    const reps = parseNum(ex.targetReps) || 10;
+                    const reps = getTargetRepsNum(ex.targetReps);
                     totalSets += sets;
                     totalRepsEst += (sets * reps);
                 });
@@ -1046,14 +876,14 @@
             }
         }
 
-        async function sendDataToSheetsDirect(dataToSync) {
-            if (!API_URL || !dataToSync || !isDataLoaded) return;
+        function sendDataToSheetsDirect(dataToSync) {
+            if (!API_URL) return;
             try {
                 const currentMonth = getTodayMonthKey();
-                await fetch(API_URL, {
+                fetch(API_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         aluno: currentStudent,
                         mes: currentMonth,
@@ -1067,8 +897,6 @@
         }
 
         function saveWorkoutData() {
-            if (!isDataLoaded) return; // Trava: não salva enquanto não carrega da nuvem
-
             updateTodayHistoryRecord();
             localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
@@ -1104,7 +932,9 @@
                 container.innerHTML = `
                     <div class="flex items-center gap-1">
                         <span class="text-[10px] text-slate-400 font-bold">Aluno(a):</span>
-                        <input type="text" value="${escapeHtml(studentName)}" onchange="updateStudentName(this.value)" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-32 sm:w-44">
+                        <input type="text" value="${escapeHtml(studentName)}" 
+                            onchange="updateStudentName(this.value)"
+                            class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-32 sm:w-44">
                     </div>
                 `;
             } else {
@@ -1121,6 +951,7 @@
             renderHeader();
         }
 
+        /* ADMIN MODE TOGGLE */
         function toggleAdminMode() {
             if (isAdminMode) {
                 isAdminMode = false;
@@ -1130,13 +961,16 @@
                 document.getElementById('input-admin-pass').value = '';
                 document.getElementById('pass-error-msg').classList.add('hidden');
                 openModal('modal-password');
-                setTimeout(() => { document.getElementById('input-admin-pass').focus(); }, 100);
+                setTimeout(() => {
+                    document.getElementById('input-admin-pass').focus();
+                }, 100);
             }
         }
 
         async function verifyAdminPassword() {
             const inputPass = document.getElementById('input-admin-pass').value;
             const errorMsg = document.getElementById('pass-error-msg');
+
             showToast("Verificando senha...", "fa-key", "text-amber-400");
 
             try {
@@ -1153,7 +987,7 @@
                     if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
                 }
             } catch (e) {
-                showToast("Erro ao validar senha", "fa-triangle-exclamation", "text-red-400");
+                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
             }
         }
 
@@ -1181,6 +1015,7 @@
             renderApp();
         }
 
+        /* GERENCIAMENTO DE SEMANAS */
         function renderWeekTabs() {
             const container = document.getElementById('week-tabs-container');
             if (!container) return;
@@ -1234,7 +1069,9 @@
                         day.exercises.forEach(ex => {
                             ex.rest = preset.defaultRest;
                             ex.targetReps = preset.exerciseReps;
-                            if (preset.defaultSets !== undefined) ex.sets = preset.defaultSets;
+                            if (preset.defaultSets !== undefined) {
+                                ex.sets = preset.defaultSets;
+                            }
                         });
                     }
                 });
@@ -1296,6 +1133,7 @@
             }
         }
 
+        /* GERENCIAMENTO DE DIAS COM STATUS DE CONCLUSÃO */
         function renderDayTabs() {
             const container = document.getElementById('day-tabs-container');
             if (!container) return;
@@ -1304,7 +1142,9 @@
             const currentWeek = workoutData.weeks[currentWeekIdx];
             const days = currentWeek ? currentWeek.days : [];
 
-            if (currentDayIdx >= days.length) currentDayIdx = Math.max(0, days.length - 1);
+            if (currentDayIdx >= days.length) {
+                currentDayIdx = Math.max(0, days.length - 1);
+            }
 
             days.forEach((day, idx) => {
                 const btn = document.createElement('button');
@@ -1319,7 +1159,12 @@
                 }
 
                 btn.className = `day-tab py-2 px-3 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center flex items-center gap-1.5 shrink-0 ${btnClass}`;
-                btn.onclick = () => { currentDayIdx = idx; renderApp(); };
+                
+                btn.onclick = () => {
+                    currentDayIdx = idx;
+                    renderApp();
+                };
+
                 btn.innerHTML = `
                     <span>${escapeHtml(day.shortName)}</span>
                     ${isComplete ? '<i class="fa-solid fa-circle-check text-[10px] text-emerald-300"></i>' : ''}
@@ -1358,7 +1203,7 @@
             currentDayIdx = workoutData.weeks[currentWeekIdx].days.length - 1;
             saveWorkoutData();
             renderApp();
-            showToast("Novo dia adicionado!", "fa-circle-plus", "text-emerald-400");
+            showToast("Novo dia adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
         }
 
         function deleteCurrentDay() {
@@ -1369,6 +1214,7 @@
             }
 
             const deletedIdx = currentDayIdx;
+
             workoutData.weeks.forEach(week => {
                 if (week.days) week.days.splice(deletedIdx, 1);
             });
@@ -1376,7 +1222,7 @@
             currentDayIdx = Math.max(0, deletedIdx - 1);
             saveWorkoutData();
             renderApp();
-            showToast("Dia removido", "fa-trash-can", "text-amber-400");
+            showToast("Dia removido de todas as semanas", "fa-trash-can", "text-amber-400");
         }
 
         function updateDayProp(prop, val) {
@@ -1385,11 +1231,515 @@
                     week.days[currentDayIdx][prop] = val;
                 }
             });
+
             saveWorkoutData();
             renderApp();
         }
 
-        /* VERIFICAÇÃO DE CICLO COMPLETO */
+        function renderApp() {
+            renderWeekTabs();
+            renderDayTabs();
+            renderHeaderDate();
+
+            const weeks = workoutData.weeks || [];
+            if (weeks.length === 0) return;
+
+            if (currentWeekIdx >= weeks.length) currentWeekIdx = weeks.length - 1;
+            const weekInfo = weeks[currentWeekIdx];
+            const days = weekInfo.days || [];
+            
+            if (days.length === 0) return;
+
+            if (currentDayIdx >= days.length) currentDayIdx = days.length - 1;
+            const dayInfo = days[currentDayIdx];
+
+            const palIdx = weekInfo.paletteIdx !== undefined ? weekInfo.paletteIdx : (currentWeekIdx % WEEK_PALETTES.length);
+            const activePalette = WEEK_PALETTES[palIdx];
+
+            const weekPlanned = calculateWeekPlannedMetrics(weekInfo);
+            const dayPlanned = calculateDayPlannedMetrics(dayInfo);
+
+            const bannerContainer = document.getElementById('week-banner-container');
+            if (isAdminMode) {
+                bannerContainer.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sliders"></i> Configurações da Semana
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="resetCycleCount()" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
+                                    <i class="fa-solid fa-rotate-left text-xs"></i> Zerar Ciclo (#1)
+                                </button>
+                                ${weeks.length > 1 ? `
+                                    <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-trash-can"></i> Excluir Semana
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> Aplicar Modelo Pronto de Foco:
+                            </label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                                <button onclick="applyWeekPreset('metabolic')" class="py-2 px-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-bold hover:bg-amber-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-bolt text-xs"></i> Metabólico (60s)
+                                </button>
+                                <button onclick="applyWeekPreset('strength')" class="py-2 px-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-bold hover:bg-red-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-weight-hanging text-xs"></i> Força (2min)
+                                </button>
+                                <button onclick="applyWeekPreset('hypertrophy')" class="py-2 px-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-cubes text-xs"></i> Hipertrofia (90s)
+                                </button>
+                                <button onclick="applyWeekPreset('deload')" class="py-2 px-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold hover:bg-emerald-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-heart-pulse text-xs"></i> Deload (60s)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Semana Força):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.shortTitle || '')}" 
+                                    onchange="updateWeekProp('shortTitle', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta Reps (ex: 4-6 RM):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.targetReps || '')}" 
+                                    onchange="updateWeekProp('targetReps', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta RIR (ex: RIR 1):</label>
+                                <input type="text" value="${escapeHtml(weekInfo.rirText || '')}" 
+                                    onchange="updateWeekProp('rirText', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Título do Banner:</label>
+                            <input type="text" value="${escapeHtml(weekInfo.title || '')}" 
+                                onchange="updateWeekProp('title', this.value)"
+                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Descrição do Foco Estratégico:</label>
+                            <input type="text" value="${escapeHtml(weekInfo.desc || '')}" 
+                                onchange="updateWeekProp('desc', this.value)"
+                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <!-- Card de Volume Total Previsto para o Microciclo (Treinador) -->
+                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center">
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Séries Semana (Micro)</div>
+                                <div class="text-sm font-extrabold text-amber-400 mt-0.5">${weekPlanned.totalSets} séries</div>
+                            </div>
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Reps Previstas (Micro)</div>
+                                <div class="text-sm font-extrabold text-blue-400 mt-0.5">~${weekPlanned.totalRepsEst} reps</div>
+                            </div>
+                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
+                                <div class="text-[9px] uppercase font-bold text-slate-400">Total Exercícios</div>
+                                <div class="text-sm font-extrabold text-emerald-400 mt-0.5">${weekPlanned.totalExercises} ex.</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                bannerContainer.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${activePalette.badgeClass}">
+                            <i class="fa-solid ${activePalette.icon} mr-1"></i> ${escapeHtml(weekInfo.title || '')}
+                        </span>
+                        <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
+                    </div>
+
+                    <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3">${escapeHtml(weekInfo.desc || '')}</p>
+
+                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
+                        <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
+                            <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
+                        </div>
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
+                            <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
+                        </div>
+                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                            <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
+                            <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">${escapeHtml(weekInfo.rirText || '-')}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const dayTitleContainer = document.getElementById('day-title-container');
+            if (isAdminMode) {
+                dayTitleContainer.innerHTML = `
+                    <div class="w-full space-y-2 bg-slate-900 border border-amber-500/30 p-3 rounded-xl">
+                        <div class="text-[10px] uppercase font-bold text-amber-400 flex items-center justify-between">
+                            <span><i class="fa-solid fa-sliders mr-1"></i> Identificação do Dia</span>
+                            ${days.length > 1 ? `
+                                <button onclick="deleteCurrentDay()" class="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1 font-bold">
+                                    <i class="fa-solid fa-trash-can"></i> Excluir Dia
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Ter • Pull):</label>
+                                <input type="text" value="${escapeHtml(dayInfo.shortName)}" 
+                                    onchange="updateDayProp('shortName', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Título da Sessão (ex: Terça: Pull Geral):</label>
+                                <input type="text" value="${escapeHtml(dayInfo.name)}" 
+                                    onchange="updateDayProp('name', this.value)"
+                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <!-- Resumo do Planejamento da Sessão do Dia -->
+                        <div class="flex items-center justify-between bg-slate-950/70 p-2 rounded-lg border border-slate-800 mt-2">
+                            <span class="text-[10px] font-bold text-slate-400">Volume Previsto do Dia:</span>
+                            <div class="flex items-center gap-3 text-xs font-extrabold">
+                                <span class="text-amber-400"><i class="fa-solid fa-layer-group text-[10px] mr-1"></i>${dayPlanned.totalSets} séries</span>
+                                <span class="text-blue-400"><i class="fa-solid fa-arrows-rotate text-[10px] mr-1"></i>~${dayPlanned.totalRepsEst} reps</span>
+                                <span class="text-emerald-400"><i class="fa-solid fa-dumbbell text-[10px] mr-1"></i>${dayPlanned.totalExercises} ex.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                dayTitleContainer.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
+                        </h2>
+                        ${dayInfo.missed ? `
+                            <span class="text-[10px] font-extrabold text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-user-xmark"></i> Falta Registrada
+                            </span>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            const notesInput = document.getElementById('session-notes');
+            notesInput.value = dayInfo.notes || "";
+
+            renderMissedButton(dayInfo);
+            renderExercises();
+            updateMetrics();
+        }
+
+        /* BOTÃO FALTAR TREINO */
+        function renderMissedButton(dayInfo) {
+            const container = document.getElementById('missed-workout-container');
+            if (!container) return;
+
+            if (dayInfo.missed) {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-red-950/40 border border-red-800/50 hover:bg-red-900/40 text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Treino Marcado como Falta (Clique para Desmarcar)</span>
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-red-950/30 border border-slate-800 hover:border-red-800/40 text-slate-400 hover:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98">
+                        <i class="fa-solid fa-user-xmark text-slate-500"></i>
+                        <span>Faltar Treino</span>
+                    </button>
+                `;
+            }
+        }
+
+        function toggleMissedWorkout() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            
+            const currentDay = currentWeek.days[currentDayIdx];
+            currentDay.missed = !currentDay.missed;
+
+            if (currentDay.missed) {
+                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
+                if (isMesocycleFullyDone()) {
+                    saveWorkoutData();
+                    renderApp();
+                    openModal('modal-mesocycle');
+                    return;
+                }
+            } else {
+                showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
+            }
+
+            saveWorkoutData();
+            renderApp();
+        }
+
+        function renderExercises() {
+            const listEl = document.getElementById('exercises-list');
+            listEl.innerHTML = '';
+
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+
+            const currentDay = currentWeek.days[currentDayIdx];
+            const exercises = currentDay.exercises;
+
+            if (currentDay.missed) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-red-400/80 border border-dashed border-red-900/50 rounded-2xl bg-red-950/20 space-y-1">
+                        <i class="fa-solid fa-user-xmark text-2xl mb-1 block"></i>
+                        <p class="text-xs font-bold">Falta registrada para esta sessão.</p>
+                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão da semana com 0 kg e 0 reps.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!exercises || exercises.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+                        <i class="fa-solid fa-dumbbell text-2xl mb-2 block"></i>
+                        <p class="text-xs">Nenhum exercício cadastrado nesta sessão.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            exercises.forEach((ex, exIdx) => {
+                const exCard = document.createElement('div');
+                exCard.className = 'bg-slate-900 border border-slate-800/90 rounded-2xl p-3.5 shadow-sm space-y-3';
+
+                const setsCount = ex.sets || 3;
+                if (!ex.logs) ex.logs = [];
+
+                let setsRowsHtml = '';
+                let defaultRepsPlaceholder = getTargetRepsNum(ex.targetReps);
+
+                for (let s = 0; s < setsCount; s++) {
+                    const log = ex.logs[s] || { load: '', reps: '', done: false };
+                    const isDone = Boolean(log.done);
+
+                    setsRowsHtml += `
+                        <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-xl transition ${isDone ? 'bg-emerald-950/25 border border-emerald-800/40' : 'bg-slate-950 border border-slate-800/80'}">
+                            <div class="w-6 shrink-0 text-center font-extrabold text-[11px] ${isDone ? 'text-emerald-400' : 'text-slate-500'}">
+                                #${s + 1}
+                            </div>
+
+                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    -
+                                </button>
+                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
+                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" 
+                                        oninput="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
+                                        onchange="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
+                                        class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">kg</span>
+                                </div>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    +
+                                </button>
+                            </div>
+
+                            <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    -
+                                </button>
+                                <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
+                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined && log.reps !== '' ? log.reps : ''}" 
+                                        oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
+                                        onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
+                                        class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                    <span class="text-[9px] text-slate-500 font-bold shrink-0">rep</span>
+                                </div>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
+                                    +
+                                </button>
+                            </div>
+
+                            <button onclick="toggleSetDone(${exIdx}, ${s})" class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-500 text-slate-950 font-black shadow-md' : 'bg-slate-800 border border-slate-700/80 text-slate-500 active:scale-95'}">
+                                <i class="fa-solid ${isDone ? 'fa-check text-sm' : 'fa-check text-xs opacity-40'}"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const hasRecLoad = ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null;
+
+                let titleHtml = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            ${isAdminMode ? `
+                                <input type="text" value="${escapeHtml(ex.name)}" 
+                                    onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
+                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none mb-1.5">
+                                
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
+                                        <span class="text-[10px] font-bold text-slate-400">Reps:</span>
+                                        <input type="text" value="${escapeHtml(ex.targetReps || '')}" 
+                                            onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)"
+                                            class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
+                                    </div>
+
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
+                                        <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
+                                        <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
+                                        <input type="text" value="${escapeHtml(ex.rest || '')}" 
+                                            onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
+                                            class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
+                                    </div>
+
+                                    <div class="flex items-center gap-1 bg-slate-950 border border-emerald-500/40 rounded-md px-2 py-0.5">
+                                        <i class="fa-solid fa-weight-hanging text-[10px] text-emerald-400"></i>
+                                        <span class="text-[10px] font-bold text-slate-400">Carga Rec.:</span>
+                                        <input type="number" step="0.5" inputmode="decimal" placeholder="Off" 
+                                            value="${hasRecLoad ? ex.recommendedLoad : ''}" 
+                                            onchange="updateRecommendedLoad(${exIdx}, this.value)"
+                                            class="w-12 bg-transparent text-[10px] font-extrabold text-emerald-400 focus:outline-none p-0">
+                                    </div>
+                                </div>
+                            ` : `
+                                <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                        ${setsCount} séries × ${ex.targetReps} reps
+                                    </span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
+                                    </span>
+                                    ${hasRecLoad ? `
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                            <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            `}
+                        </div>
+
+                        ${isAdminMode ? `
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="changeSetsCount(${exIdx}, 1)" title="Adicionar Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-emerald-400 flex items-center justify-center">
+                                    +
+                                </button>
+                                <button onclick="changeSetsCount(${exIdx}, -1)" title="Remover Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center justify-center">
+                                    -
+                                </button>
+                                <button onclick="deleteExercise(${exIdx})" title="Excluir Exercício" class="w-7 h-7 bg-red-950/60 border border-red-800/60 rounded-lg text-xs text-red-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                let notesHtml = '';
+                if (ex.notes || isAdminMode) {
+                    notesHtml = `
+                        <div>
+                            ${isAdminMode ? `
+                                <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
+                                    onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
+                            ` : `
+                                <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
+                                    <span>${escapeHtml(ex.notes)}</span>
+                                </p>
+                            `}
+                        </div>
+                    `;
+                }
+
+                exCard.innerHTML = `
+                    ${titleHtml}
+                    ${notesHtml}
+                    <div class="space-y-1.5 pt-1">
+                        ${setsRowsHtml}
+                    </div>
+                `;
+
+                listEl.appendChild(exCard);
+            });
+        }
+
+        /* CARGA RECOMENDADA PELO TREINADOR */
+        function updateRecommendedLoad(exIdx, val) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx]) {
+                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+                if (ex) {
+                    const parsedVal = parseNum(val);
+                    ex.recommendedLoad = parsedVal;
+
+                    if (parsedVal !== '') {
+                        if (!ex.logs) ex.logs = [];
+                        const count = ex.sets || 3;
+                        for (let s = 0; s < count; s++) {
+                            if (!ex.logs[s]) {
+                                ex.logs[s] = { load: parsedVal, reps: getTargetRepsNum(ex.targetReps), done: false };
+                            } else {
+                                ex.logs[s].load = parsedVal;
+                            }
+                        }
+                    }
+                }
+            }
+            saveWorkoutData();
+            renderExercises();
+            if (val !== '') {
+                showToast(`Carga recomendada de ${val}kg aplicada!`, "fa-weight-hanging", "text-emerald-400");
+            }
+        }
+
+        function adjustSetVal(exIdx, setIdx, field, delta) {
+            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
+            if (!ex.logs) ex.logs = [];
+
+            let defaultReps = getTargetRepsNum(ex.targetReps);
+
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
+
+            let currentVal = parseNum(ex.logs[setIdx][field]);
+            if (typeof currentVal !== 'number') {
+                currentVal = field === 'reps' ? defaultReps : 0;
+            }
+
+            let step = 1;
+            let newVal = Math.max(0, currentVal + (delta * step));
+            newVal = Math.round(newVal * 10) / 10;
+
+            ex.logs[setIdx][field] = newVal;
+            saveWorkoutData();
+            renderExercises();
+        }
+
+        function updateSetLog(exIdx, setIdx, field, value) {
+            const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
+            if (!ex.logs) ex.logs = [];
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: '', done: false };
+
+            if (field === 'load' || field === 'reps') {
+                ex.logs[setIdx][field] = parseNum(value);
+            }
+
+            saveWorkoutData();
+            updateMetrics();
+        }
+
         function isMesocycleFullyDone() {
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return false;
@@ -1397,18 +1747,20 @@
                 const days = weeks[w].days || [];
                 if (days.length === 0) return false;
                 for (let d = 0; d < days.length; d++) {
-                    if (!isDayCompleted(w, d)) return false;
+                    if (!isDayCompleted(w, d)) {
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        /* TOGGLE DE SÉRIE */
         function toggleSetDone(exIdx, setIdx) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
 
-            let defaultReps = parseNum(ex.targetReps) || 10;
+            let defaultReps = getTargetRepsNum(ex.targetReps);
+
             if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
 
             if (!ex.logs[setIdx].done && (ex.logs[setIdx].reps === '' || ex.logs[setIdx].reps === undefined)) {
@@ -1418,18 +1770,22 @@
             const wasDone = ex.logs[setIdx].done;
             ex.logs[setIdx].done = !wasDone;
 
-            if (navigator.vibrate) navigator.vibrate(40);
+            if (navigator.vibrate) {
+                navigator.vibrate(40);
+            }
 
-            if (!wasDone) startRestTimer(exIdx);
+            if (!wasDone && isMesocycleFullyDone()) {
+                pendingMesocycleToggle = { exIdx, setIdx };
+                saveWorkoutData();
+                renderExercises();
+                renderDayTabs();
+                openModal('modal-mesocycle');
+                return;
+            }
 
             saveWorkoutData();
             renderExercises();
             renderDayTabs();
-
-            if (!wasDone && isMesocycleFullyDone()) {
-                pendingMesocycleToggle = { exIdx, setIdx };
-                openModal('modal-mesocycle');
-            }
         }
 
         function cancelMesocycleComplete() {
@@ -1447,12 +1803,9 @@
             closeModal('modal-mesocycle');
         }
 
-        /* AVANÇO AUTOMÁTICO DE SEMANA COM LIMPEZA DE SÉRIES */
         function confirmMesocycleReset() {
             updateTodayHistoryRecord();
-            
             workoutData.cycleCount = (workoutData.cycleCount || 1) + 1;
-            workoutData.weekOffset = (workoutData.weekOffset || 0) + 1;
 
             if (workoutData.weeks) {
                 workoutData.weeks.forEach(w => {
@@ -1476,10 +1829,9 @@
 
             saveWorkoutData();
             closeModal('modal-mesocycle');
-            processDateAndAutoMissedDays();
             renderHeader();
             renderApp();
-            showToast(`Ciclo #${workoutData.cycleCount} iniciado na nova semana!`, "fa-rotate-left", "text-emerald-400");
+            showToast(`Ciclo #${workoutData.cycleCount} iniciado!`, "fa-rotate-left", "text-emerald-400");
         }
 
         function updateMetrics() {
@@ -1499,13 +1851,16 @@
                 exercises.forEach(ex => {
                     const count = ex.sets || 3;
                     totalSets += count;
-                    let defaultReps = parseNum(ex.targetReps) || 10;
+
+                    let defaultReps = getTargetRepsNum(ex.targetReps);
 
                     if (ex.logs) {
                         for (let s = 0; s < count; s++) {
                             const log = ex.logs[s];
                             if (log) {
-                                if (log.done) completedSets++;
+                                if (log.done) {
+                                    completedSets++;
+                                }
 
                                 const loadNum = parseNum(log.load);
                                 const repsNum = parseNum(log.reps);
@@ -1533,14 +1888,14 @@
 
             if (elPercent) elPercent.textContent = dayInfo.missed ? 'FALTA' : `${pct}%`;
             if (elCount) elCount.textContent = dayInfo.missed ? 'Treino Faltado' : `${completedSets}/${totalSets} séries`;
-            if (elBar) {
-                elBar.style.width = dayInfo.missed ? '100%' : `${pct}%`;
-                elBar.className = dayInfo.missed ? "bg-red-500/80 h-full transition-all duration-300" : "bg-blue-500 h-full transition-all duration-300";
-            }
+            if (elBar) elBar.style.width = dayInfo.missed ? '100%' : `${pct}%`;
+            if (elBar && dayInfo.missed) elBar.className = "bg-red-500/80 h-full transition-all duration-300";
+            if (elBar && !dayInfo.missed) elBar.className = "bg-blue-500 h-full transition-all duration-300";
             if (elTonnage) elTonnage.innerHTML = `${totalTonnage.toLocaleString('pt-BR')} <span class="text-[10px] font-normal text-slate-400">kg</span>`;
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
 
+        /* ATUALIZAÇÃO DE PROPRIEDADES DO EXERCÍCIO */
         function updateExerciseProp(exIdx, prop, value) {
             if (prop === 'rest' || prop === 'targetReps') {
                 const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
@@ -1556,6 +1911,7 @@
             renderApp();
         }
 
+        /* ALTERAÇÃO DE SÉRIES INDIVIDUAL POR SEMANA */
         function changeSetsCount(exIdx, delta) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises[exIdx]) {
@@ -1590,7 +1946,7 @@
             });
             saveWorkoutData();
             renderApp();
-            showToast("Exercício adicionado!", "fa-circle-plus", "text-emerald-400");
+            showToast("Exercício adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
         }
 
         function deleteExercise(exIdx) {
@@ -1601,7 +1957,7 @@
             });
             saveWorkoutData();
             renderApp();
-            showToast("Exercício removido", "fa-trash-can", "text-amber-400");
+            showToast("Exercício removido de todas as semanas", "fa-trash-can", "text-amber-400");
         }
 
         function saveSessionNotes() {
@@ -1610,7 +1966,7 @@
             saveWorkoutData();
         }
 
-        /* HISTÓRICO & CALENDÁRIO */
+        /* HISTÓRICO DE TREINOS E CALENDÁRIO */
         function openHistoryModal() {
             renderHistoryCalendar();
             renderHistoryRecentList();
@@ -1657,6 +2013,7 @@
                 const dayStr = String(d).padStart(2, '0');
                 const monthStr = String(calendarMonth + 1).padStart(2, '0');
                 const dateKey = `${calendarYear}-${monthStr}-${dayStr}`;
+
                 const record = history[dateKey];
 
                 if (record) {
@@ -1668,7 +2025,11 @@
                         </button>
                     `;
                 } else {
-                    html += `<div class="p-2 rounded-xl bg-slate-950/40 text-slate-600 text-xs font-semibold">${d}</div>`;
+                    html += `
+                        <div class="p-2 rounded-xl bg-slate-950/40 text-slate-600 text-xs font-semibold">
+                            ${d}
+                        </div>
+                    `;
                 }
             }
 
@@ -1734,34 +2095,41 @@
                 exContainer.innerHTML = `
                     <div class="bg-slate-950 border border-red-900/40 p-3 rounded-xl text-center text-xs text-red-400 font-bold">
                         <i class="fa-solid fa-user-xmark text-lg mb-1 block"></i>
-                        Treino registrado como Falta (sem volume numérico).
+                        Treino registrado como Falta (sem volume de cargas/repetições).
                     </div>
                 `;
             } else {
-                (item.exercises || []).forEach(ex => {
+                const exercises = item.exercises || [];
+                exercises.forEach(ex => {
                     const exCard = document.createElement('div');
                     exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
 
                     let setsHtml = '';
-                    (ex.logs || []).forEach((log, sIdx) => {
-                        if (log && log.done) {
-                            setsHtml += `
-                                <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
-                                    <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
-                                    <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
-                                </div>
-                            `;
-                        }
-                    });
+                    if (ex.logs && ex.logs.length > 0) {
+                        ex.logs.forEach((log, sIdx) => {
+                            if (log && log.done) {
+                                setsHtml += `
+                                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
+                                        <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
+                                        <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
 
-                    if (!setsHtml) setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
+                    if (!setsHtml) {
+                        setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
+                    }
 
                     exCard.innerHTML = `
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-extrabold text-white">${escapeHtml(ex.name)}</h4>
                             <span class="text-[10px] font-bold text-blue-400">${ex.sets || 3} séries</span>
                         </div>
-                        <div class="space-y-0.5 pt-1">${setsHtml}</div>
+                        <div class="space-y-0.5 pt-1">
+                            ${setsHtml}
+                        </div>
                     `;
                     exContainer.appendChild(exCard);
                 });
@@ -1869,7 +2237,7 @@
                     if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
                 }
             } catch (e) {
-                showToast("Erro ao validar senha", "fa-triangle-exclamation", "text-red-400");
+                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
             }
         }
 
@@ -1890,15 +2258,17 @@
             }, 2500);
         }
 
+        function getTargetRepsNum(targetRepsStr) {
+            if (!targetRepsStr) return 10;
+            const match = String(targetRepsStr).match(/\d+/);
+            return match ? parseFloat(match[0]) : 10;
+        }
+
         function parseNum(val) {
             if (val === null || val === undefined || val === '') return '';
             const clean = String(val).replace(',', '.').trim();
-            const match = clean.match(/(\d+(?:\.\d+)?)/);
-            if (match) {
-                const num = parseFloat(match[1]);
-                return isNaN(num) ? '' : num;
-            }
-            return '';
+            const num = parseFloat(clean);
+            return isNaN(num) ? '' : num;
         }
 
         function escapeHtml(str) {
