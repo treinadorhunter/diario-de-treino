@@ -593,30 +593,49 @@
             }
         }
 
+        /* VERIFICAÇÃO EXATA DE DIA COMPLETO (EXIGE 100% DAS SÉRIES FEITAS) */
         function isDayCompleted(weekIdx, dayIdx) {
             const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
             if (!week || !week.days || !week.days[dayIdx]) return false;
             const day = week.days[dayIdx];
+
+            // 1. Se o dia foi marcado como falta, contabiliza como concluído
             if (day.missed) return true;
 
             const dayInfo = getCalculatedDateForDay(dayIdx);
             const histRecord = (workoutData.history && workoutData.history[dayInfo.dateKey]) ? workoutData.history[dayInfo.dateKey] : null;
-            
-            if (histRecord && !histRecord.missed) {
-                const hasDoneLogs = (histRecord.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
-                if (hasDoneLogs) return true;
-            }
+            if (histRecord && histRecord.missed) return true;
 
             const exercises = day.exercises || [];
             if (exercises.length === 0) return false;
-            return exercises.every(ex => {
+
+            // 2. Validação rigorosa: TODAS as séries de TODOS os exercícios precisam estar com done = true
+            const allSetsDone = exercises.every(ex => {
                 const count = ex.sets || 3;
                 const logs = ex.logs || [];
+                if (logs.length < count) return false;
                 for (let s = 0; s < count; s++) {
                     if (!logs[s] || !logs[s].done) return false;
                 }
                 return true;
             });
+
+            if (allSetsDone) return true;
+
+            // 3. Verificação para dias passados salvos no histórico (exige todas as séries feitas)
+            if (histRecord && !histRecord.missed && Array.isArray(histRecord.exercises) && histRecord.exercises.length > 0) {
+                return histRecord.exercises.every(ex => {
+                    const count = ex.sets || 3;
+                    const logs = ex.logs || [];
+                    if (logs.length < count) return false;
+                    for (let s = 0; s < count; s++) {
+                        if (!logs[s] || !logs[s].done) return false;
+                    }
+                    return true;
+                });
+            }
+
+            return false;
         }
 
         /* AUTO-PREENCHIMENTO COM TIMESTAMP DE CALENDÁRIO */
@@ -648,7 +667,7 @@
                     }
                 } else if (targetTimestamp < todayMidnight) {
                     // DIA PASSADO: marca falta se não completado
-                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
+                    const isCompleted = (currentWeekIdx, dIdx);
                     if (!isCompleted && !day.missed) {
                         day.missed = true;
                         hasChanged = true;
@@ -1251,7 +1270,7 @@
             days.forEach((day, idx) => {
                 const btn = document.createElement('button');
                 const isActive = idx === currentDayIdx;
-                const isComplete = isDayCompleted(currentWeekIdx, idx);
+                const isComplete = (currentWeekIdx, idx);
 
                 let btnClass = '';
                 if (isActive) {
@@ -1780,6 +1799,7 @@
             updateMetrics();
         }
 
+       /* VERIFICAÇÃO DE CICLO COMPLETO */
         function isMesocycleFullyDone() {
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return false;
@@ -1793,6 +1813,7 @@
             return true;
         }
 
+        /* TOGGLE DE SÉRIE COM DISPARO APENAS NO ÚLTIMO CHECK REAL */
         function toggleSetDone(exIdx, setIdx) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
@@ -1809,17 +1830,19 @@
 
             if (navigator.vibrate) navigator.vibrate(40);
 
-            // Inicia o timer ao dar check
+            // Inicia o timer de descanso se acabou de marcar a série
             if (!wasDone) startRestTimer(exIdx);
 
+            saveWorkoutData();
+            renderExercises();
+            renderDayTabs();
+
+            // Só dispara a mensagem se foi marcado (não desmarcado) e se TODAS as séries de todos os dias estiverem concluídas
             if (!wasDone && isMesocycleFullyDone()) {
                 pendingMesocycleToggle = { exIdx, setIdx };
-                saveWorkoutData();
-                renderExercises();
-                renderDayTabs();
                 openModal('modal-mesocycle');
-                return;
             }
+        }
 
             saveWorkoutData();
             renderExercises();
