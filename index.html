@@ -31,7 +31,7 @@
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
 
-    <!-- App Bar Header -->
+    <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800/80 sticky top-0 z-40 shadow-md backdrop-blur-md bg-slate-900/90">
         <div class="px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -43,23 +43,19 @@
                         Treinador Hunter <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-bold border border-blue-500/20">PRO</span>
                     </h1>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <div id="student-name-container" class="text-[11px] text-slate-300 font-medium">
-                            <!-- Dynamic Student Name -->
-                        </div>
+                        <div id="student-name-container" class="text-[11px] text-slate-300 font-medium"></div>
                         <span class="text-slate-600 text-[10px]">•</span>
-                        <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                            <!-- Dynamic Cycle Badge -->
-                        </div>
+                        <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"></div>
                         <span class="text-slate-600 text-[10px]">•</span>
-                        <div id="header-date-container" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                            <i class="fa-regular fa-calendar text-[9px]"></i>
-                            <span id="current-date-text"></span>
+                        <div id="header-sync-status" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-cloud-check text-[9px]" id="sync-icon"></i>
+                            <span id="sync-text">Nuvem OK</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Top Actions -->
+            <!-- Ações do Topo -->
             <div class="flex items-center gap-1.5">
                 <button onclick="toggleAdminMode()" id="btn-admin-toggle" class="px-2.5 py-1.5 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition">
                     <i class="fa-solid fa-lock text-slate-400" id="icon-admin-lock"></i>
@@ -72,33 +68,21 @@
             </div>
         </div>
 
-        <!-- Dynamic Week Selector Bar -->
-        <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50">
-            <!-- Dynamic Weeks Rendered Here -->
-        </div>
+        <!-- Seletor de Semanas -->
+        <div id="week-tabs-container" class="px-3 pb-3 pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar border-t border-slate-800/50"></div>
     </header>
 
-    <!-- Sticky Day Navigation Bar -->
-    <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[108px] z-30 shadow-sm">
-        <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar">
-            <!-- Dynamic Day Tabs Rendered Here -->
-        </div>
+    <!-- Navegação de Dias -->
+    <nav class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-[68px] z-30 shadow-sm">
+        <div id="day-tabs-container" class="px-2 py-2 flex items-center justify-start gap-1.5 overflow-x-auto no-scrollbar"></div>
     </nav>
 
-    <!-- Main Content Area -->
+    <!-- Conteúdo Principal -->
     <main class="px-3 py-4 space-y-4 flex-1">
-        
-        <!-- Strategy & Progress Banner Card / Week Admin Config -->
-        <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-            <!-- Dynamic Content -->
-        </div>
+        <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden"></div>
 
-        <!-- Day Title Bar & Admin Controls -->
         <div class="flex flex-col gap-2 pt-1">
-            <div id="day-title-container" class="w-full">
-                <!-- Dynamic Day Title / Admin Form -->
-            </div>
-
+            <div id="day-title-container" class="w-full"></div>
             <div class="flex justify-end">
                 <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus text-xs"></i> Exercício
@@ -106,35 +90,29 @@
             </div>
         </div>
 
-        <!-- Exercises List Container -->
+        <!-- Lista de Exercícios -->
         <div id="exercises-list" class="space-y-4"></div>
 
-        <!-- Session Notes (PSE) & Missed Workout Action -->
+        <!-- Notas da Sessão -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
             <div>
                 <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
                     <i class="fa-solid fa-pen-to-square text-blue-400"></i> Anotações / Percepção de Esforço (PSE)
                 </label>
-                <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dor articular, Pumps ou ajustes para o próximo treino..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+                <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dores, pumps ou ajustes..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
             </div>
-
-            <!-- Botão Faltar Treino -->
-            <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80">
-                <!-- Dynamic Missed Workout Button -->
-            </div>
+            <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80"></div>
         </div>
 
-        <!-- Botão Treinos Anteriores (Histórico) -->
         <div class="pt-1">
             <button onclick="openHistoryModal()" class="w-full py-3.5 px-4 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 hover:text-blue-300 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition">
                 <i class="fa-solid fa-clock-rotate-left text-sm"></i>
                 <span>Treinos Anteriores (Histórico)</span>
             </button>
         </div>
-
     </main>
 
-    <!-- Modal Ciclo Concluído -->
+    <!-- Modais -->
     <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -142,9 +120,7 @@
             </div>
             <div>
                 <h3 class="text-base font-extrabold text-white mb-1">Parabéns!</h3>
-                <p id="modal-mesocycle-msg" class="text-xs text-slate-300 leading-relaxed">
-                    Você concluiu todos os dias previstos para este ciclo. O treino foi registrado e o próximo ciclo será iniciado.
-                </p>
+                <p class="text-xs text-slate-300 leading-relaxed">Você concluiu todos os treinos deste ciclo. Deseja reiniciar para o próximo ciclo?</p>
             </div>
             <div class="flex gap-2 pt-2">
                 <button onclick="cancelMesocycleComplete()" class="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold active:scale-95 transition">Voltar</button>
@@ -153,11 +129,9 @@
         </div>
     </div>
 
-    <!-- Modal Calendário de Histórico -->
     <div id="modal-history" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
-            
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h3 class="text-base font-extrabold text-white flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-blue-400"></i> Histórico de Treinos
@@ -166,132 +140,67 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-
-            <!-- Navegação do Mês no Calendário -->
             <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize">
-                    <!-- Dynamic Month/Year -->
-                </div>
-                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
+                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize"></div>
+                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-
-            <!-- Grid do Mini Calendário -->
-            <div id="calendar-grid-container" class="space-y-1">
-                <!-- Dynamic Calendar Grid Rendered Here -->
-            </div>
-
-            <!-- Lista de Históricos Recentes -->
+            <div id="calendar-grid-container" class="space-y-1"></div>
             <div class="pt-2 border-t border-slate-800 space-y-2">
                 <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     <i class="fa-solid fa-list-check text-emerald-400 mr-1"></i> Registros Recentes
                 </label>
-                <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
-                    <!-- Dynamic Recent History Items -->
-                </div>
+                <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar"></div>
             </div>
-
-            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Fechar
-            </button>
+            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
         </div>
     </div>
 
-    <!-- Modal Detalhes do Treino Anterior -->
     <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
-
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div>
                     <span id="detail-date-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold"></span>
                     <h3 id="detail-day-title" class="text-sm font-extrabold text-white mt-1"></h3>
                 </div>
-                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
             <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
-
             <div id="detail-exercises-container" class="space-y-3"></div>
-
             <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
-
-            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Voltar
-            </button>
+            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Voltar</button>
         </div>
     </div>
 
-    <!-- Modal Menu Settings -->
     <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-3">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2 sm:hidden"></div>
-            
             <h3 class="text-base font-extrabold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
                 <i class="fa-solid fa-sliders text-blue-400"></i> Opções da Planilha
             </h3>
-
             <div class="space-y-2 pt-1">
                 <button onclick="exportData(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-download text-blue-400"></i> Exportar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="triggerImport(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-upload text-emerald-400"></i> Importar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="window.print(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir ou Gerar PDF</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="confirmReset(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-bold flex items-center justify-between transition border border-red-800/40">
-                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para os Padrões</span>
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para Padrão</span>
                     <i class="fa-solid fa-chevron-right text-red-500/60 text-xs"></i>
                 </button>
             </div>
-
-            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Fechar
-            </button>
+            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
         </div>
     </div>
 
-    <!-- Modal Confirm Reset com Senha -->
-    <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
-            <div class="w-12 h-12 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div>
-                <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
-                <p class="text-xs text-slate-400">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
-            </div>
-            <div>
-                <label class="text-[10px] text-slate-400 font-bold block mb-1">Digite a senha do Treinador:</label>
-                <input type="password" id="input-reset-pass" inputmode="numeric" maxlength="6" placeholder="****" 
-                    onkeydown="if(event.key==='Enter') executeReset()"
-                    class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-base font-extrabold tracking-widest text-amber-400 focus:outline-none focus:border-amber-500 transition">
-                <p id="reset-pass-error-msg" class="text-[11px] text-red-400 font-semibold mt-1.5 hidden">
-                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="closeModal('modal-reset')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancelar</button>
-                <button onclick="executeReset()" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold">Sim, Apagar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Password (Acesso Treinador) -->
     <div id="modal-password" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -318,157 +227,83 @@
 
     <input type="file" id="file-import" class="hidden" accept=".json" onchange="importData(event)">
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur text-white text-xs px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none w-[90%] max-w-xs justify-center">
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
         <span id="toast-msg" class="font-semibold">Mensagem</span>
     </div>
 
     <script>
-        /* CONFIGURAÇÃO DA API DO GOOGLE SHEETS COM SEGURANÇA */
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
         const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; 
 
         const urlParams = new URLSearchParams(window.location.search);
-        const currentStudent = (urlParams.get('aluno') || 'default').toLowerCase().trim();
+        const currentStudent = (urlParams.get('aluno') || 'teibe_h_27084347').toLowerCase().trim();
 
-        /* PALETA DE CORES E ÍCONES DAS SEMANAS */
         const WEEK_PALETTES = [
-            { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
-            { textClass: "text-red-400", badgeClass: "bg-red-500/15 text-red-400 border-red-500/30", icon: "fa-weight-hanging" },
             { textClass: "text-purple-400", badgeClass: "bg-purple-500/15 text-purple-400 border-purple-500/30", icon: "fa-cubes" },
+            { textClass: "text-red-400", badgeClass: "bg-red-500/15 text-red-400 border-red-500/30", icon: "fa-weight-hanging" },
+            { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
             { textClass: "text-emerald-400", badgeClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: "fa-heart-pulse" }
         ];
 
-        /* MODELOS PRONTOS DE FOCO ESTRATÉGICO */
-        const WEEK_PRESETS = {
-            metabolic: {
-                label: "Metabólica",
-                shortTitle: "Semana Metabólica",
-                targetReps: "15-20 RM",
-                exerciseReps: "15-20",
-                titleSuffix: "Estresse Metabólico",
-                title: "Semana Metabólica — Estresse Metabólico",
-                desc: "Cargas moderadas a leves (15-20 RM), descansos curtos (60s) e RIR 1.",
-                rirText: "RIR 1",
-                paletteIdx: 0,
-                defaultRest: "60s"
-            },
-            strength: {
-                label: "Força",
-                shortTitle: "Semana de Força",
-                targetReps: "4-6 RM",
-                exerciseReps: "4-6",
-                titleSuffix: "Tensão Mecânica / Força",
-                title: "Semana de Força — Tensão Mecânica / Força",
-                desc: "Cargas pesadas (4-6 RM), volume reduzido (-30%) e descansos longos (2 min).",
-                rirText: "RIR 2",
-                paletteIdx: 1,
-                defaultRest: "2min"
-            },
-            hypertrophy: {
-                label: "Hipertrofia",
-                shortTitle: "Semana Hipertrofia",
-                targetReps: "8-12 RM",
-                exerciseReps: "8-12",
-                titleSuffix: "Hipertrofia Tradicional",
-                title: "Semana Hipertrofia — Hipertrofia Tradicional",
-                desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
-                rirText: "RIR 0-1",
-                paletteIdx: 2,
-                defaultRest: "90s"
-            },
-            deload: {
-                label: "Deload",
-                shortTitle: "Semana Deload",
-                targetReps: "8-12 RM",
-                exerciseReps: "8-12",
-                defaultSets: 2,
-                titleSuffix: "Deload / Recuperação",
-                title: "Semana Deload — Recuperação Ativa",
-                desc: "Corte de 30% a 50% na carga, apenas 2 séries por exercício e longe da falha (RIR 3-4).",
-                rirText: "RIR 3-4",
-                paletteIdx: 3,
-                defaultRest: "60s"
-            }
-        };
-
-        /* PROGRAMA PADRÃO DO TREINO */
+        /* PROGRAMA PADRÃO NATIVO (FULL BODY 3X) */
         const DEFAULT_PROGRAM = {
-            studentName: "Nome do Aluno",
+            studentName: "Teibe Figueiredo",
             cycleCount: 1,
             history: {},
             weeks: [
                 {
                     id: "W1",
-                    shortTitle: "Semana Hipertrofia",
+                    shortTitle: "Semana Hipertrofia / Força",
                     targetReps: "8-12 RM",
-                    title: "Semana Hipertrofia — Hipertrofia Tradicional",
-                    desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
+                    title: "Semana Hipertrofia / Força",
+                    desc: "Cargas moderadas-altas (4-6 e 10-12 RM), volume completo e falha próxima (RIR 0-1).",
                     rirText: "RIR 0-1",
-                    paletteIdx: 2,
+                    paletteIdx: 0,
                     days: [
-                        { 
-                            id: "SEG", 
-                            shortName: "Seg • Upper", 
-                            name: "Segunda: Upper (Superior Geral)", 
+                        {
+                            id: "SEG",
+                            shortName: "Seg • Full Body",
+                            name: "Segunda: Full Body — Ênfase de Carga: Cadeia Anterior",
                             exercises: [
-                                { name: "Supino Reto c/ Barra", sets: 4, targetReps: "8-12", rest: "90s", notes: "Controle na fase excêntrica." },
-                                { name: "Remada Curvada c/ Barra", sets: 4, targetReps: "8-12", rest: "90s", notes: "Tronco estável e cotovelos firmes." },
-                                { name: "Desenvolvimento c/ Halteres", sets: 3, targetReps: "8-12", rest: "90s", notes: "Escápulas travadas no banco." },
-                                { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 3, targetReps: "8-12", rest: "90s", notes: "Puxar direcionando aos cotovelos." },
-                                { name: "Super-série: Rosca Direta + Tríceps Testa", sets: 3, targetReps: "8-12", rest: "60s", notes: "Sem pausa longa entre os dois." },
-                                { name: "Abdominal Infra no Banco Inclinado", sets: 3, targetReps: "12-15", rest: "45s", notes: "Elevação controlada do quadril." }
+                                { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "4-6", rest: "2min", notes: "Profundidade mantendo pelve neutra." },
+                                { name: "Supino Reto c/ Barra", sets: 4, targetReps: "4-6", rest: "2min", notes: "Tronco estável e cotovelos firmes." },
+                                { name: "Puxada Alta Neutra (Lat Pulldown)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Puxar direcionando aos cotovelos." },
+                                { name: "Mesa Flexora", sets: 4, targetReps: "10-12", rest: "60s", notes: "Puxar direcionando aos posteriores." },
+                                { name: "Elevação Lateral", sets: 4, targetReps: "10-12", rest: "60s", notes: "Sem balanço de tronco." },
+                                { name: "Tríceps Polia", sets: 4, targetReps: "10-12", rest: "60s", notes: "Foco na porção lateral do tríceps." },
+                                { name: "Abdominal Infra no Banco Inclinado", sets: 3, targetReps: "8-12", rest: "60s", notes: "Elevação controlada do quadril." },
+                                { name: "Prancha Lateral", sets: 3, targetReps: "8-12", rest: "60s", notes: "Dica de execução..." }
                             ]
                         },
-                        { 
-                            id: "TER", 
-                            shortName: "Ter • Lower", 
-                            name: "Terça: Lower (Inferior Geral)", 
+                        {
+                            id: "QUA",
+                            shortName: "Qua • Full Body",
+                            name: "Quarta: Full Body — Ênfase de Carga: Cadeia Posterior",
                             exercises: [
-                                { name: "Agachamento Livre c/ Barra", sets: 4, targetReps: "8-12", rest: "90s", notes: "Profundidade mantendo pelve neutra." },
-                                { name: "Stiff / RDL c/ Barra", sets: 4, targetReps: "8-12", rest: "90s", notes: "Quadril para trás, alongando posterior." },
-                                { name: "Cadeira Extensora", sets: 3, targetReps: "8-12", rest: "60s", notes: "Pausa de 1s no topo contraído." },
-                                { name: "Mesa Flexora", sets: 3, targetReps: "8-12", rest: "60s", notes: "Sem compensação na lombar." },
-                                { name: "Panturrilha em Pé (Gêmeos)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Amplitude total com pausa estrita." },
-                                { name: "Prancha Lateral", sets: 3, targetReps: "30-45s", rest: "45s", notes: "Sustentação isométrica focada nos oblíquos." }
+                                { name: "RDL / Stiff / Elevação Pélvica", sets: 4, targetReps: "4-6", rest: "2min", notes: "Quadril para trás, alongando posterior." },
+                                { name: "Remada Curvada com Barra / Serrote", sets: 4, targetReps: "4-6", rest: "2min", notes: "Tensão constante na dorsal." },
+                                { name: "Leg Press 45º", sets: 4, targetReps: "10-12", rest: "60s", notes: "Controle estrito na descida." },
+                                { name: "Supino Inclinado com Halteres", sets: 4, targetReps: "10-12", rest: "60s", notes: "Banco em 30º para peitoral superior." },
+                                { name: "Rosca Direta com Barra W / Alternada", sets: 3, targetReps: "10-12", rest: "60s", notes: "Foco no bíceps." },
+                                { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "10-12", rest: "60s", notes: "Trabalho direcionado para o músculo sóleo." },
+                                { name: "Abdominal Supra (Solo ou Puxada)", sets: 3, targetReps: "8-12", rest: "60s", notes: "Dica de execução..." },
+                                { name: "Prancha Frontal", sets: 3, targetReps: "8-12", rest: "60s", notes: "Estabilidade do core." }
                             ]
                         },
-                        { 
-                            id: "QUA", 
-                            shortName: "Qua • Push", 
-                            name: "Quarta: Push (Peito, Ombro, Tríceps)", 
+                        {
+                            id: "SEX",
+                            shortName: "Sex • Full Body",
+                            name: "Sexta: Full Body — Ênfase de Carga: Ombros e Estresse Metabólico Global",
                             exercises: [
-                                { name: "Supino Inclinado c/ Halteres", sets: 4, targetReps: "8-12", rest: "90s", notes: "Banco em 30º para porção superior." },
-                                { name: "Chest Press Articulado (Máquina)", sets: 3, targetReps: "8-12", rest: "90s", notes: "Tensão constante no peitoral." },
-                                { name: "Elevação Lateral c/ Cabo ou Halter", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide sem balanço de tronco." },
-                                { name: "Tríceps Pulley c/ Corda", sets: 4, targetReps: "8-12", rest: "45s", notes: "Abrir a corda no ponto final." },
-                                { name: "Abdominal Supra (Solo ou Puxada)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Expiração completa na flexão do tronco." }
-                            ]
-                        },
-                        { 
-                            id: "QUI", 
-                            shortName: "Qui • Pull", 
-                            name: "Quinta: Pull (Dorsal, Rear Delt, Bíceps)", 
-                            exercises: [
-                                { name: "Remada Cavalinho / Apoiada", sets: 4, targetReps: "8-12", rest: "90s", notes: "Protração e retração escapular." },
-                                { name: "Puxada Articulada ou Pulldown", sets: 3, targetReps: "8-12", rest: "90s", notes: "Expandir o dorsal ao subir." },
-                                { name: "Crucifixo Invertido (Peck Deck)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Isolar deltoide posterior." },
-                                { name: "Rosca Inclinada c/ Halteres", sets: 4, targetReps: "8-12", rest: "45s", notes: "Bíceps em posição de alongamento." },
-                                { name: "Prancha Isométrica (Frontal)", sets: 3, targetReps: "45-60s", rest: "45s", notes: "Estabilidade do core." }
-                            ]
-                        },
-                        { 
-                            id: "SEX", 
-                            shortName: "Sex • Legs", 
-                            name: "Sexta: Legs (Pernas Hipertrofia)", 
-                            exercises: [
-                                { name: "Leg Press 45º", sets: 4, targetReps: "8-12", rest: "90s", notes: "Controle firme na descida." },
-                                { name: "Elevação Pélvica c/ Barra", sets: 4, targetReps: "8-12", rest: "60s", notes: "Contração de 2s no topo do quadril." },
-                                { name: "Cadeira Extensora", sets: 3, targetReps: "8-12", rest: "60s", notes: "Cadência fluida e contínua." },
-                                { name: "Cadeira Flexora", sets: 3, targetReps: "8-12", rest: "60s", notes: "Rolo posicionado no calcanhar." },
-                                { name: "Panturrilha Sentado (Solear)", sets: 4, targetReps: "12-15", rest: "45s", notes: "Trabalho direcionado para o músculo sóleo." },
-                                { name: "Hiperextensão Lombar (Banco Romano)", sets: 3, targetReps: "12-15", rest: "45s", notes: "Movimento cadenciado focado nos eretores." }
+                                { name: "Desenvolvimento Militar / Halteres", sets: 4, targetReps: "4-6", rest: "2min", notes: "Escápulas travadas no banco." },
+                                { name: "Afundo / Búlgaro", sets: 4, targetReps: "8-12", rest: "60s", notes: "Contração no topo do quadril." },
+                                { name: "Chest Press na Polia Alta", sets: 4, targetReps: "10-12", rest: "60s", notes: "Cadência fluida e contínua." },
+                                { name: "Remada Baixa no Triângulo / Remada Alta", sets: 4, targetReps: "10-12", rest: "60s", notes: "Foco pronunciado na dorsal." },
+                                { name: "Tríceps Testa Polia + Rosca Martelo (Super-série - Braços)", sets: 3, targetReps: "10-12", rest: "60s", notes: "Trabalho direcionado para o músculo braquial/tríceps." },
+                                { name: "Mesa Flexora + Extensora (Super-série - Pernas)", sets: 3, targetReps: "10-12", rest: "60s", notes: "Tensão constante." },
+                                { name: "Hiperextensão Lombar (Banco Romano)", sets: 3, targetReps: "10-12", rest: "60s", notes: "Movimento cadenciado focado nos eretores e glúteos." },
+                                { name: "Abdominal Carretilha", sets: 3, targetReps: "8-12", rest: "60s", notes: "Dica de execução..." }
                             ]
                         }
                     ]
@@ -476,32 +311,30 @@
             ]
         };
 
-        /* ESTADO DO APP */
         let currentWeekIdx = 0;
         let currentDayIdx = 0;
         let workoutData = {};
         let isAdminMode = false;
         let saveTimeout = null;
         let pendingMesocycleToggle = null;
+        let restTimer = { intervalId: null, exIdx: null, remaining: 0, total: 0 };
 
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
 
-        /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             loadFromLocalStorageFirst();
-            processDateAndAutoMissedDays();
             renderHeader();
             renderApp();
             await fetchFromSheetsAndUpdate();
         });
 
-        window.addEventListener('beforeunload', () => {
-            if (saveTimeout) {
-                clearTimeout(saveTimeout);
-                sendDataToSheetsDirect(workoutData);
-            }
-        });
+        function getTodayMonthKey() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${year}-${month}`;
+        }
 
         function loadFromLocalStorageFirst() {
             const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
@@ -519,241 +352,187 @@
 
         async function fetchFromSheetsAndUpdate() {
             if (!API_URL) return;
+            setSyncStatus("loading", "Sincronizando...");
             try {
                 const currentMonth = getTodayMonthKey();
                 const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                 const data = await response.json();
 
-                if (data && data.error === "Aluno não encontrado.") {
-                    showToast("Aluno não cadastrado na planilha!", "fa-triangle-exclamation", "text-amber-400");
-                    return;
-                }
-
                 if (data && !data.error && !data.empty) {
                     workoutData = data;
                     normalizeWorkoutData(workoutData);
                     localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
-                    processDateAndAutoMissedDays();
                     renderHeader();
                     renderApp();
-                    showToast("Sincronizado com a planilha!", "fa-circle-check", "text-emerald-400");
+                    setSyncStatus("success", "Nuvem OK");
+                } else if (data && data.empty) {
+                    sendDataToSheetsDirect(workoutData);
+                    setSyncStatus("success", "Nuvem OK");
                 }
             } catch (e) {
-                console.error("Erro ao puxar dados da planilha:", e);
+                console.error("Erro ao sincronizar com Google Sheets:", e);
+                setSyncStatus("error", "Offline (Local)");
             }
         }
 
-        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA */
-        function getDayWeekdayOffset(day, fallbackIdx) {
-            if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
-            const sName = (day.shortName || '').toLowerCase();
-            const name = (day.name || '').toLowerCase();
-            const text = `${sName} ${name}`;
+        function setSyncStatus(status, text) {
+            const icon = document.getElementById('sync-icon');
+            const textEl = document.getElementById('sync-text');
+            if (!icon || !textEl) return;
 
-            if (/\b(seg|segunda)\b/i.test(text)) return 0;
-            if (/\b(ter|terça|terca)\b/i.test(text)) return 1;
-            if (/\b(qua|quarta)\b/i.test(text)) return 2;
-            if (/\b(qui|quinta)\b/i.test(text)) return 3;
-            if (/\b(sex|sexta)\b/i.test(text)) return 4;
-            if (/\b(sáb|sab|sábado|sabado)\b/i.test(text)) return 5;
-            if (/\b(dom|domingo)\b/i.test(text)) return 6;
-
-            const id = (day.id || '').toLowerCase();
-            if (id === 'seg') return 0;
-            if (id === 'ter') return 1;
-            if (id === 'qua') return 2;
-            if (id === 'qui') return 3;
-            if (id === 'sex') return 4;
-            if (id === 'sab' || id === 'sáb') return 5;
-            if (id === 'dom') return 6;
-
-            return fallbackIdx !== undefined ? fallbackIdx : 0;
-        }
-
-        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E LIMPEZA DE DATAS INVÁLIDAS */
-        function processDateAndAutoMissedDays() {
-            const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
-            if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
-
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
-
-            let bestMatchingIdx = -1;
-            let firstFutureOrTodayIdx = -1;
-            let hasChanged = false;
-
-            if (!workoutData.history) workoutData.history = {};
-
-            // 1. Mapeia as datas oficiais dos dias de treino programados desta semana
-            const validWeekDateKeys = [];
-            currentWeek.days.forEach((day, dIdx) => {
-                const dayInfo = getCalculatedDateForDay(dIdx);
-                validWeekDateKeys.push(dayInfo.dateKey);
-            });
-
-            // 2. LIMPEZA AUTOMÁTICA: Remove registros fantasmas de falta gerados em dias sem treino (ex: terça 18/08)
-            Object.keys(workoutData.history).forEach(dateKey => {
-                const item = workoutData.history[dateKey];
-                if (item && item.missed) {
-                    // Se for falta em dia sem treino ou falta gravada no dia de hoje/futuro, remove do histórico
-                    if (!validWeekDateKeys.includes(dateKey) || dateKey >= getCalculatedDateForDay(currentWeek.days.length - 1).dateKey) {
-                        delete workoutData.history[dateKey];
-                        hasChanged = true;
-                    }
-                }
-            });
-
-            // 3. Processa apenas faltas reais de dias de treino que já ficaram para trás
-            currentWeek.days.forEach((day, dIdx) => {
-                const dayOffset = getDayWeekdayOffset(day, dIdx);
-                const dayInfo = getCalculatedDateForDay(dIdx);
-
-                if (dayOffset < todayWeekdayOffset) {
-                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
-                    if (!isCompleted && !day.missed) {
-                        day.missed = true;
-                        hasChanged = true;
-
-                        const cycleNum = workoutData.cycleCount || 1;
-                        workoutData.history[dayInfo.dateKey] = {
-                            dateKey: dayInfo.dateKey,
-                            dateFormatted: dayInfo.dateFormatted,
-                            weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                            dayName: day.name || '',
-                            dayShortName: day.shortName || '',
-                            notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
-                            missed: true,
-                            exercises: [
-                                {
-                                    name: "FALTOU TREINO",
-                                    sets: 0,
-                                    targetReps: "-",
-                                    rest: "-",
-                                    notes: "Faltou Treino",
-                                    logs: [{ load: 0, reps: 0, done: true }]
-                                }
-                            ],
-                            updatedAt: new Date().toISOString()
-                        };
-                    }
-                } else {
-                    // Se for dia de hoje ou futuro, remove qualquer marcação indevida de falta
-                    if (day.missed) {
-                        day.missed = false;
-                        hasChanged = true;
-                    }
-
-                    if (dayOffset === todayWeekdayOffset && bestMatchingIdx === -1) {
-                        bestMatchingIdx = dIdx;
-                    } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
-                        firstFutureOrTodayIdx = dIdx;
-                    }
-                }
-            });
-
-            // 4. Seleciona o dia de hoje ou o próximo dia útil de treino
-            if (bestMatchingIdx !== -1) {
-                currentDayIdx = bestMatchingIdx;
-            } else if (firstFutureOrTodayIdx !== -1) {
-                currentDayIdx = firstFutureOrTodayIdx;
+            textEl.textContent = text;
+            if (status === "loading") {
+                icon.className = "fa-solid fa-arrows-rotate fa-spin text-[9px] text-amber-400";
+            } else if (status === "success") {
+                icon.className = "fa-solid fa-cloud-check text-[9px] text-emerald-400";
             } else {
-                currentDayIdx = Math.max(0, currentWeek.days.length - 1);
-            }
-
-            if (hasChanged) {
-                saveWorkoutData();
-            }
-        }
-
-        /* CÁLCULO DE DATA DINÂMICA BASEADA NO DIA REAL */
-        function getCalculatedDateForDay(dayIdx) {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-            
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + mondayOffset);
-            
-            const currentWeek = (workoutData.weeks && workoutData.weeks[currentWeekIdx]) ? workoutData.weeks[currentWeekIdx] : null;
-            const dayObj = (currentWeek && currentWeek.days) ? currentWeek.days[dayIdx] : null;
-            const weekdayOffset = getDayWeekdayOffset(dayObj, dayIdx);
-            
-            const targetDate = new Date(monday);
-            targetDate.setDate(monday.getDate() + weekdayOffset);
-            
-            const year = targetDate.getFullYear();
-            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-            const day = String(targetDate.getDate()).padStart(2, '0');
-            
-            return {
-                dateKey: `${year}-${month}-${day}`,
-                dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-            };
-        }
-
-        function getTodayMonthKey() {
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            return `${year}-${month}`;
-        }
-
-        function renderHeaderDate() {
-            const container = document.getElementById('current-date-text');
-            if (container) {
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                container.textContent = dayInfo.dateFormatted;
+                icon.className = "fa-solid fa-cloud-slash text-[9px] text-red-400";
             }
         }
 
         function normalizeWorkoutData(data) {
             if (!data) return;
-            if (!data.studentName) data.studentName = "Nome do Aluno";
+            if (!data.studentName) data.studentName = "Teibe Figueiredo";
             if (!data.cycleCount) data.cycleCount = 1;
             if (!data.history) data.history = {};
+            if (!data.weeks || data.weeks.length === 0) {
+                data.weeks = JSON.parse(JSON.stringify(DEFAULT_PROGRAM.weeks));
+            }
+        }
 
-            if (!data.weeks) {
-                data.weeks = [];
-                const oldKeys = ['W1', 'W2', 'W3', 'W4'];
-                oldKeys.forEach((k, idx) => {
-                    if (data[k]) {
-                        data.weeks.push({
-                            id: k,
-                            shortTitle: k === 'W1' ? 'Semana Metabólica' : k === 'W2' ? 'Semana de Força' : k === 'W3' ? 'Semana Hipertrofia' : 'Semana Deload',
-                            targetReps: k === 'W1' ? '15-20 RM' : k === 'W2' ? '4-6 RM' : k === 'W3' ? '8-12 RM' : '8-12 RM',
-                            title: data[k].title || `Semana ${idx + 1}`,
-                            desc: data[k].desc || "",
-                            rirText: data[k].rirText || "RIR 1",
-                            paletteIdx: idx % WEEK_PALETTES.length,
-                            days: data[k].days || []
-                        });
-                        delete data[k];
-                    }
-                });
+        function saveWorkoutData() {
+            updateTodayHistoryRecord();
+            localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
+            updateMetrics();
+
+            setSyncStatus("loading", "Salvando...");
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                sendDataToSheetsDirect(workoutData);
+            }, 600);
+        }
+
+        function sendDataToSheetsDirect(dataToSync) {
+            if (!API_URL) return;
+            const currentMonth = getTodayMonthKey();
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    aluno: currentStudent,
+                    mes: currentMonth,
+                    token: API_SECRET_TOKEN,
+                    data: dataToSync
+                })
+            }).then(() => {
+                setSyncStatus("success", "Nuvem OK");
+            }).catch(() => {
+                setSyncStatus("error", "Erro ao Salvar");
+            });
+        }
+
+        /* CRONÔMETRO REGRESSIVO DE DESCANSO (TIMER) */
+        function parseRestTimeSeconds(str) {
+            if (!str) return 60;
+            const clean = String(str).toLowerCase().trim();
+            if (clean.includes('min') || clean.includes('m')) {
+                const match = clean.match(/(\d+(?:[.,]\d+)?)/);
+                if (match) return Math.round(parseFloat(match[1].replace(',', '.')) * 60);
+            }
+            const matchSec = clean.match(/(\d+)/);
+            if (matchSec) return parseInt(matchSec[1], 10);
+            return 60;
+        }
+
+        function formatTimerSeconds(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function playBeepSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch (e) {
+                console.log("Audio feedback error:", e);
+            }
+        }
+
+        function startRestTimer(exIdx) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+            if (!ex) return;
+
+            const seconds = parseRestTimeSeconds(ex.rest || "60s");
+
+            if (restTimer.intervalId) {
+                clearInterval(restTimer.intervalId);
             }
 
-            data.weeks.forEach((w) => {
-                if (w.days && !Array.isArray(w.days)) {
-                    const daysArr = [];
-                    const defaultLabels = { SEG: 'Seg • Upper', TER: 'Ter • Lower', QUA: 'Qua • Push', QUI: 'Qui • Pull', SEX: 'Sex • Legs' };
-                    Object.keys(w.days).forEach(dKey => {
-                        daysArr.push({
-                            id: dKey,
-                            shortName: defaultLabels[dKey] || dKey,
-                            name: w.days[dKey].name || dKey,
-                            notes: w.days[dKey].notes || '',
-                            missed: Boolean(w.days[dKey].missed),
-                            exercises: w.days[dKey].exercises || []
-                        });
-                    });
-                    w.days = daysArr;
-                } else if (w.days && Array.isArray(w.days)) {
-                    w.days.forEach(d => {
-                        if (d.missed === undefined) d.missed = false;
-                    });
+            restTimer.exIdx = exIdx;
+            restTimer.remaining = seconds;
+            restTimer.total = seconds;
+
+            updateRestTimerBadgeUI();
+
+            restTimer.intervalId = setInterval(() => {
+                restTimer.remaining--;
+                if (restTimer.remaining <= 0) {
+                    clearInterval(restTimer.intervalId);
+                    restTimer.intervalId = null;
+                    updateRestTimerBadgeUI();
+                    playBeepSound();
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200, 100, 300]);
+                    }
+                    showToast("Descanso finalizado! Próxima série!", "fa-bell", "text-emerald-400");
+                } else {
+                    updateRestTimerBadgeUI();
                 }
-            });
+            }, 1000);
+        }
+
+        function cancelRestTimer() {
+            if (restTimer.intervalId) {
+                clearInterval(restTimer.intervalId);
+                restTimer.intervalId = null;
+            }
+            restTimer.exIdx = null;
+            restTimer.remaining = 0;
+            updateRestTimerBadgeUI();
+            showToast("Cronômetro cancelado", "fa-stop", "text-slate-400");
+        }
+
+        function updateRestTimerBadgeUI() {
+            const allBadges = document.querySelectorAll('[id^="rest-timer-container-"]');
+            allBadges.forEach(el => { el.innerHTML = ''; });
+
+            if (restTimer.exIdx !== null && restTimer.remaining > 0) {
+                const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
+                if (targetContainer) {
+                    targetContainer.innerHTML = `
+                        <button onclick="cancelRestTimer()" title="Clique para cancelar o descanso" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm active:scale-95 transition animate-pulse">
+                            <i class="fa-solid fa-stopwatch text-[9px] text-emerald-300"></i>
+                            <span>Descanso: ${formatTimerSeconds(restTimer.remaining)}</span>
+                            <i class="fa-solid fa-xmark text-[8px] text-slate-400 hover:text-white ml-0.5"></i>
+                        </button>
+                    `;
+                }
+            }
         }
 
         function isDayCompleted(weekIdx, dayIdx) {
@@ -764,7 +543,7 @@
             const exercises = day.exercises || [];
             if (exercises.length === 0) return false;
             return exercises.every(ex => {
-                const count = ex.sets || 3;
+                const count = ex.sets || 4;
                 const logs = ex.logs || [];
                 for (let s = 0; s < count; s++) {
                     if (!logs[s] || !logs[s].done) return false;
@@ -773,173 +552,26 @@
             });
         }
 
-        /* FUNÇÕES DE GERENCIAMENTO DE CICLO (MODO TREINADOR) */
-        function resetCycleCount() {
-            workoutData.cycleCount = 1;
-            saveWorkoutData();
-            renderHeader();
-            renderApp();
-            showToast("Contagem de ciclos zerada para Ciclo #1!", "fa-rotate-left", "text-amber-400");
-        }
-
-        function updateCycleCount(val) {
-            const num = parseInt(val, 10);
-            workoutData.cycleCount = isNaN(num) || num < 1 ? 1 : num;
-            saveWorkoutData();
-            renderHeader();
-        }
-
-        /* CÁLCULO DE MÉTRICAS PREVISTAS (MODO TREINADOR) */
-        function calculateDayPlannedMetrics(day) {
-            let totalSets = 0;
-            let totalRepsEst = 0;
-            if (day && day.exercises) {
-                day.exercises.forEach(ex => {
-                    const sets = Number(ex.sets) || 0;
-                    const reps = getTargetRepsNum(ex.targetReps);
-                    totalSets += sets;
-                    totalRepsEst += (sets * reps);
-                });
-            }
-            return { totalSets, totalRepsEst, totalExercises: day && day.exercises ? day.exercises.length : 0 };
-        }
-
-        function calculateWeekPlannedMetrics(week) {
-            let totalSets = 0;
-            let totalRepsEst = 0;
-            let totalExercises = 0;
-            if (week && week.days) {
-                week.days.forEach(day => {
-                    const m = calculateDayPlannedMetrics(day);
-                    totalSets += m.totalSets;
-                    totalRepsEst += m.totalRepsEst;
-                    totalExercises += m.totalExercises;
-                });
-            }
-            return { totalSets, totalRepsEst, totalExercises };
-        }
-
-        function updateTodayHistoryRecord() {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-
-            const currentDay = currentWeek.days[currentDayIdx];
-            const exercises = currentDay.exercises || [];
-            const cycleNum = workoutData.cycleCount || 1;
-
-            let hasActivity = false;
-            exercises.forEach(ex => {
-                if (ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
-                    hasActivity = true;
-                }
-            });
-
-            if (currentDay.missed) {
-                if (!workoutData.history) workoutData.history = {};
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                
-                workoutData.history[dayInfo.dateKey] = {
-                    dateKey: dayInfo.dateKey,
-                    dateFormatted: dayInfo.dateFormatted,
-                    weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                    dayName: currentDay.name || '',
-                    dayShortName: currentDay.shortName || '',
-                    notes: currentDay.notes ? `[FALTOU TREINO] ${currentDay.notes}` : "Faltou Treino",
-                    missed: true,
-                    exercises: [
-                        {
-                            name: "FALTOU TREINO",
-                            sets: 0,
-                            targetReps: "-",
-                            rest: "-",
-                            notes: "Faltou Treino",
-                            logs: [{ load: 0, reps: 0, done: true }]
-                        }
-                    ],
-                    updatedAt: new Date().toISOString()
-                };
-            } else if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
-                if (!workoutData.history) workoutData.history = {};
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                
-                workoutData.history[dayInfo.dateKey] = {
-                    dateKey: dayInfo.dateKey,
-                    dateFormatted: dayInfo.dateFormatted,
-                    weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                    dayName: currentDay.name || '',
-                    dayShortName: currentDay.shortName || '',
-                    notes: currentDay.notes || '',
-                    missed: false,
-                    exercises: JSON.parse(JSON.stringify(exercises)),
-                    updatedAt: new Date().toISOString()
-                };
-            }
-        }
-
-        function sendDataToSheetsDirect(dataToSync) {
-            if (!API_URL) return;
-            try {
-                const currentMonth = getTodayMonthKey();
-                fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        aluno: currentStudent,
-                        mes: currentMonth,
-                        token: API_SECRET_TOKEN,
-                        data: dataToSync
-                    })
-                });
-            } catch (e) {
-                console.error("Erro ao salvar no Sheets:", e);
-            }
-        }
-
-        function saveWorkoutData() {
-            updateTodayHistoryRecord();
-            localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
-            updateMetrics();
-
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                sendDataToSheetsDirect(workoutData);
-            }, 800);
-        }
-
         function renderHeader() {
             const container = document.getElementById('student-name-container');
             const cycleBadge = document.getElementById('header-cycle-badge');
-            const studentName = workoutData.studentName || "Nome do Aluno";
+            const studentName = workoutData.studentName || "Aluno";
             const cycleNum = workoutData.cycleCount || 1;
 
             if (cycleBadge) {
-                if (isAdminMode) {
-                    cycleBadge.innerHTML = `
-                        <div class="flex items-center gap-1">
-                            <i class="fa-solid fa-repeat text-[9px]"></i>
-                            <span>Ciclo #</span>
-                            <input type="number" min="1" value="${cycleNum}" onchange="updateCycleCount(this.value)" class="w-8 bg-slate-950 text-amber-400 border border-amber-500/40 rounded px-1 py-0.2 text-[10px] font-extrabold text-center focus:outline-none">
-                            <button onclick="resetCycleCount()" title="Zerar Ciclo para #1" class="text-slate-400 hover:text-white ml-0.5"><i class="fa-solid fa-rotate-left text-[9px]"></i></button>
-                        </div>
-                    `;
-                } else {
-                    cycleBadge.innerHTML = `<i class="fa-solid fa-repeat text-[9px]"></i><span>Ciclo #${cycleNum}</span>`;
-                }
+                cycleBadge.innerHTML = `<i class="fa-solid fa-repeat text-[9px]"></i><span>Ciclo #${cycleNum}</span>`;
             }
 
             if (isAdminMode) {
                 container.innerHTML = `
                     <div class="flex items-center gap-1">
-                        <span class="text-[10px] text-slate-400 font-bold">Aluno(a):</span>
-                        <input type="text" value="${escapeHtml(studentName)}" 
-                            onchange="updateStudentName(this.value)"
-                            class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none focus:border-amber-500 w-32 sm:w-44">
+                        <span class="text-[10px] text-slate-400 font-bold">Aluno:</span>
+                        <input type="text" value="${escapeHtml(studentName)}" onchange="updateStudentName(this.value)" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-400 font-extrabold focus:outline-none w-36">
                     </div>
                 `;
             } else {
                 container.innerHTML = `
-                    <span class="text-[10px] text-slate-400 font-medium">Aluno(a):</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Aluno:</span>
                     <span class="text-xs font-extrabold text-white ml-1">${escapeHtml(studentName)}</span>
                 `;
             }
@@ -951,19 +583,16 @@
             renderHeader();
         }
 
-        /* ADMIN MODE TOGGLE */
         function toggleAdminMode() {
             if (isAdminMode) {
                 isAdminMode = false;
                 updateAdminUI();
-                showToast("Modo Aluno (Apenas Registro de Treino)", "fa-circle-check", "text-blue-400");
+                showToast("Modo Aluno ativado", "fa-circle-check", "text-blue-400");
             } else {
                 document.getElementById('input-admin-pass').value = '';
                 document.getElementById('pass-error-msg').classList.add('hidden');
                 openModal('modal-password');
-                setTimeout(() => {
-                    document.getElementById('input-admin-pass').focus();
-                }, 100);
+                setTimeout(() => document.getElementById('input-admin-pass').focus(), 100);
             }
         }
 
@@ -981,13 +610,12 @@
                     isAdminMode = true;
                     closeModal('modal-password');
                     updateAdminUI();
-                    showToast("Modo Edição Ativado!", "fa-lock-open", "text-amber-400");
+                    showToast("Modo Treinador Liberado!", "fa-lock-open", "text-amber-400");
                 } else {
                     errorMsg.classList.remove('hidden');
-                    if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
                 }
             } catch (e) {
-                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
+                showToast("Erro ao validar com a planilha", "fa-triangle-exclamation", "text-red-400");
             }
         }
 
@@ -998,14 +626,12 @@
             const addBtn = document.getElementById('btn-add-exercise');
 
             if (isAdminMode) {
-                btn.classList.remove('bg-slate-800', 'border-slate-700/80');
-                btn.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+                btn.className = "px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1.5";
                 icon.className = 'fa-solid fa-lock-open text-amber-400';
                 text.textContent = 'Modo Edição';
                 if (addBtn) addBtn.classList.remove('hidden');
             } else {
-                btn.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
-                btn.classList.add('bg-slate-800', 'border-slate-700/80');
+                btn.className = "px-2.5 py-1.5 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5";
                 icon.className = 'fa-solid fa-lock text-slate-400';
                 text.textContent = 'Modo Aluno';
                 if (addBtn) addBtn.classList.add('hidden');
@@ -1015,22 +641,18 @@
             renderApp();
         }
 
-        /* GERENCIAMENTO DE SEMANAS */
         function renderWeekTabs() {
             const container = document.getElementById('week-tabs-container');
             if (!container) return;
             container.innerHTML = '';
 
             const weeks = workoutData.weeks || [];
-            if (currentWeekIdx >= weeks.length) currentWeekIdx = Math.max(0, weeks.length - 1);
-
             weeks.forEach((w, idx) => {
-                const palIdx = w.paletteIdx !== undefined ? w.paletteIdx : (idx % WEEK_PALETTES.length);
-                const palette = WEEK_PALETTES[palIdx];
+                const palette = WEEK_PALETTES[w.paletteIdx || 0];
                 const isActive = idx === currentWeekIdx;
                 const btn = document.createElement('button');
                 btn.onclick = () => { currentWeekIdx = idx; renderApp(); };
-                btn.className = `week-tab flex-1 min-w-[110px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
+                btn.className = `week-tab flex-1 min-w-[120px] px-3 py-2 rounded-xl border text-left transition ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
                 btn.innerHTML = `
                     <div class="text-[9px] font-bold uppercase tracking-wider ${palette.textClass} flex items-center justify-between">
                         ${escapeHtml(w.shortTitle || `Semana ${idx + 1}`)} <i class="fa-solid ${palette.icon} text-[8px]"></i>
@@ -1039,101 +661,8 @@
                 `;
                 container.appendChild(btn);
             });
-
-            if (isAdminMode) {
-                const addWBtn = document.createElement('button');
-                addWBtn.onclick = addNewWeek;
-                addWBtn.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition shrink-0 flex items-center gap-1';
-                addWBtn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i> Semana';
-                container.appendChild(addWBtn);
-            }
         }
 
-        function applyWeekPreset(presetKey) {
-            const preset = WEEK_PRESETS[presetKey];
-            if (!preset) return;
-
-            const week = workoutData.weeks[currentWeekIdx];
-            if (!week) return;
-
-            week.shortTitle = preset.shortTitle;
-            week.targetReps = preset.targetReps;
-            week.title = preset.title;
-            week.desc = preset.desc;
-            week.rirText = preset.rirText;
-            week.paletteIdx = preset.paletteIdx;
-
-            if (week.days) {
-                week.days.forEach(day => {
-                    if (day.exercises) {
-                        day.exercises.forEach(ex => {
-                            ex.rest = preset.defaultRest;
-                            ex.targetReps = preset.exerciseReps;
-                            if (preset.defaultSets !== undefined) {
-                                ex.sets = preset.defaultSets;
-                            }
-                        });
-                    }
-                });
-            }
-
-            saveWorkoutData();
-            renderApp();
-            showToast(`Modelo '${preset.label}' aplicado!`, "fa-bolt", "text-amber-400");
-        }
-
-        function addNewWeek() {
-            const weeks = workoutData.weeks || [];
-            const sampleDays = weeks.length > 0 ? weeks[0].days : [];
-            const clonedDays = JSON.parse(JSON.stringify(sampleDays));
-
-            clonedDays.forEach(day => {
-                day.exercises.forEach(ex => { ex.logs = []; });
-                day.notes = "";
-                day.missed = false;
-            });
-
-            weeks.push({
-                id: `W_${Date.now()}`,
-                shortTitle: "Semana Hipertrofia",
-                targetReps: "8-12 RM",
-                title: "Semana Hipertrofia — Hipertrofia Tradicional",
-                desc: "Cargas moderadas-altas (8-12 RM), volume completo e falha próxima (RIR 0-1).",
-                rirText: "RIR 0-1",
-                paletteIdx: (weeks.length) % WEEK_PALETTES.length,
-                days: clonedDays
-            });
-
-            currentWeekIdx = weeks.length - 1;
-            saveWorkoutData();
-            renderApp();
-            showToast("Nova semana adicionada!", "fa-circle-plus", "text-emerald-400");
-        }
-
-        function deleteCurrentWeek() {
-            const weeks = workoutData.weeks || [];
-            if (weeks.length <= 1) {
-                showToast("O treino deve ter pelo menos 1 semana!", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
-            weeks.splice(currentWeekIdx, 1);
-            currentWeekIdx = Math.max(0, currentWeekIdx - 1);
-            saveWorkoutData();
-            renderApp();
-            showToast("Semana removida", "fa-trash-can", "text-amber-400");
-        }
-
-        function updateWeekProp(prop, val) {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (currentWeek) {
-                currentWeek[prop] = val;
-                saveWorkoutData();
-                renderApp();
-            }
-        }
-
-        /* GERENCIAMENTO DE DIAS COM STATUS DE CONCLUSÃO */
         function renderDayTabs() {
             const container = document.getElementById('day-tabs-container');
             if (!container) return;
@@ -1142,349 +671,73 @@
             const currentWeek = workoutData.weeks[currentWeekIdx];
             const days = currentWeek ? currentWeek.days : [];
 
-            if (currentDayIdx >= days.length) {
-                currentDayIdx = Math.max(0, days.length - 1);
-            }
-
             days.forEach((day, idx) => {
                 const btn = document.createElement('button');
                 const isActive = idx === currentDayIdx;
                 const isComplete = isDayCompleted(currentWeekIdx, idx);
 
-                let btnClass = '';
-                if (isActive) {
-                    btnClass = isComplete ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm' : 'bg-blue-600 text-white border-blue-500 shadow-sm';
-                } else {
-                    btnClass = isComplete ? 'bg-emerald-950/30 text-emerald-400 border-emerald-800/60' : 'bg-slate-900 text-slate-400 border-slate-800';
-                }
+                let btnClass = isActive 
+                    ? (isComplete ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm' : 'bg-blue-600 text-white border-blue-500 shadow-sm')
+                    : (isComplete ? 'bg-emerald-950/30 text-emerald-400 border-emerald-800/60' : 'bg-slate-900 text-slate-400 border-slate-800');
 
                 btn.className = `day-tab py-2 px-3 rounded-lg text-xs font-extrabold uppercase whitespace-nowrap transition border text-center flex items-center gap-1.5 shrink-0 ${btnClass}`;
-                
-                btn.onclick = () => {
-                    currentDayIdx = idx;
-                    renderApp();
-                };
-
+                btn.onclick = () => { currentDayIdx = idx; renderApp(); };
                 btn.innerHTML = `
                     <span>${escapeHtml(day.shortName)}</span>
                     ${isComplete ? '<i class="fa-solid fa-circle-check text-[10px] text-emerald-300"></i>' : ''}
                 `;
                 container.appendChild(btn);
             });
-
-            if (isAdminMode) {
-                const addDayBtn = document.createElement('button');
-                addDayBtn.className = 'py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition shrink-0 flex items-center gap-1';
-                addDayBtn.onclick = addNewDay;
-                addDayBtn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i> Dia';
-                container.appendChild(addDayBtn);
-            }
-        }
-
-        function addNewDay() {
-            const sampleWeek = workoutData.weeks[0];
-            const dayNum = (sampleWeek && sampleWeek.days) ? sampleWeek.days.length + 1 : 1;
-            const newShort = `Dia ${dayNum}`;
-            const newName = `Dia ${dayNum}: Novo Treino`;
-
-            workoutData.weeks.forEach(week => {
-                week.days.push({
-                    id: `D_${Date.now()}`,
-                    shortName: newShort,
-                    name: newName,
-                    notes: '',
-                    missed: false,
-                    exercises: [
-                        { name: "Novo Exercício", sets: 3, targetReps: "8-12", rest: "60s", notes: "Observação de execução...", logs: [] }
-                    ]
-                });
-            });
-
-            currentDayIdx = workoutData.weeks[currentWeekIdx].days.length - 1;
-            saveWorkoutData();
-            renderApp();
-            showToast("Novo dia adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
-        }
-
-        function deleteCurrentDay() {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (currentWeek.days.length <= 1) {
-                showToast("O treino deve ter pelo menos 1 dia!", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
-            const deletedIdx = currentDayIdx;
-
-            workoutData.weeks.forEach(week => {
-                if (week.days) week.days.splice(deletedIdx, 1);
-            });
-
-            currentDayIdx = Math.max(0, deletedIdx - 1);
-            saveWorkoutData();
-            renderApp();
-            showToast("Dia removido de todas as semanas", "fa-trash-can", "text-amber-400");
-        }
-
-        function updateDayProp(prop, val) {
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx]) {
-                    week.days[currentDayIdx][prop] = val;
-                }
-            });
-
-            saveWorkoutData();
-            renderApp();
         }
 
         function renderApp() {
             renderWeekTabs();
             renderDayTabs();
-            renderHeaderDate();
 
-            const weeks = workoutData.weeks || [];
-            if (weeks.length === 0) return;
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days) return;
 
-            if (currentWeekIdx >= weeks.length) currentWeekIdx = weeks.length - 1;
-            const weekInfo = weeks[currentWeekIdx];
-            const days = weekInfo.days || [];
-            
-            if (days.length === 0) return;
-
-            if (currentDayIdx >= days.length) currentDayIdx = days.length - 1;
-            const dayInfo = days[currentDayIdx];
-
-            const palIdx = weekInfo.paletteIdx !== undefined ? weekInfo.paletteIdx : (currentWeekIdx % WEEK_PALETTES.length);
-            const activePalette = WEEK_PALETTES[palIdx];
-
-            const weekPlanned = calculateWeekPlannedMetrics(weekInfo);
-            const dayPlanned = calculateDayPlannedMetrics(dayInfo);
+            const dayInfo = currentWeek.days[currentDayIdx];
+            const activePalette = WEEK_PALETTES[currentWeek.paletteIdx || 0];
 
             const bannerContainer = document.getElementById('week-banner-container');
-            if (isAdminMode) {
-                bannerContainer.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                            <span class="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
-                                <i class="fa-solid fa-sliders"></i> Configurações da Semana
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="resetCycleCount()" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
-                                    <i class="fa-solid fa-rotate-left text-xs"></i> Zerar Ciclo (#1)
-                                </button>
-                                ${weeks.length > 1 ? `
-                                    <button onclick="deleteCurrentWeek()" class="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-trash-can"></i> Excluir Semana
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1.5">
-                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> Aplicar Modelo Pronto de Foco:
-                            </label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                                <button onclick="applyWeekPreset('metabolic')" class="py-2 px-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-bold hover:bg-amber-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-bolt text-xs"></i> Metabólico (60s)
-                                </button>
-                                <button onclick="applyWeekPreset('strength')" class="py-2 px-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-bold hover:bg-red-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-weight-hanging text-xs"></i> Força (2min)
-                                </button>
-                                <button onclick="applyWeekPreset('hypertrophy')" class="py-2 px-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-cubes text-xs"></i> Hipertrofia (90s)
-                                </button>
-                                <button onclick="applyWeekPreset('deload')" class="py-2 px-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold hover:bg-emerald-500/20 active:scale-95 transition text-center flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-heart-pulse text-xs"></i> Deload (60s)
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Semana Força):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.shortTitle || '')}" 
-                                    onchange="updateWeekProp('shortTitle', this.value)"
-                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta Reps (ex: 4-6 RM):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.targetReps || '')}" 
-                                    onchange="updateWeekProp('targetReps', this.value)"
-                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Meta RIR (ex: RIR 1):</label>
-                                <input type="text" value="${escapeHtml(weekInfo.rirText || '')}" 
-                                    onchange="updateWeekProp('rirText', this.value)"
-                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Título do Banner:</label>
-                            <input type="text" value="${escapeHtml(weekInfo.title || '')}" 
-                                onchange="updateWeekProp('title', this.value)"
-                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Descrição do Foco Estratégico:</label>
-                            <input type="text" value="${escapeHtml(weekInfo.desc || '')}" 
-                                onchange="updateWeekProp('desc', this.value)"
-                                class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                        </div>
-
-                        <!-- Card de Volume Total Previsto para o Microciclo (Treinador) -->
-                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center">
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Séries Semana (Micro)</div>
-                                <div class="text-sm font-extrabold text-amber-400 mt-0.5">${weekPlanned.totalSets} séries</div>
-                            </div>
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Reps Previstas (Micro)</div>
-                                <div class="text-sm font-extrabold text-blue-400 mt-0.5">~${weekPlanned.totalRepsEst} reps</div>
-                            </div>
-                            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-amber-500/20">
-                                <div class="text-[9px] uppercase font-bold text-slate-400">Total Exercícios</div>
-                                <div class="text-sm font-extrabold text-emerald-400 mt-0.5">${weekPlanned.totalExercises} ex.</div>
-                            </div>
-                        </div>
+            bannerContainer.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${activePalette.badgeClass}">
+                        <i class="fa-solid ${activePalette.icon} mr-1"></i> ${escapeHtml(currentWeek.title || '')}
+                    </span>
+                    <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed mb-3">${escapeHtml(currentWeek.desc || '')}</p>
+                <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
+                    <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+                    <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
+                        <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
                     </div>
-                `;
-            } else {
-                bannerContainer.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span id="badge-week-title" class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${activePalette.badgeClass}">
-                            <i class="fa-solid ${activePalette.icon} mr-1"></i> ${escapeHtml(weekInfo.title || '')}
-                        </span>
-                        <span id="metric-progress-count" class="text-xs font-bold text-slate-400">0/0 séries</span>
+                    <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
+                        <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
                     </div>
-
-                    <p id="week-desc-text" class="text-xs text-slate-300 leading-relaxed mb-3">${escapeHtml(weekInfo.desc || '')}</p>
-
-                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
-                        <div id="metric-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                    <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
+                        <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">${escapeHtml(currentWeek.rirText || '-')}</div>
                     </div>
-
-                    <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Concluído</div>
-                            <div id="metric-progress-percent" class="text-sm font-extrabold text-blue-400 mt-0.5">0%</div>
-                        </div>
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Tonelagem</div>
-                            <div id="metric-tonnage" class="text-sm font-extrabold text-amber-400 mt-0.5">0 kg</div>
-                        </div>
-                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                            <div class="text-[9px] uppercase font-bold text-slate-500">Meta RIR</div>
-                            <div id="metric-rir-short" class="text-xs font-extrabold text-emerald-400 mt-0.5">${escapeHtml(weekInfo.rirText || '-')}</div>
-                        </div>
-                    </div>
-                `;
-            }
+                </div>
+            `;
 
             const dayTitleContainer = document.getElementById('day-title-container');
-            if (isAdminMode) {
-                dayTitleContainer.innerHTML = `
-                    <div class="w-full space-y-2 bg-slate-900 border border-amber-500/30 p-3 rounded-xl">
-                        <div class="text-[10px] uppercase font-bold text-amber-400 flex items-center justify-between">
-                            <span><i class="fa-solid fa-sliders mr-1"></i> Identificação do Dia</span>
-                            ${days.length > 1 ? `
-                                <button onclick="deleteCurrentDay()" class="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1 font-bold">
-                                    <i class="fa-solid fa-trash-can"></i> Excluir Dia
-                                </button>
-                            ` : ''}
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Nome na Aba (ex: Ter • Pull):</label>
-                                <input type="text" value="${escapeHtml(dayInfo.shortName)}" 
-                                    onchange="updateDayProp('shortName', this.value)"
-                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold block mb-1">Título da Sessão (ex: Terça: Pull Geral):</label>
-                                <input type="text" value="${escapeHtml(dayInfo.name)}" 
-                                    onchange="updateDayProp('name', this.value)"
-                                    class="w-full bg-slate-950 text-xs font-bold text-white border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
-                            </div>
-                        </div>
+            dayTitleContainer.innerHTML = `
+                <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
+                </h2>
+            `;
 
-                        <!-- Resumo do Planejamento da Sessão do Dia -->
-                        <div class="flex items-center justify-between bg-slate-950/70 p-2 rounded-lg border border-slate-800 mt-2">
-                            <span class="text-[10px] font-bold text-slate-400">Volume Previsto do Dia:</span>
-                            <div class="flex items-center gap-3 text-xs font-extrabold">
-                                <span class="text-amber-400"><i class="fa-solid fa-layer-group text-[10px] mr-1"></i>${dayPlanned.totalSets} séries</span>
-                                <span class="text-blue-400"><i class="fa-solid fa-arrows-rotate text-[10px] mr-1"></i>~${dayPlanned.totalRepsEst} reps</span>
-                                <span class="text-emerald-400"><i class="fa-solid fa-dumbbell text-[10px] mr-1"></i>${dayPlanned.totalExercises} ex.</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                dayTitleContainer.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-day text-blue-400"></i> ${escapeHtml(dayInfo.name)}
-                        </h2>
-                        ${dayInfo.missed ? `
-                            <span class="text-[10px] font-extrabold text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                <i class="fa-solid fa-user-xmark"></i> Falta Registrada
-                            </span>
-                        ` : ''}
-                    </div>
-                `;
-            }
-
-            const notesInput = document.getElementById('session-notes');
-            notesInput.value = dayInfo.notes || "";
-
-            renderMissedButton(dayInfo);
+            document.getElementById('session-notes').value = dayInfo.notes || "";
             renderExercises();
             updateMetrics();
-        }
-
-        /* BOTÃO FALTAR TREINO */
-        function renderMissedButton(dayInfo) {
-            const container = document.getElementById('missed-workout-container');
-            if (!container) return;
-
-            if (dayInfo.missed) {
-                container.innerHTML = `
-                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-red-950/40 border border-red-800/50 hover:bg-red-900/40 text-red-300 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        <span>Treino Marcado como Falta (Clique para Desmarcar)</span>
-                    </button>
-                `;
-            } else {
-                container.innerHTML = `
-                    <button onclick="toggleMissedWorkout()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-red-950/30 border border-slate-800 hover:border-red-800/40 text-slate-400 hover:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98">
-                        <i class="fa-solid fa-user-xmark text-slate-500"></i>
-                        <span>Faltar Treino</span>
-                    </button>
-                `;
-            }
-        }
-
-        function toggleMissedWorkout() {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-            
-            const currentDay = currentWeek.days[currentDayIdx];
-            currentDay.missed = !currentDay.missed;
-
-            if (currentDay.missed) {
-                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
-                if (isMesocycleFullyDone()) {
-                    saveWorkoutData();
-                    renderApp();
-                    openModal('modal-mesocycle');
-                    return;
-                }
-            } else {
-                showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
-            }
-
-            saveWorkoutData();
-            renderApp();
         }
 
         function renderExercises() {
@@ -1492,42 +745,17 @@
             listEl.innerHTML = '';
 
             const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
-
             const currentDay = currentWeek.days[currentDayIdx];
-            const exercises = currentDay.exercises;
-
-            if (currentDay.missed) {
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-red-400/80 border border-dashed border-red-900/50 rounded-2xl bg-red-950/20 space-y-1">
-                        <i class="fa-solid fa-user-xmark text-2xl mb-1 block"></i>
-                        <p class="text-xs font-bold">Falta registrada para esta sessão.</p>
-                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão da semana com 0 kg e 0 reps.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            if (!exercises || exercises.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
-                        <i class="fa-solid fa-dumbbell text-2xl mb-2 block"></i>
-                        <p class="text-xs">Nenhum exercício cadastrado nesta sessão.</p>
-                    </div>
-                `;
-                return;
-            }
+            const exercises = currentDay.exercises || [];
 
             exercises.forEach((ex, exIdx) => {
                 const exCard = document.createElement('div');
                 exCard.className = 'bg-slate-900 border border-slate-800/90 rounded-2xl p-3.5 shadow-sm space-y-3';
 
-                const setsCount = ex.sets || 3;
+                const setsCount = ex.sets || 4;
                 if (!ex.logs) ex.logs = [];
 
                 let setsRowsHtml = '';
-                let defaultRepsPlaceholder = getTargetRepsNum(ex.targetReps);
-
                 for (let s = 0; s < setsCount; s++) {
                     const log = ex.logs[s] || { load: '', reps: '', done: false };
                     const isDone = Boolean(log.done);
@@ -1537,192 +765,62 @@
                             <div class="w-6 shrink-0 text-center font-extrabold text-[11px] ${isDone ? 'text-emerald-400' : 'text-slate-500'}">
                                 #${s + 1}
                             </div>
-
                             <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
-                                    -
-                                </button>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
                                 <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" 
-                                        oninput="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
+                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined ? log.load : ''}" 
                                         onchange="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
                                         class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
                                     <span class="text-[9px] text-slate-500 font-bold shrink-0">kg</span>
                                 </div>
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
-                                    +
-                                </button>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
                             </div>
-
                             <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
-                                    -
-                                </button>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
                                 <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined && log.reps !== '' ? log.reps : ''}" 
-                                        oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
+                                    <input type="number" inputmode="numeric" placeholder="${ex.targetReps}" value="${log.reps !== undefined ? log.reps : ''}" 
                                         onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
                                         class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
                                     <span class="text-[9px] text-slate-500 font-bold shrink-0">rep</span>
                                 </div>
-                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">
-                                    +
-                                </button>
+                                <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
                             </div>
-
-                            <button onclick="toggleSetDone(${exIdx}, ${s})" class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-500 text-slate-950 font-black shadow-md' : 'bg-slate-800 border border-slate-700/80 text-slate-500 active:scale-95'}">
+                            <button onclick="toggleSetDone(${exIdx}, ${s})" class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-500 text-slate-950 font-black shadow-md' : 'bg-slate-800 border border-slate-700/80 text-slate-500'}">
                                 <i class="fa-solid ${isDone ? 'fa-check text-sm' : 'fa-check text-xs opacity-40'}"></i>
                             </button>
                         </div>
                     `;
                 }
 
-                const hasRecLoad = ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null;
-
-                let titleHtml = `
+                exCard.innerHTML = `
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1">
-                            ${isAdminMode ? `
-                                <input type="text" value="${escapeHtml(ex.name)}" 
-                                    onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
-                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none mb-1.5">
-                                
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
-                                        <span class="text-[10px] font-bold text-slate-400">Reps:</span>
-                                        <input type="text" value="${escapeHtml(ex.targetReps || '')}" 
-                                            onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)"
-                                            class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
-                                    </div>
-
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
-                                        <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
-                                        <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
-                                        <input type="text" value="${escapeHtml(ex.rest || '')}" 
-                                            onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
-                                            class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
-                                    </div>
-
-                                    <div class="flex items-center gap-1 bg-slate-950 border border-emerald-500/40 rounded-md px-2 py-0.5">
-                                        <i class="fa-solid fa-weight-hanging text-[10px] text-emerald-400"></i>
-                                        <span class="text-[10px] font-bold text-slate-400">Carga Rec.:</span>
-                                        <input type="number" step="0.5" inputmode="decimal" placeholder="Off" 
-                                            value="${hasRecLoad ? ex.recommendedLoad : ''}" 
-                                            onchange="updateRecommendedLoad(${exIdx}, this.value)"
-                                            class="w-12 bg-transparent text-[10px] font-extrabold text-emerald-400 focus:outline-none p-0">
-                                    </div>
-                                </div>
-                            ` : `
-                                <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
-                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                        ${setsCount} séries × ${ex.targetReps} reps
-                                    </span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                        <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
-                                    </span>
-                                    ${hasRecLoad ? `
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                            <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
-                                        </span>
-                                    ` : ''}
-                                </div>
-                            `}
-                        </div>
-
-                        ${isAdminMode ? `
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button onclick="changeSetsCount(${exIdx}, 1)" title="Adicionar Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-emerald-400 flex items-center justify-center">
-                                    +
+                            <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">${setsCount} séries × ${ex.targetReps} reps</span>
+                                <button onclick="startRestTimer(${exIdx})" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 active:scale-95 transition flex items-center gap-1 cursor-pointer">
+                                    <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
                                 </button>
-                                <button onclick="changeSetsCount(${exIdx}, -1)" title="Remover Série" class="w-7 h-7 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center justify-center">
-                                    -
-                                </button>
-                                <button onclick="deleteExercise(${exIdx})" title="Excluir Exercício" class="w-7 h-7 bg-red-950/60 border border-red-800/60 rounded-lg text-xs text-red-400 flex items-center justify-center">
-                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
-                                </button>
+                                <div id="rest-timer-container-${exIdx}"></div>
                             </div>
-                        ` : ''}
-                    </div>
-                `;
-
-                let notesHtml = '';
-                if (ex.notes || isAdminMode) {
-                    notesHtml = `
-                        <div>
-                            ${isAdminMode ? `
-                                <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
-                                    onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
-                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
-                            ` : `
-                                <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
-                                    <i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
-                                    <span>${escapeHtml(ex.notes)}</span>
-                                </p>
-                            `}
                         </div>
-                    `;
-                }
-
-                exCard.innerHTML = `
-                    ${titleHtml}
-                    ${notesHtml}
-                    <div class="space-y-1.5 pt-1">
-                        ${setsRowsHtml}
                     </div>
+                    ${ex.notes ? `<p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2"><i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i><span>${escapeHtml(ex.notes)}</span></p>` : ''}
+                    <div class="space-y-1.5 pt-1">${setsRowsHtml}</div>
                 `;
-
                 listEl.appendChild(exCard);
             });
-        }
 
-        /* CARGA RECOMENDADA PELO TREINADOR */
-        function updateRecommendedLoad(exIdx, val) {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx]) {
-                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-                if (ex) {
-                    const parsedVal = parseNum(val);
-                    ex.recommendedLoad = parsedVal;
-
-                    if (parsedVal !== '') {
-                        if (!ex.logs) ex.logs = [];
-                        const count = ex.sets || 3;
-                        for (let s = 0; s < count; s++) {
-                            if (!ex.logs[s]) {
-                                ex.logs[s] = { load: parsedVal, reps: getTargetRepsNum(ex.targetReps), done: false };
-                            } else {
-                                ex.logs[s].load = parsedVal;
-                            }
-                        }
-                    }
-                }
-            }
-            saveWorkoutData();
-            renderExercises();
-            if (val !== '') {
-                showToast(`Carga recomendada de ${val}kg aplicada!`, "fa-weight-hanging", "text-emerald-400");
-            }
+            updateRestTimerBadgeUI();
         }
 
         function adjustSetVal(exIdx, setIdx, field, delta) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: 10, done: false };
 
-            let defaultReps = getTargetRepsNum(ex.targetReps);
-
-            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
-
-            let currentVal = parseNum(ex.logs[setIdx][field]);
-            if (typeof currentVal !== 'number') {
-                currentVal = field === 'reps' ? defaultReps : 0;
-            }
-
-            let step = 1;
-            let newVal = Math.max(0, currentVal + (delta * step));
-            newVal = Math.round(newVal * 10) / 10;
-
-            ex.logs[setIdx][field] = newVal;
+            let currentVal = parseFloat(ex.logs[setIdx][field]) || 0;
+            ex.logs[setIdx][field] = Math.max(0, currentVal + delta);
             saveWorkoutData();
             renderExercises();
         }
@@ -1732,553 +830,97 @@
             if (!ex.logs) ex.logs = [];
             if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: '', done: false };
 
-            if (field === 'load' || field === 'reps') {
-                ex.logs[setIdx][field] = parseNum(value);
-            }
-
+            ex.logs[setIdx][field] = value === '' ? '' : parseFloat(value);
             saveWorkoutData();
-            updateMetrics();
-        }
-
-        function isMesocycleFullyDone() {
-            const weeks = workoutData.weeks || [];
-            if (weeks.length === 0) return false;
-            for (let w = 0; w < weeks.length; w++) {
-                const days = weeks[w].days || [];
-                if (days.length === 0) return false;
-                for (let d = 0; d < days.length; d++) {
-                    if (!isDayCompleted(w, d)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
 
         function toggleSetDone(exIdx, setIdx) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
-
-            let defaultReps = getTargetRepsNum(ex.targetReps);
-
-            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
-
-            if (!ex.logs[setIdx].done && (ex.logs[setIdx].reps === '' || ex.logs[setIdx].reps === undefined)) {
-                ex.logs[setIdx].reps = defaultReps;
-            }
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: 10, done: false };
 
             const wasDone = ex.logs[setIdx].done;
             ex.logs[setIdx].done = !wasDone;
 
-            if (navigator.vibrate) {
-                navigator.vibrate(40);
-            }
-
-            if (!wasDone && isMesocycleFullyDone()) {
-                pendingMesocycleToggle = { exIdx, setIdx };
-                saveWorkoutData();
-                renderExercises();
-                renderDayTabs();
-                openModal('modal-mesocycle');
-                return;
+            if (!wasDone) {
+                startRestTimer(exIdx);
             }
 
             saveWorkoutData();
             renderExercises();
             renderDayTabs();
-        }
-
-        function cancelMesocycleComplete() {
-            if (pendingMesocycleToggle) {
-                const { exIdx, setIdx } = pendingMesocycleToggle;
-                const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
-                if (ex && ex.logs && ex.logs[setIdx]) {
-                    ex.logs[setIdx].done = false;
-                }
-                pendingMesocycleToggle = null;
-            }
-            saveWorkoutData();
-            renderExercises();
-            renderDayTabs();
-            closeModal('modal-mesocycle');
-        }
-
-        function confirmMesocycleReset() {
-            updateTodayHistoryRecord();
-            workoutData.cycleCount = (workoutData.cycleCount || 1) + 1;
-
-            if (workoutData.weeks) {
-                workoutData.weeks.forEach(w => {
-                    if (w.days) {
-                        w.days.forEach(d => {
-                            d.missed = false;
-                            d.notes = "";
-                            if (d.exercises) {
-                                d.exercises.forEach(ex => {
-                                    ex.logs = [];
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-
-            currentWeekIdx = 0;
-            currentDayIdx = 0;
-            pendingMesocycleToggle = null;
-
-            saveWorkoutData();
-            closeModal('modal-mesocycle');
-            renderHeader();
-            renderApp();
-            showToast(`Ciclo #${workoutData.cycleCount} iniciado!`, "fa-rotate-left", "text-emerald-400");
         }
 
         function updateMetrics() {
-            const weekInfo = workoutData.weeks[currentWeekIdx];
-            if (!weekInfo || !weekInfo.days || !weekInfo.days[currentDayIdx]) return;
+            const week = workoutData.weeks[currentWeekIdx];
+            const day = week.days[currentDayIdx];
+            let totalSets = 0, completedSets = 0, tonnage = 0;
 
-            const dayInfo = weekInfo.days[currentDayIdx];
-            const exercises = dayInfo.exercises || [];
-
-            let totalSets = 0;
-            let completedSets = 0;
-            let totalTonnage = 0;
-
-            if (dayInfo.missed) {
-                completedSets = 0;
-            } else {
-                exercises.forEach(ex => {
-                    const count = ex.sets || 3;
-                    totalSets += count;
-
-                    let defaultReps = getTargetRepsNum(ex.targetReps);
-
-                    if (ex.logs) {
-                        for (let s = 0; s < count; s++) {
-                            const log = ex.logs[s];
-                            if (log) {
-                                if (log.done) {
-                                    completedSets++;
-                                }
-
-                                const loadNum = parseNum(log.load);
-                                const repsNum = parseNum(log.reps);
-
-                                const load = typeof loadNum === 'number' ? loadNum : 0;
-                                const reps = typeof repsNum === 'number' && repsNum > 0 ? repsNum : defaultReps;
-
-                                if (log.done && load > 0) {
-                                    totalTonnage += (load * reps);
-                                }
-                            }
-                        }
+            (day.exercises || []).forEach(ex => {
+                const count = ex.sets || 4;
+                totalSets += count;
+                (ex.logs || []).forEach(log => {
+                    if (log && log.done) {
+                        completedSets++;
+                        const l = parseFloat(log.load) || 0;
+                        const r = parseFloat(log.reps) || 10;
+                        tonnage += (l * r);
                     }
                 });
-            }
+            });
 
-            if (totalSets === 0 && dayInfo.missed) totalSets = exercises.reduce((acc, ex) => acc + (ex.sets || 3), 0);
             const pct = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
-
-            const elPercent = document.getElementById('metric-progress-percent');
+            const elPct = document.getElementById('metric-progress-percent');
             const elCount = document.getElementById('metric-progress-count');
             const elBar = document.getElementById('metric-progress-bar');
             const elTonnage = document.getElementById('metric-tonnage');
-            const elRir = document.getElementById('metric-rir-short');
 
-            if (elPercent) elPercent.textContent = dayInfo.missed ? 'FALTA' : `${pct}%`;
-            if (elCount) elCount.textContent = dayInfo.missed ? 'Treino Faltado' : `${completedSets}/${totalSets} séries`;
-            if (elBar) elBar.style.width = dayInfo.missed ? '100%' : `${pct}%`;
-            if (elBar && dayInfo.missed) elBar.className = "bg-red-500/80 h-full transition-all duration-300";
-            if (elBar && !dayInfo.missed) elBar.className = "bg-blue-500 h-full transition-all duration-300";
-            if (elTonnage) elTonnage.innerHTML = `${totalTonnage.toLocaleString('pt-BR')} <span class="text-[10px] font-normal text-slate-400">kg</span>`;
-            if (elRir) elRir.textContent = weekInfo.rirText || '-';
+            if (elPct) elPct.textContent = `${pct}%`;
+            if (elCount) elCount.textContent = `${completedSets}/${totalSets} séries`;
+            if (elBar) elBar.style.width = `${pct}%`;
+            if (elTonnage) elTonnage.innerHTML = `${tonnage.toLocaleString('pt-BR')} <span class="text-[10px] font-normal text-slate-400">kg</span>`;
         }
 
-        /* ATUALIZAÇÃO DE PROPRIEDADES DO EXERCÍCIO */
-        function updateExerciseProp(exIdx, prop, value) {
-            if (prop === 'rest' || prop === 'targetReps') {
-                const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
-                if (ex) ex[prop] = value;
-            } else {
-                workoutData.weeks.forEach(week => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
-                        week.days[currentDayIdx].exercises[exIdx][prop] = value;
-                    }
-                });
-            }
-            saveWorkoutData();
-            renderApp();
-        }
-
-        /* ALTERAÇÃO DE SÉRIES INDIVIDUAL POR SEMANA */
-        function changeSetsCount(exIdx, delta) {
+        function updateTodayHistoryRecord() {
+            const d = new Date();
+            const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             const currentWeek = workoutData.weeks[currentWeekIdx];
-            if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises[exIdx]) {
-                const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-                ex.sets = Math.max(1, (ex.sets || 3) + delta);
-            }
-            saveWorkoutData();
-            renderApp();
-        }
+            const currentDay = currentWeek.days[currentDayIdx];
 
-        function addNewExercise() {
-            const currentWeek = workoutData.weeks[currentWeekIdx];
-            let defaultRestTime = "60s";
-
-            if (currentWeek && currentWeek.paletteIdx !== undefined) {
-                const presetKeys = Object.keys(WEEK_PRESETS);
-                const matchedPreset = presetKeys.find(k => WEEK_PRESETS[k].paletteIdx === currentWeek.paletteIdx);
-                if (matchedPreset) defaultRestTime = WEEK_PRESETS[matchedPreset].defaultRest;
-            }
-
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx]) {
-                    week.days[currentDayIdx].exercises.push({
-                        name: "Novo Exercício",
-                        sets: 3,
-                        targetReps: "8-12",
-                        rest: defaultRestTime,
-                        notes: "Dica de execução...",
-                        logs: []
-                    });
-                }
-            });
-            saveWorkoutData();
-            renderApp();
-            showToast("Exercício adicionado em todas as semanas!", "fa-circle-plus", "text-emerald-400");
-        }
-
-        function deleteExercise(exIdx) {
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
-                    week.days[currentDayIdx].exercises.splice(exIdx, 1);
-                }
-            });
-            saveWorkoutData();
-            renderApp();
-            showToast("Exercício removido de todas as semanas", "fa-trash-can", "text-amber-400");
+            if (!workoutData.history) workoutData.history = {};
+            workoutData.history[dateKey] = {
+                dateKey: dateKey,
+                dateFormatted: d.toLocaleDateString('pt-BR'),
+                weekTitle: currentWeek.title,
+                dayName: currentDay.name,
+                exercises: JSON.parse(JSON.stringify(currentDay.exercises || [])),
+                notes: currentDay.notes || ''
+            };
         }
 
         function saveSessionNotes() {
-            const notes = document.getElementById('session-notes').value;
-            workoutData.weeks[currentWeekIdx].days[currentDayIdx].notes = notes;
+            workoutData.weeks[currentWeekIdx].days[currentDayIdx].notes = document.getElementById('session-notes').value;
             saveWorkoutData();
         }
 
-        /* HISTÓRICO DE TREINOS E CALENDÁRIO */
-        function openHistoryModal() {
-            renderHistoryCalendar();
-            renderHistoryRecentList();
-            openModal('modal-history');
-        }
-
-        function changeHistoryMonth(delta) {
-            calendarMonth += delta;
-            if (calendarMonth < 0) {
-                calendarMonth = 11;
-                calendarYear--;
-            } else if (calendarMonth > 11) {
-                calendarMonth = 0;
-                calendarYear++;
-            }
-            renderHistoryCalendar();
-        }
-
-        function renderHistoryCalendar() {
-            const monthYearEl = document.getElementById('calendar-month-year');
-            const gridContainer = document.getElementById('calendar-grid-container');
-            if (!gridContainer || !monthYearEl) return;
-
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            monthYearEl.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
-
-            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
-            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-
-            let html = `
-                <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-500 mb-1">
-                    <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center">
-            `;
-
-            for (let i = 0; i < firstDay; i++) {
-                html += `<div class="p-2"></div>`;
-            }
-
-            const history = workoutData.history || {};
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dayStr = String(d).padStart(2, '0');
-                const monthStr = String(calendarMonth + 1).padStart(2, '0');
-                const dateKey = `${calendarYear}-${monthStr}-${dayStr}`;
-
-                const record = history[dateKey];
-
-                if (record) {
-                    const isMissed = Boolean(record.missed);
-                    html += `
-                        <button onclick="viewHistoryDetail('${dateKey}')" class="p-1.5 rounded-xl ${isMissed ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'} font-extrabold text-xs hover:scale-105 transition flex flex-col items-center justify-center gap-0.5 shadow-sm">
-                            <span>${d}</span>
-                            <i class="fa-solid ${isMissed ? 'fa-user-xmark' : 'fa-circle-check'} text-[8px]"></i>
-                        </button>
-                    `;
-                } else {
-                    html += `
-                        <div class="p-2 rounded-xl bg-slate-950/40 text-slate-600 text-xs font-semibold">
-                            ${d}
-                        </div>
-                    `;
-                }
-            }
-
-            html += `</div>`;
-            gridContainer.innerHTML = html;
-        }
-
-        function renderHistoryRecentList() {
-            const listEl = document.getElementById('history-recent-list');
-            if (!listEl) return;
-            listEl.innerHTML = '';
-
-            const history = workoutData.history || {};
-            const keys = Object.keys(history).sort().reverse();
-
-            if (keys.length === 0) {
-                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino registrado ainda.</div>`;
-                return;
-            }
-
-            keys.forEach(dateKey => {
-                const item = history[dateKey];
-                const card = document.createElement('div');
-                const isMissed = Boolean(item.missed);
-
-                card.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer hover:border-blue-500/50 transition";
-                card.onclick = () => viewHistoryDetail(dateKey);
-
-                card.innerHTML = `
-                    <div>
-                        <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
-                            <span>${escapeHtml(item.dayName || item.dayShortName || 'Treino')}</span>
-                            ${isMissed ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 font-bold border border-red-500/30">Falta</span>' : ''}
-                        </div>
-                        <div class="text-[10px] text-slate-400">${escapeHtml(item.weekTitle || '')}</div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-bold ${isMissed ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'} px-2 py-0.5 rounded-md border">${item.dateFormatted}</span>
-                        <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
-                    </div>
-                `;
-                listEl.appendChild(card);
-            });
-        }
-
-        function viewHistoryDetail(dateKey) {
-            const history = workoutData.history || {};
-            const item = history[dateKey];
-            if (!item) return;
-
-            const isMissed = Boolean(item.missed);
-            const badgeEl = document.getElementById('detail-date-badge');
-            badgeEl.textContent = item.dateFormatted;
-            badgeEl.className = isMissed ? "px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold" : "px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold";
-
-            document.getElementById('detail-day-title').textContent = item.dayName || 'Treino Realizado';
-            document.getElementById('detail-week-title').textContent = item.weekTitle || '';
-
-            const exContainer = document.getElementById('detail-exercises-container');
-            exContainer.innerHTML = '';
-
-            if (isMissed) {
-                exContainer.innerHTML = `
-                    <div class="bg-slate-950 border border-red-900/40 p-3 rounded-xl text-center text-xs text-red-400 font-bold">
-                        <i class="fa-solid fa-user-xmark text-lg mb-1 block"></i>
-                        Treino registrado como Falta (sem volume de cargas/repetições).
-                    </div>
-                `;
-            } else {
-                const exercises = item.exercises || [];
-                exercises.forEach(ex => {
-                    const exCard = document.createElement('div');
-                    exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
-
-                    let setsHtml = '';
-                    if (ex.logs && ex.logs.length > 0) {
-                        ex.logs.forEach((log, sIdx) => {
-                            if (log && log.done) {
-                                setsHtml += `
-                                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-900 last:border-0">
-                                        <span class="font-bold text-slate-500">Série #${sIdx + 1}</span>
-                                        <span class="font-extrabold text-emerald-400">${log.load || 0} kg × ${log.reps || 0} reps</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
-
-                    if (!setsHtml) {
-                        setsHtml = `<div class="text-[11px] text-slate-500 italic">Sem séries concluídas registradas.</div>`;
-                    }
-
-                    exCard.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-extrabold text-white">${escapeHtml(ex.name)}</h4>
-                            <span class="text-[10px] font-bold text-blue-400">${ex.sets || 3} séries</span>
-                        </div>
-                        <div class="space-y-0.5 pt-1">
-                            ${setsHtml}
-                        </div>
-                    `;
-                    exContainer.appendChild(exCard);
-                });
-            }
-
-            const notesEl = document.getElementById('detail-notes-container');
-            if (item.notes && item.notes.trim() !== '') {
-                notesEl.innerHTML = `<span class="font-bold text-slate-400 block mb-1">Anotações da sessão:</span>${escapeHtml(item.notes)}`;
-                notesEl.classList.remove('hidden');
-            } else {
-                notesEl.classList.add('hidden');
-            }
-
-            openModal('modal-history-detail');
-        }
-
-        function exportData() {
-            const jsonStr = JSON.stringify(workoutData, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `TreinadorHunter_Backup_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast("Backup exportado!", "fa-circle-check", "text-emerald-400");
-        }
-
-        function triggerImport() {
-            document.getElementById('file-import').click();
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data) {
-                        workoutData = data;
-                        normalizeWorkoutData(workoutData);
-                        saveWorkoutData();
-                        processDateAndAutoMissedDays();
-                        renderHeader();
-                        renderApp();
-                        showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
-                    } else {
-                        showToast("Arquivo JSON inválido!", "fa-circle-xmark", "text-red-400");
-                    }
-                } catch(err) {
-                    showToast("Erro ao importar dados!", "fa-circle-xmark", "text-red-400");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function confirmReset() {
-            const passInput = document.getElementById('input-reset-pass');
-            const errorMsg = document.getElementById('reset-pass-error-msg');
-            if (passInput) passInput.value = '';
-            if (errorMsg) errorMsg.classList.add('hidden');
-            openModal('modal-reset');
-        }
-
-        async function executeReset() {
-            const inputPass = document.getElementById('input-reset-pass').value;
-            const errorMsg = document.getElementById('reset-pass-error-msg');
-
-            if (!inputPass) {
-                errorMsg.textContent = "Digite a senha do Treinador!";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-
-            showToast("Verificando senha...", "fa-key", "text-amber-400");
-
-            try {
-                const res = await fetch(`${API_URL}?action=verifyPass&pass=${encodeURIComponent(inputPass)}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                const result = await res.json();
-
-                if (result && result.valid) {
-                    localStorage.removeItem(`WORKOUT_${currentStudent}`);
-                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-                    normalizeWorkoutData(workoutData);
-                    closeModal('modal-reset');
-                    processDateAndAutoMissedDays();
-                    renderHeader();
-                    renderApp();
-                    showToast("Dados resetados para padrão!", "fa-rotate-left", "text-amber-400");
-                } else {
-                    errorMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Senha incorreta!';
-                    errorMsg.classList.remove('hidden');
-                    if (navigator.vibrate) navigator.vibrate([80, 50, 80]);
-                }
-            } catch (e) {
-                showToast("Erro ao validar senha no servidor", "fa-triangle-exclamation", "text-red-400");
-            }
-        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function showToast(msg, iconClass = "fa-circle-check", iconColor = "text-emerald-400") {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            const toastIcon = document.getElementById('toast-icon');
-
-            toastMsg.textContent = msg;
-            toastIcon.className = `fa-solid ${iconClass} ${iconColor}`;
-
+            document.getElementById('toast-msg').textContent = msg;
+            document.getElementById('toast-icon').className = `fa-solid ${iconClass} ${iconColor}`;
             toast.classList.remove('translate-y-24', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
-
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-24', 'opacity-0');
             }, 2500);
         }
 
-        function getTargetRepsNum(targetRepsStr) {
-            if (!targetRepsStr) return 10;
-            const match = String(targetRepsStr).match(/\d+/);
-            return match ? parseFloat(match[0]) : 10;
-        }
-
-        function parseNum(val) {
-            if (val === null || val === undefined || val === '') return '';
-            const clean = String(val).replace(',', '.').trim();
-            const num = parseFloat(clean);
-            return isNaN(num) ? '' : num;
-        }
-
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         }
     </script>
 </body>
