@@ -31,21 +31,16 @@
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
 
-    <!-- Tela de Bloqueio de Segurança: Treino / Planilha Não Cadastrada -->
-    <div id="unauthorized-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-2xl shadow-lg animate-pulse">
+    <!-- Tela de Bloqueio de Segurança: Treino Não Cadastrado -->
+    <div id="unauthorized-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 hidden">
+        <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-2xl shadow-lg">
             <i class="fa-solid fa-lock"></i>
         </div>
         <div class="space-y-1.5 max-w-sm">
             <h2 class="text-lg font-extrabold text-white tracking-tight">Treino Não Cadastrado</h2>
             <p id="unauthorized-msg" class="text-xs text-slate-400 leading-relaxed">
-                Verificando credenciais de acesso à planilha...
+                Nenhum treino vinculado a este link. Verifique com seu treinador.
             </p>
-        </div>
-        <div class="pt-2">
-            <span class="text-[11px] text-slate-500 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg inline-block">
-                diario-de-treino/?aluno=seu_id
-            </span>
         </div>
     </div>
 
@@ -102,14 +97,10 @@
 
     <!-- Main Content Area -->
     <main class="px-3 py-4 space-y-4 flex-1">
-        
-        <!-- Strategy & Progress Banner Card / Week Admin Config -->
         <div id="week-banner-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden"></div>
 
-        <!-- Day Title Bar & Admin Controls -->
         <div class="flex flex-col gap-2 pt-1">
             <div id="day-title-container" class="w-full"></div>
-
             <div class="flex justify-end">
                 <button id="btn-add-exercise" onclick="addNewExercise()" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus text-xs"></i> Exercício
@@ -117,10 +108,8 @@
             </div>
         </div>
 
-        <!-- Exercises List Container -->
         <div id="exercises-list" class="space-y-4"></div>
 
-        <!-- Session Notes (PSE) & Missed Workout Action -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
             <div>
                 <label class="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2 block">
@@ -128,19 +117,15 @@
                 </label>
                 <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dores, pumps ou ajustes..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
             </div>
-
-            <!-- Botão Faltar Treino -->
             <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80"></div>
         </div>
 
-        <!-- Botão Treinos Anteriores (Histórico) -->
         <div class="pt-1">
             <button onclick="openHistoryModal()" class="w-full py-3.5 px-4 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 hover:text-blue-300 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition">
                 <i class="fa-solid fa-clock-rotate-left text-sm"></i>
                 <span>Treinos Anteriores (Histórico)</span>
             </button>
         </div>
-
     </main>
 
     <!-- Modal Ciclo Concluído -->
@@ -176,21 +161,14 @@
                 </button>
             </div>
 
-            <!-- Navegação do Mês no Calendário -->
             <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
+                <button onclick="changeHistoryMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-left"></i></button>
                 <div id="calendar-month-year" class="text-xs font-extrabold text-white capitalize"></div>
-                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
+                <button onclick="changeHistoryMonth(1)" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
 
-            <!-- Grid do Mini Calendário -->
             <div id="calendar-grid-container" class="space-y-1"></div>
 
-            <!-- Lista de Históricos Recentes -->
             <div class="pt-2 border-t border-slate-800 space-y-2">
                 <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
                     <i class="fa-solid fa-list-check text-emerald-400 mr-1"></i> Registros Recentes
@@ -198,9 +176,7 @@
                 <div id="history-recent-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar"></div>
             </div>
 
-            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Fechar
-            </button>
+            <button onclick="closeModal('modal-history')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
         </div>
     </div>
 
@@ -208,26 +184,17 @@
     <div id="modal-history-detail" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto sm:hidden"></div>
-
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div>
                     <span id="detail-date-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold"></span>
                     <h3 id="detail-day-title" class="text-sm font-extrabold text-white mt-1"></h3>
                 </div>
-                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+                <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
             <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
-
             <div id="detail-exercises-container" class="space-y-3"></div>
-
             <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
-
-            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Voltar
-            </button>
+            <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Voltar</button>
         </div>
     </div>
 
@@ -235,36 +202,28 @@
     <div id="modal-menu" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-3">
             <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2 sm:hidden"></div>
-            
             <h3 class="text-base font-extrabold text-white flex items-center gap-2 pb-2 border-b border-slate-800">
                 <i class="fa-solid fa-sliders text-blue-400"></i> Opções da Planilha
             </h3>
-
             <div class="space-y-2 pt-1">
                 <button onclick="exportData(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-download text-blue-400"></i> Exportar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="triggerImport(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-upload text-emerald-400"></i> Importar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="window.print(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir ou Gerar PDF</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-
                 <button onclick="confirmReset(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-bold flex items-center justify-between transition border border-red-800/40">
-                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para os Padrões</span>
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-rotate-left"></i> Resetar para Padrão</span>
                     <i class="fa-solid fa-chevron-right text-red-500/60 text-xs"></i>
                 </button>
             </div>
-
-            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">
-                Fechar
-            </button>
+            <button onclick="closeModal('modal-menu')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Fechar</button>
         </div>
     </div>
 
@@ -330,7 +289,6 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzvEkGzOf1KSYVAxHLiui5cfTLEeDV26fgKoeTzpBBDLyiVzzQuqNNsTjwHf-1Z4Lr1-w/exec";
         const API_SECRET_TOKEN = "HunterTreinador2026@Seguro"; 
 
-        // TRAVA DE SEGURANÇA: Captura estrita da URL (Sem fallback automático)
         const urlParams = new URLSearchParams(window.location.search);
         const alunoParam = urlParams.get('aluno');
         const currentStudent = alunoParam ? alunoParam.toLowerCase().trim() : null;
@@ -408,7 +366,7 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             if (!currentStudent) {
-                showUnauthorizedScreen("Nenhum aluno informado na URL. Solicite seu link correto de acesso com o treinador.");
+                showUnauthorizedScreen();
                 return;
             }
             updateAdminUI();
@@ -422,10 +380,8 @@
             }
         });
 
-        function showUnauthorizedScreen(msg) {
+        function showUnauthorizedScreen() {
             const screen = document.getElementById('unauthorized-screen');
-            const text = document.getElementById('unauthorized-msg');
-            if (text && msg) text.textContent = msg;
             if (screen) screen.classList.remove('hidden');
         }
 
@@ -465,9 +421,7 @@
                 const data = await response.json();
 
                 if (data && data.error) {
-                    showUnauthorizedScreen(data.error === "Aluno não encontrado." 
-                        ? "Planilha não cadastrada pelo Treinador para este aluno." 
-                        : data.error);
+                    showUnauthorizedScreen();
                     setSyncStatus("error", "Não Autorizado");
                     return;
                 }
@@ -481,12 +435,12 @@
                     renderApp();
                     setSyncStatus("success", "Nuvem OK");
                 } else {
-                    showUnauthorizedScreen("Aba de treino vazia ou não configurada na planilha.");
+                    showUnauthorizedScreen();
                     setSyncStatus("error", "Planilha Vazia");
                 }
             } catch (e) {
                 console.error("Erro ao puxar dados da planilha:", e);
-                showUnauthorizedScreen("Erro ao sincronizar com a planilha do Google Sheets.");
+                showUnauthorizedScreen();
                 setSyncStatus("error", "Offline");
             }
         }
