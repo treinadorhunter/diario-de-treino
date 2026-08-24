@@ -433,13 +433,14 @@
             ]
         };
 
-        /* ESTADO */
+        /* ESTADO DO APP */
         let currentWeekIdx = 0;
         let currentDayIdx = 0;
         let workoutData = {};
         let isAdminMode = false;
         let saveTimeout = null;
         let pendingMesocycleToggle = null;
+        let isDataLoaded = false; // TRAVA DE SEGURANÇA: impede salvar antes de carregar da nuvem
 
         let restTimer = {
             exIdx: null,
@@ -450,17 +451,16 @@
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
 
-        /* INICIALIZAÇÃO */
+        /* INICIALIZAÇÃO BLINDADA */
         window.addEventListener('DOMContentLoaded', async () => {
             loadFromLocalStorageFirst();
-            processDateAndAutoMissedDays();
             renderHeader();
             renderApp();
             await fetchFromSheetsAndUpdate();
         });
 
         window.addEventListener('beforeunload', () => {
-            if (saveTimeout) {
+            if (saveTimeout && isDataLoaded) {
                 clearTimeout(saveTimeout);
                 sendDataToSheetsDirect(workoutData);
             }
@@ -481,14 +481,20 @@
         }
 
         async function fetchFromSheetsAndUpdate() {
-            if (!API_URL) return;
+            if (!API_URL) {
+                isDataLoaded = true;
+                processDateAndAutoMissedDays();
+                return;
+            }
             try {
+                showToast("Carregando treino...", "fa-cloud-arrow-down", "text-blue-400");
                 const currentMonth = getTodayMonthKey();
                 const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
                 const data = await response.json();
 
                 if (data && data.error === "Aluno não encontrado.") {
                     showToast("Aluno não cadastrado na planilha!", "fa-triangle-exclamation", "text-amber-400");
+                    isDataLoaded = true;
                     return;
                 }
 
@@ -496,13 +502,15 @@
                     workoutData = data;
                     normalizeWorkoutData(workoutData);
                     localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
-                    processDateAndAutoMissedDays();
-                    renderHeader();
-                    renderApp();
-                    showToast("Sincronizado com a planilha!", "fa-circle-check", "text-emerald-400");
+                    showToast("Treino sincronizado!", "fa-circle-check", "text-emerald-400");
                 }
             } catch (e) {
                 console.error("Erro ao puxar dados da planilha:", e);
+            } finally {
+                isDataLoaded = true;
+                processDateAndAutoMissedDays();
+                renderHeader();
+                renderApp();
             }
         }
 
@@ -513,15 +521,47 @@
             if (data.weekOffset === undefined) data.weekOffset = 0;
             if (!data.history) data.history = {};
 
-            if (data.weeks) {
-                data.weeks.forEach((w) => {
-                    if (w.days && Array.isArray(w.days)) {
-                        w.days.forEach(d => {
-                            if (d.missed === undefined) d.missed = false;
+            if (!data.weeks) {
+                data.weeks = [];
+                const oldKeys = ['W1', 'W2', 'W3', 'W4'];
+                oldKeys.forEach((k, idx) => {
+                    if (data[k]) {
+                        data.weeks.push({
+                            id: k,
+                            shortTitle: data[k].shortTitle || `Semana ${idx + 1}`,
+                            targetReps: data[k].targetReps || "8-12 RM",
+                            title: data[k].title || `Semana ${idx + 1}`,
+                            desc: data[k].desc || "",
+                            rirText: data[k].rirText || "RIR 1",
+                            paletteIdx: idx % WEEK_PALETTES.length,
+                            days: data[k].days || []
                         });
+                        delete data[k];
                     }
                 });
             }
+
+            data.weeks.forEach((w) => {
+                if (w.days && !Array.isArray(w.days)) {
+                    const daysArr = [];
+                    const defaultLabels = { SEG: 'Seg • Upper', TER: 'Ter • Lower', QUA: 'Qua • Push', QUI: 'Qui • Pull', SEX: 'Sex • Legs' };
+                    Object.keys(w.days).forEach(dKey => {
+                        daysArr.push({
+                            id: dKey,
+                            shortName: defaultLabels[dKey] || dKey,
+                            name: w.days[dKey].name || dKey,
+                            notes: w.days[dKey].notes || '',
+                            missed: Boolean(w.days[dKey].missed),
+                            exercises: w.days[dKey].exercises || []
+                        });
+                    });
+                    w.days = daysArr;
+                } else if (w.days && Array.isArray(w.days)) {
+                    w.days.forEach(d => {
+                        if (d.missed === undefined) d.missed = false;
+                    });
+                }
+            });
         }
 
         /* IDENTIFICAÇÃO PRECISA DO DIA DA SEMANA */
@@ -593,13 +633,12 @@
             }
         }
 
-        /* VERIFICAÇÃO EXATA DE DIA COMPLETO (EXIGE 100% DAS SÉRIES FEITAS) */
+        /* VERIFICAÇÃO EXATA DE DIA COMPLETO */
         function isDayCompleted(weekIdx, dayIdx) {
             const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
             if (!week || !week.days || !week.days[dayIdx]) return false;
             const day = week.days[dayIdx];
 
-            // 1. Se o dia foi marcado como falta, contabiliza como concluído
             if (day.missed) return true;
 
             const dayInfo = getCalculatedDateForDay(dayIdx);
@@ -609,7 +648,6 @@
             const exercises = day.exercises || [];
             if (exercises.length === 0) return false;
 
-            // 2. Validação rigorosa: TODAS as séries de TODOS os exercícios precisam estar com done = true
             const allSetsDone = exercises.every(ex => {
                 const count = ex.sets || 3;
                 const logs = ex.logs || [];
@@ -622,7 +660,6 @@
 
             if (allSetsDone) return true;
 
-            // 3. Verificação para dias passados salvos no histórico
             if (histRecord && !histRecord.missed && Array.isArray(histRecord.exercises) && histRecord.exercises.length > 0) {
                 return histRecord.exercises.every(ex => {
                     const count = ex.sets || 3;
@@ -640,6 +677,8 @@
 
         /* AUTO-PREENCHIMENTO COM TIMESTAMP DE CALENDÁRIO */
         function processDateAndAutoMissedDays() {
+            if (!isDataLoaded) return;
+
             const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
             if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
 
@@ -723,7 +762,7 @@
             }
         }
 
-        /* GERENCIAMENTO DE CICLO (MODO TREINADOR) */
+        /* GERENCIAMENTO DE CICLO */
         function resetCycleCount() {
             workoutData.cycleCount = 1;
             workoutData.weekOffset = 0;
@@ -779,7 +818,7 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.4);
             } catch (e) {
-                console.log("Audio feedback error:", e);
+                console.log("Audio error:", e);
             }
         }
 
@@ -1007,14 +1046,14 @@
             }
         }
 
-        function sendDataToSheetsDirect(dataToSync) {
-            if (!API_URL) return;
+        async function sendDataToSheetsDirect(dataToSync) {
+            if (!API_URL || !dataToSync || !isDataLoaded) return;
             try {
                 const currentMonth = getTodayMonthKey();
-                fetch(API_URL, {
+                await fetch(API_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         aluno: currentStudent,
                         mes: currentMonth,
@@ -1028,6 +1067,8 @@
         }
 
         function saveWorkoutData() {
+            if (!isDataLoaded) return; // Trava: não salva enquanto não carrega da nuvem
+
             updateTodayHistoryRecord();
             localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
@@ -1362,7 +1403,7 @@
             return true;
         }
 
-        /* TOGGLE DE SÉRIE COM DISPARO APENAS NO ÚLTIMO CHECK REAL */
+        /* TOGGLE DE SÉRIE */
         function toggleSetDone(exIdx, setIdx) {
             const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
             if (!ex.logs) ex.logs = [];
