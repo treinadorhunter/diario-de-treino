@@ -47,7 +47,6 @@
                         <span class="text-slate-600 text-[10px]">•</span>
                         <div id="header-cycle-badge" class="text-[10px] text-amber-400 font-bold flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"></div>
                         <span class="text-slate-600 text-[10px]">•</span>
-                        <!-- Data Dinâmica Sincronizada com o Dia Selecionado -->
                         <div id="header-date-container" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
                             <i class="fa-regular fa-calendar text-[9px]"></i>
                             <span id="current-date-text">--/--/----</span>
@@ -259,7 +258,7 @@
             </div>
             <div>
                 <h3 class="text-base font-extrabold text-white mb-1">Resetar Planilha?</h3>
-                <p class="text-xs text-slate-400">Todas as cargas, repetições salvas e observações serão apagadas permanentemente.</p>
+                <p class="text-xs text-slate-400">Todas as cargas, repetições salvas e observações serão apagadas permanentemente na planilha.</p>
             </div>
             <div>
                 <label class="text-[10px] text-slate-400 font-bold block mb-1">Digite a senha do Treinador:</label>
@@ -379,7 +378,7 @@
             }
         };
 
-        /* PROGRAMA PADRÃO DO TREINO */
+        /* PROGRAMA PADRÃO NATIVO */
         const DEFAULT_PROGRAM = {
             studentName: "Teibe Figueiredo",
             cycleCount: 1,
@@ -447,8 +446,8 @@
         /* ESTADO DO APP */
         let currentWeekIdx = 0;
         let currentDayIdx = 0;
-        let workoutData = {};
-        let isAdminMode = false;
+        let workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+        let isAdminMode = sessionStorage.getItem('hunter_admin_mode') === 'true';
         let saveTimeout = null;
         let pendingMesocycleToggle = null;
         let restTimer = { intervalId: null, exIdx: null, remaining: 0, total: 0 };
@@ -457,10 +456,9 @@
         let calendarMonth = new Date().getMonth();
         let historyMonthCache = {};
 
-        /* INICIALIZAÇÃO */
+        /* INICIALIZAÇÃO 100% PLANILHA */
         window.addEventListener('DOMContentLoaded', async () => {
-            loadFromLocalStorageFirst();
-            processDateAndAutoMissedDays();
+            updateAdminUI();
             renderHeader();
             renderApp();
             await fetchFromSheetsAndUpdate();
@@ -495,20 +493,6 @@
             }
         }
 
-        function loadFromLocalStorageFirst() {
-            const saved = localStorage.getItem(`WORKOUT_${currentStudent}`);
-            if (saved) {
-                try {
-                    workoutData = JSON.parse(saved);
-                } catch(e) {
-                    workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-                }
-            } else {
-                workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
-            }
-            normalizeWorkoutData(workoutData);
-        }
-
         async function fetchFromSheetsAndUpdate() {
             if (!API_URL) return;
             setSyncStatus("loading", "Sincronizando...");
@@ -520,7 +504,6 @@
                 if (data && !data.error && !data.empty) {
                     workoutData = data;
                     normalizeWorkoutData(workoutData);
-                    localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
                     processDateAndAutoMissedDays();
                     renderHeader();
                     renderApp();
@@ -531,11 +514,10 @@
                 }
             } catch (e) {
                 console.error("Erro ao puxar dados da planilha:", e);
-                setSyncStatus("error", "Offline (Local)");
+                setSyncStatus("error", "Offline");
             }
         }
 
-        /* IDENTIFICADOR PRECISO DO DIA DA SEMANA */
         function getDayWeekdayOffset(day, fallbackIdx) {
             if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
             const sName = (day.shortName || '').toLowerCase();
@@ -554,7 +536,6 @@
             return fallbackIdx !== undefined ? fallbackIdx : 0;
         }
 
-        /* CÁLCULO DE DATA DINÂMICA BASEADA NO DIA REAL */
         function getCalculatedDateForDay(dayIdx) {
             const now = new Date();
             const currentDayOfWeek = now.getDay();
@@ -608,7 +589,6 @@
                 validWeekDateKeys.push(dayInfo.dateKey);
             });
 
-            // Limpeza automática de faltas fantasmas
             Object.keys(workoutData.history).forEach(dateKey => {
                 const item = workoutData.history[dateKey];
                 if (item && item.missed) {
@@ -619,7 +599,6 @@
                 }
             });
 
-            // Processa faltas retroativas reais
             currentWeek.days.forEach((day, dIdx) => {
                 const dayOffset = getDayWeekdayOffset(day, dIdx);
                 const dayInfo = getCalculatedDateForDay(dIdx);
@@ -728,7 +707,6 @@
             });
         }
 
-        /* TIMER REGRESSIVO DE DESCANSO */
         function parseRestTimeSeconds(str) {
             if (!str) return 60;
             const clean = String(str).toLowerCase().trim();
@@ -831,7 +809,6 @@
             }
         }
 
-        /* GERENCIAMENTO DE CICLO (MODO TREINADOR) */
         function resetCycleCount() {
             workoutData.cycleCount = 1;
             saveWorkoutData();
@@ -847,7 +824,6 @@
             renderHeader();
         }
 
-        /* CÁLCULO DE MÉTRICAS PREVISTAS */
         function calculateDayPlannedMetrics(day) {
             let totalSets = 0;
             let totalRepsEst = 0;
@@ -956,7 +932,6 @@
 
         function saveWorkoutData() {
             updateTodayHistoryRecord();
-            localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(workoutData));
             updateMetrics();
 
             setSyncStatus("loading", "Salvando...");
@@ -1012,12 +987,12 @@
             renderHeader();
         }
 
-        /* ADMIN MODE TOGGLE */
         function toggleAdminMode() {
             if (isAdminMode) {
                 isAdminMode = false;
+                sessionStorage.removeItem('hunter_admin_mode');
                 updateAdminUI();
-                showToast("Modo Aluno (Apenas Registro de Treino)", "fa-circle-check", "text-blue-400");
+                showToast("Modo Aluno ativado", "fa-circle-check", "text-blue-400");
             } else {
                 document.getElementById('input-admin-pass').value = '';
                 document.getElementById('pass-error-msg').classList.add('hidden');
@@ -1040,6 +1015,7 @@
 
                 if (result && result.valid) {
                     isAdminMode = true;
+                    sessionStorage.setItem('hunter_admin_mode', 'true');
                     closeModal('modal-password');
                     updateAdminUI();
                     showToast("Modo Edição Ativado!", "fa-lock-open", "text-amber-400");
@@ -1059,14 +1035,12 @@
             const addBtn = document.getElementById('btn-add-exercise');
 
             if (isAdminMode) {
-                btn.classList.remove('bg-slate-800', 'border-slate-700/80');
-                btn.classList.add('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
+                btn.className = "px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition";
                 icon.className = 'fa-solid fa-lock-open text-amber-400';
                 text.textContent = 'Modo Edição';
                 if (addBtn) addBtn.classList.remove('hidden');
             } else {
-                btn.classList.remove('bg-amber-500/20', 'border-amber-500/40', 'text-amber-300');
-                btn.classList.add('bg-slate-800', 'border-slate-700/80');
+                btn.className = "px-2.5 py-1.5 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition";
                 icon.className = 'fa-solid fa-lock text-slate-400';
                 text.textContent = 'Modo Aluno';
                 if (addBtn) addBtn.classList.add('hidden');
@@ -1076,7 +1050,6 @@
             renderApp();
         }
 
-        /* GERENCIAMENTO DE SEMANAS */
         function renderWeekTabs() {
             const container = document.getElementById('week-tabs-container');
             if (!container) return;
@@ -1194,7 +1167,6 @@
             }
         }
 
-        /* GERENCIAMENTO DE DIAS */
         function renderDayTabs() {
             const container = document.getElementById('day-tabs-container');
             if (!container) return;
@@ -1256,7 +1228,7 @@
                     notes: '',
                     missed: false,
                     exercises: [
-                        { name: "Novo Exercício", sets: 3, targetReps: "8-12", rest: "60s", notes: "Observação de execução...", logs: [] }
+                        { name: "Novo Exercício", sets: 4, targetReps: "8-12", rest: "60s", notes: "Observação de execução...", logs: [] }
                     ]
                 });
             });
@@ -1685,7 +1657,6 @@
             updateRestTimerBadgeUI();
         }
 
-        /* CARGA RECOMENDADA PELO TREINADOR */
         function updateRecommendedLoad(exIdx, val) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx]) {
@@ -1908,7 +1879,6 @@
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
 
-        /* ATUALIZAÇÃO DE PROPRIEDADES DO EXERCÍCIO */
         function updateExerciseProp(exIdx, prop, value) {
             if (prop === 'rest' || prop === 'targetReps') {
                 const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
@@ -1924,7 +1894,6 @@
             renderApp();
         }
 
-        /* ALTERAÇÃO DE SÉRIES INDIVIDUAL POR SEMANA */
         function changeSetsCount(exIdx, delta) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises[exIdx]) {
@@ -1979,7 +1948,6 @@
             saveWorkoutData();
         }
 
-        /* HISTÓRICO DE TREINOS E CALENDÁRIO COM BUSCA DINÂMICA DE MESES */
         function openHistoryModal() {
             renderHistoryCalendar();
             renderHistoryRecentList();
@@ -2255,9 +2223,9 @@
                 const result = await res.json();
 
                 if (result && result.valid) {
-                    localStorage.removeItem(`WORKOUT_${currentStudent}`);
                     workoutData = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
                     normalizeWorkoutData(workoutData);
+                    saveWorkoutData();
                     closeModal('modal-reset');
                     processDateAndAutoMissedDays();
                     renderHeader();
