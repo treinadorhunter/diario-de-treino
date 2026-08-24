@@ -484,6 +484,14 @@
         let saveTimeout = null;
         let pendingMesocycleToggle = null;
 
+        /* ESTADO DO TIMER DE DESCANSO */
+        let restTimer = {
+            exIdx: null,
+            remaining: 0,
+            total: 0,
+            intervalId: null
+        };
+
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
 
@@ -570,14 +578,41 @@
             return fallbackIdx !== undefined ? fallbackIdx : 0;
         }
 
-        /* AUTO-PREENCHIMENTO DE FALTAS RETROATIVAS E LIMPEZA DE DATAS INVÁLIDAS */
+        /* VERIFICAÇÃO BLINDADA: CONSULTA A SESSÃO E O HISTÓRICO DA PLANILHA */
+        function isDayCompleted(weekIdx, dayIdx) {
+            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
+            if (!week || !week.days || !week.days[dayIdx]) return false;
+            const day = week.days[dayIdx];
+            if (day.missed) return true;
+
+            const dayInfo = getCalculatedDateForDay(dayIdx);
+            const histRecord = (workoutData.history && workoutData.history[dayInfo.dateKey]) ? workoutData.history[dayInfo.dateKey] : null;
+            
+            if (histRecord && !histRecord.missed) {
+                const hasDoneLogs = (histRecord.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+                if (hasDoneLogs) return true;
+            }
+
+            const exercises = day.exercises || [];
+            if (exercises.length === 0) return false;
+            return exercises.every(ex => {
+                const count = ex.sets || 3;
+                const logs = ex.logs || [];
+                for (let s = 0; s < count; s++) {
+                    if (!logs[s] || !logs[s].done) return false;
+                }
+                return true;
+            });
+        }
+
+        /* AUTO-PREENCHIMENTO COM TRAVA DE SEGURANÇA */
         function processDateAndAutoMissedDays() {
             const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
             if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
 
             const now = new Date();
             const currentDayOfWeek = now.getDay();
-            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sab=5, Dom=6
+            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
 
             let bestMatchingIdx = -1;
             let firstFutureOrTodayIdx = -1;
@@ -585,18 +620,15 @@
 
             if (!workoutData.history) workoutData.history = {};
 
-            // 1. Mapeia as datas oficiais dos dias de treino programados desta semana
             const validWeekDateKeys = [];
             currentWeek.days.forEach((day, dIdx) => {
                 const dayInfo = getCalculatedDateForDay(dIdx);
                 validWeekDateKeys.push(dayInfo.dateKey);
             });
 
-            // 2. LIMPEZA AUTOMÁTICA: Remove registros fantasmas de falta gerados em dias sem treino (ex: terça 18/08)
             Object.keys(workoutData.history).forEach(dateKey => {
                 const item = workoutData.history[dateKey];
                 if (item && item.missed) {
-                    // Se for falta em dia sem treino ou falta gravada no dia de hoje/futuro, remove do histórico
                     if (!validWeekDateKeys.includes(dateKey) || dateKey >= getCalculatedDateForDay(currentWeek.days.length - 1).dateKey) {
                         delete workoutData.history[dateKey];
                         hasChanged = true;
@@ -604,12 +636,19 @@
                 }
             });
 
-            // 3. Processa apenas faltas reais de dias de treino que já ficaram para trás
             currentWeek.days.forEach((day, dIdx) => {
                 const dayOffset = getDayWeekdayOffset(day, dIdx);
                 const dayInfo = getCalculatedDateForDay(dIdx);
+                const histRecord = workoutData.history[dayInfo.dateKey];
 
-                if (dayOffset < todayWeekdayOffset) {
+                const isRealWorkoutSaved = histRecord && !histRecord.missed && (histRecord.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+
+                if (isRealWorkoutSaved) {
+                    if (day.missed) {
+                        day.missed = false;
+                        hasChanged = true;
+                    }
+                } else if (dayOffset < todayWeekdayOffset) {
                     const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
                     if (!isCompleted && !day.missed) {
                         day.missed = true;
@@ -638,9 +677,11 @@
                         };
                     }
                 } else {
-                    // Se for dia de hoje ou futuro, remove qualquer marcação indevida de falta
-                    if (day.missed) {
+                    if (day.missed && (!day.notes || day.notes === "Faltou Treino" || day.notes.includes("[FALTOU TREINO]"))) {
                         day.missed = false;
+                        if (histRecord && histRecord.missed) {
+                            delete workoutData.history[dayInfo.dateKey];
+                        }
                         hasChanged = true;
                     }
 
@@ -652,7 +693,6 @@
                 }
             });
 
-            // 4. Seleciona o dia de hoje ou o próximo dia útil de treino
             if (bestMatchingIdx !== -1) {
                 currentDayIdx = bestMatchingIdx;
             } else if (firstFutureOrTodayIdx !== -1) {
@@ -756,23 +796,6 @@
             });
         }
 
-        function isDayCompleted(weekIdx, dayIdx) {
-            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
-            if (!week || !week.days || !week.days[dayIdx]) return false;
-            const day = week.days[dayIdx];
-            if (day.missed) return true;
-            const exercises = day.exercises || [];
-            if (exercises.length === 0) return false;
-            return exercises.every(ex => {
-                const count = ex.sets || 3;
-                const logs = ex.logs || [];
-                for (let s = 0; s < count; s++) {
-                    if (!logs[s] || !logs[s].done) return false;
-                }
-                return true;
-            });
-        }
-
         /* FUNÇÕES DE GERENCIAMENTO DE CICLO (MODO TREINADOR) */
         function resetCycleCount() {
             workoutData.cycleCount = 1;
@@ -787,6 +810,109 @@
             workoutData.cycleCount = isNaN(num) || num < 1 ? 1 : num;
             saveWorkoutData();
             renderHeader();
+        }
+
+        /* CRONÔMETRO REGRESSIVO DE DESCANSO (TIMER) */
+        function parseRestTimeSeconds(str) {
+            if (!str) return 60;
+            const clean = String(str).toLowerCase().trim();
+            if (clean.includes('min') || clean.includes('m')) {
+                const match = clean.match(/(\d+(?:[.,]\d+)?)/);
+                if (match) return Math.round(parseFloat(match[1].replace(',', '.')) * 60);
+            }
+            const matchSec = clean.match(/(\d+)/);
+            if (matchSec) return parseInt(matchSec[1], 10);
+            return 60;
+        }
+
+        function formatTimerSeconds(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function playBeepSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch (e) {
+                console.log("Audio feedback error:", e);
+            }
+        }
+
+        function startRestTimer(exIdx) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+            if (!ex) return;
+
+            const seconds = parseRestTimeSeconds(ex.rest || "60s");
+
+            if (restTimer.intervalId) {
+                clearInterval(restTimer.intervalId);
+            }
+
+            restTimer.exIdx = exIdx;
+            restTimer.remaining = seconds;
+            restTimer.total = seconds;
+
+            updateRestTimerBadgeUI();
+
+            restTimer.intervalId = setInterval(() => {
+                restTimer.remaining--;
+                if (restTimer.remaining <= 0) {
+                    clearInterval(restTimer.intervalId);
+                    restTimer.intervalId = null;
+                    updateRestTimerBadgeUI();
+                    playBeepSound();
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200, 100, 300]);
+                    }
+                    showToast("Descanso finalizado! Próxima série!", "fa-bell", "text-emerald-400");
+                } else {
+                    updateRestTimerBadgeUI();
+                }
+            }, 1000);
+        }
+
+        function cancelRestTimer() {
+            if (restTimer.intervalId) {
+                clearInterval(restTimer.intervalId);
+                restTimer.intervalId = null;
+            }
+            restTimer.exIdx = null;
+            restTimer.remaining = 0;
+            updateRestTimerBadgeUI();
+            showToast("Cronômetro cancelado", "fa-stop", "text-slate-400");
+        }
+
+        function updateRestTimerBadgeUI() {
+            const allBadges = document.querySelectorAll('[id^="rest-timer-container-"]');
+            allBadges.forEach(el => { el.innerHTML = ''; });
+
+            if (restTimer.exIdx !== null && restTimer.remaining > 0) {
+                const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
+                if (targetContainer) {
+                    targetContainer.innerHTML = `
+                        <button onclick="cancelRestTimer()" title="Clique para cancelar o descanso" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm active:scale-95 transition animate-pulse">
+                            <i class="fa-solid fa-stopwatch text-[9px] text-emerald-300"></i>
+                            <span>Descanso: ${formatTimerSeconds(restTimer.remaining)}</span>
+                            <i class="fa-solid fa-xmark text-[8px] text-slate-400 hover:text-white ml-0.5"></i>
+                        </button>
+                    `;
+                }
+            }
         }
 
         /* CÁLCULO DE MÉTRICAS PREVISTAS (MODO TREINADOR) */
@@ -1614,18 +1740,23 @@
                                 </div>
                             ` : `
                                 <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
-                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                        ${setsCount} séries × ${ex.targetReps} reps
-                                    </span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                        <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
-                                    </span>
-                                    ${hasRecLoad ? `
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                            <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
+                                <div class="flex items-center justify-between gap-2 mt-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                            ${setsCount} séries × ${ex.targetReps} reps
                                         </span>
-                                    ` : ''}
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                            <i class="fa-solid fa-stopwatch text-[9px]"></i> ${ex.rest}
+                                        </span>
+                                        ${hasRecLoad ? `
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                                <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
+                                            </span>
+                                        ` : ''}
+                                    </div>
+
+                                    <!-- TIMER DE DESCANSO REGRESSIVO -->
+                                    <div id="rest-timer-container-${exIdx}" class="shrink-0"></div>
                                 </div>
                             `}
                         </div>
@@ -1674,6 +1805,8 @@
 
                 listEl.appendChild(exCard);
             });
+
+            updateRestTimerBadgeUI();
         }
 
         /* CARGA RECOMENDADA PELO TREINADOR */
@@ -1772,6 +1905,11 @@
 
             if (navigator.vibrate) {
                 navigator.vibrate(40);
+            }
+
+            // INICIA O CRONÔMETRO AUTOMATICAMENTE AO CONCLUIR UMA SÉRIE
+            if (!wasDone) {
+                startRestTimer(exIdx);
             }
 
             if (!wasDone && isMesocycleFullyDone()) {
