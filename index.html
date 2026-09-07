@@ -386,6 +386,14 @@
             return `${year}-${month}`;
         }
 
+        function getTodayDateKey() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         function setSyncStatus(status, text) {
             const icon = document.getElementById('sync-icon');
             const textEl = document.getElementById('sync-text');
@@ -419,7 +427,7 @@
                     hideUnauthorizedScreen();
                     workoutData = data;
                     normalizeWorkoutData(workoutData);
-                    processDateAndAutoMissedDays();
+                    smartAutoNavigate();
                     renderHeader();
                     renderApp();
                     setSyncStatus("success", "Nuvem OK");
@@ -428,140 +436,35 @@
                     setSyncStatus("error", "Planilha Vazia");
                 }
             } catch (e) {
-                console.error("Erro ao puxar dados da planilha:", e);
+                console.error("Erro na sincronização:", e);
                 showUnauthorizedScreen();
                 setSyncStatus("error", "Offline");
             }
         }
 
-        function getDayWeekdayOffset(day, fallbackIdx) {
-            if (!day) return fallbackIdx !== undefined ? fallbackIdx : 0;
-            const sName = (day.shortName || '').toLowerCase();
-            const name = (day.name || '').toLowerCase();
-            const id = (day.id || '').toLowerCase();
-            const text = `${sName} ${name} ${id}`;
-
-            if (/\b(seg|segunda)\b/i.test(text)) return 0;
-            if (/\b(ter|terça|terca)\b/i.test(text)) return 1;
-            if (/\b(qua|quarta)\b/i.test(text)) return 2;
-            if (/\b(qui|quinta)\b/i.test(text)) return 3;
-            if (/\b(sex|sexta)\b/i.test(text)) return 4;
-            if (/\b(sáb|sab|sábado|sabado)\b/i.test(text)) return 5;
-            if (/\b(dom|domingo)\b/i.test(text)) return 6;
-
-            return fallbackIdx !== undefined ? fallbackIdx : 0;
+        /* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
+        function smartAutoNavigate() {
+            const weeks = workoutData.weeks || [];
+            for (let w = 0; w < weeks.length; w++) {
+                const days = weeks[w].days || [];
+                for (let d = 0; d < days.length; d++) {
+                    if (!isDayCompleted(w, d)) {
+                        currentWeekIdx = w;
+                        currentDayIdx = d;
+                        return;
+                    }
+                }
+            }
+            currentWeekIdx = 0;
+            currentDayIdx = 0;
         }
 
-        function getCalculatedDateForDay(dayIdx) {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-            
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + mondayOffset);
-            
-            const currentWeek = (workoutData.weeks && workoutData.weeks[currentWeekIdx]) ? workoutData.weeks[currentWeekIdx] : null;
-            const dayObj = (currentWeek && currentWeek.days) ? currentWeek.days[dayIdx] : null;
-            const weekdayOffset = getDayWeekdayOffset(dayObj, dayIdx);
-            
-            const targetDate = new Date(monday);
-            targetDate.setDate(monday.getDate() + weekdayOffset);
-            
-            const year = targetDate.getFullYear();
-            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-            const day = String(targetDate.getDate()).padStart(2, '0');
-            
-            return {
-                dateKey: `${year}-${month}-${day}`,
-                dateFormatted: targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-            };
-        }
-
+        /* DATA ATUAL APENAS INFORMATIVA NO CABEÇALHO */
         function renderHeaderDate() {
             const container = document.getElementById('current-date-text');
             if (container) {
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                container.textContent = dayInfo.dateFormatted;
-            }
-        }
-
-        function processDateAndAutoMissedDays() {
-            const currentWeek = workoutData.weeks ? workoutData.weeks[currentWeekIdx] : null;
-            if (!currentWeek || !currentWeek.days || currentWeek.days.length === 0) return;
-
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const todayWeekdayOffset = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-
-            let bestMatchingIdx = -1;
-            let firstFutureOrTodayIdx = -1;
-            let hasChanged = false;
-
-            if (!workoutData.history) workoutData.history = {};
-
-            const validWeekDateKeys = [];
-            currentWeek.days.forEach((day, dIdx) => {
-                const dayInfo = getCalculatedDateForDay(dIdx);
-                validWeekDateKeys.push(dayInfo.dateKey);
-            });
-
-            Object.keys(workoutData.history).forEach(dateKey => {
-                const item = workoutData.history[dateKey];
-                if (item && item.missed) {
-                    if (!validWeekDateKeys.includes(dateKey) || dateKey >= getCalculatedDateForDay(currentWeek.days.length - 1).dateKey) {
-                        delete workoutData.history[dateKey];
-                        hasChanged = true;
-                    }
-                }
-            });
-
-            currentWeek.days.forEach((day, dIdx) => {
-                const dayOffset = getDayWeekdayOffset(day, dIdx);
-                const dayInfo = getCalculatedDateForDay(dIdx);
-
-                if (dayOffset < todayWeekdayOffset) {
-                    const isCompleted = isDayCompleted(currentWeekIdx, dIdx);
-                    if (!isCompleted && !day.missed) {
-                        day.missed = true;
-                        hasChanged = true;
-
-                        const cycleNum = workoutData.cycleCount || 1;
-                        workoutData.history[dayInfo.dateKey] = {
-                            dateKey: dayInfo.dateKey,
-                            dateFormatted: dayInfo.dateFormatted,
-                            weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
-                            dayName: day.name || '',
-                            dayShortName: day.shortName || '',
-                            notes: day.notes ? `[FALTOU TREINO] ${day.notes}` : "Faltou Treino",
-                            missed: true,
-                            exercises: JSON.parse(JSON.stringify(day.exercises || [])),
-                            updatedAt: new Date().toISOString()
-                        };
-                    }
-                } else {
-                    if (day.missed) {
-                        day.missed = false;
-                        hasChanged = true;
-                    }
-
-                    if (dayOffset === todayWeekdayOffset && bestMatchingIdx === -1) {
-                        bestMatchingIdx = dIdx;
-                    } else if (dayOffset > todayWeekdayOffset && firstFutureOrTodayIdx === -1) {
-                        firstFutureOrTodayIdx = dIdx;
-                    }
-                }
-            });
-
-            if (bestMatchingIdx !== -1) {
-                currentDayIdx = bestMatchingIdx;
-            } else if (firstFutureOrTodayIdx !== -1) {
-                currentDayIdx = firstFutureOrTodayIdx;
-            } else {
-                currentDayIdx = Math.max(0, currentWeek.days.length - 1);
-            }
-
-            if (hasChanged) {
-                saveWorkoutData();
+                const now = new Date();
+                container.textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
             }
         }
 
@@ -758,9 +661,24 @@
             return { totalSets, totalRepsEst, totalExercises };
         }
 
+        /* BOTÃO FALTAR TREINO COM BLOQUEIO AUTOMÁTICO PARA TREINO PARCIAL */
         function renderMissedButton(dayInfo) {
             const container = document.getElementById('missed-workout-container');
             if (!container) return;
+
+            const hasAnyDoneSet = (dayInfo.exercises || []).some(ex => 
+                (ex.logs || []).some(l => l && l.done)
+            );
+
+            if (hasAnyDoneSet) {
+                container.innerHTML = `
+                    <div class="w-full py-2.5 px-3 bg-emerald-950/20 border border-emerald-800/30 text-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check text-xs"></i>
+                        <span>Treino em andamento / parcial registrado com sucesso</span>
+                    </div>
+                `;
+                return;
+            }
 
             if (dayInfo.missed) {
                 container.innerHTML = `
@@ -784,10 +702,19 @@
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
             
             const currentDay = currentWeek.days[currentDayIdx];
+            const hasAnyDoneSet = (currentDay.exercises || []).some(ex => 
+                (ex.logs || []).some(l => l && l.done)
+            );
+
+            if (hasAnyDoneSet) {
+                showToast("Treino já possui séries concluídas!", "fa-circle-exclamation", "text-amber-400");
+                return;
+            }
+
             currentDay.missed = !currentDay.missed;
 
             if (currentDay.missed) {
-                showToast("Falta registrada (treino concluído sem volume)!", "fa-user-xmark", "text-amber-400");
+                showToast("Falta registrada para esta sessão!", "fa-user-xmark", "text-amber-400");
                 if (isMesocycleFullyDone()) {
                     saveWorkoutData();
                     renderApp();
@@ -802,6 +729,7 @@
             renderApp();
         }
 
+        /* GRAVAÇÃO COM DATA REAL DA EXECUÇÃO */
         function updateTodayHistoryRecord() {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -817,35 +745,34 @@
                 }
             });
 
+            if (!workoutData.history) workoutData.history = {};
+            const now = new Date();
+            const dateKey = getTodayDateKey();
+            const dateFormatted = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
             if (currentDay.missed) {
-                if (!workoutData.history) workoutData.history = {};
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                
-                workoutData.history[dayInfo.dateKey] = {
-                    dateKey: dayInfo.dateKey,
-                    dateFormatted: dayInfo.dateFormatted,
+                workoutData.history[dateKey] = {
+                    dateKey: dateKey,
+                    dateFormatted: dateFormatted,
                     weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
                     dayName: currentDay.name || '',
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes ? `[FALTOU TREINO] ${currentDay.notes}` : "Faltou Treino",
                     missed: true,
                     exercises: JSON.parse(JSON.stringify(exercises)),
-                    updatedAt: new Date().toISOString()
+                    updatedAt: now.toISOString()
                 };
             } else if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
-                if (!workoutData.history) workoutData.history = {};
-                const dayInfo = getCalculatedDateForDay(currentDayIdx);
-                
-                workoutData.history[dayInfo.dateKey] = {
-                    dateKey: dayInfo.dateKey,
-                    dateFormatted: dayInfo.dateFormatted,
+                workoutData.history[dateKey] = {
+                    dateKey: dateKey,
+                    dateFormatted: dateFormatted,
                     weekTitle: `${currentWeek.title || ''} (Ciclo ${cycleNum})`,
                     dayName: currentDay.name || '',
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes || '',
                     missed: false,
                     exercises: JSON.parse(JSON.stringify(exercises)),
-                    updatedAt: new Date().toISOString()
+                    updatedAt: now.toISOString()
                 };
             }
         }
@@ -1428,7 +1355,7 @@
                     <div class="text-center py-8 text-red-400/80 border border-dashed border-red-900/50 rounded-2xl bg-red-950/20 space-y-1">
                         <i class="fa-solid fa-user-xmark text-2xl mb-1 block"></i>
                         <p class="text-xs font-bold">Falta registrada para esta sessão.</p>
-                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão da semana com 0 kg e 0 reps.</p>
+                        <p class="text-[11px] text-slate-500">O treino contabiliza para a conclusão com 0 kg e 0 reps.</p>
                     </div>
                 `;
                 return;
@@ -1703,6 +1630,7 @@
                 saveWorkoutData();
                 renderExercises();
                 renderDayTabs();
+                renderMissedButton(workoutData.weeks[currentWeekIdx].days[currentDayIdx]);
                 openModal('modal-mesocycle');
                 return;
             }
@@ -1710,6 +1638,7 @@
             saveWorkoutData();
             renderExercises();
             renderDayTabs();
+            renderMissedButton(workoutData.weeks[currentWeekIdx].days[currentDayIdx]);
         }
 
         function cancelMesocycleComplete() {
@@ -1727,6 +1656,7 @@
             closeModal('modal-mesocycle');
         }
 
+        /* REINÍCIO DO CICLO COMPLETO APÓS A ÚLTIMA SÉRIE DA ÚLTIMA SEMANA */
         function confirmMesocycleReset() {
             updateTodayHistoryRecord();
             workoutData.cycleCount = (workoutData.cycleCount || 1) + 1;
@@ -2116,7 +2046,7 @@
                         workoutData = data;
                         normalizeWorkoutData(workoutData);
                         saveWorkoutData();
-                        processDateAndAutoMissedDays();
+                        smartAutoNavigate();
                         renderHeader();
                         renderApp();
                         showToast("Dados importados com sucesso!", "fa-circle-check", "text-emerald-400");
@@ -2179,7 +2109,7 @@
                     }
                     saveWorkoutData();
                     closeModal('modal-reset');
-                    processDateAndAutoMissedDays();
+                    smartAutoNavigate();
                     renderHeader();
                     renderApp();
                     showToast("Dados do ciclo resetados!", "fa-rotate-left", "text-amber-400");
