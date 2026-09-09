@@ -798,10 +798,20 @@
             }
 
             currentDay.missed = !currentDay.missed;
+            const cycleNum = workoutData.cycleCount || 1;
 
             if (currentDay.missed) {
                 showToast("Falta registrada para esta sessão!", "fa-user-xmark", "text-amber-400");
             } else {
+                // Ao desmarcar a falta, apaga qualquer registro de falta dessa sessão no histórico
+                if (workoutData.history) {
+                    Object.keys(workoutData.history).forEach(k => {
+                        const hItem = workoutData.history[k];
+                        if (hItem && hItem.dayName === currentDay.name && hItem.weekTitle === `${currentWeek.title || ''} (Ciclo ${cycleNum})`) {
+                            delete workoutData.history[k];
+                        }
+                    });
+                }
                 showToast("Falta desmarcada!", "fa-rotate-left", "text-blue-400");
             }
 
@@ -809,7 +819,7 @@
             renderApp();
         }
 
-        /* GRAVAÇÃO COM DATA REAL DA EXECUÇÃO */
+        /* GRAVAÇÃO COM DATA REAL DA EXECUÇÃO E LIMPEZA DE FALTAS ÓRFÃS */
         function updateTodayHistoryRecord() {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -843,6 +853,14 @@
                     updatedAt: now.toISOString()
                 };
             } else if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
+                // Se o treino foi executado hoje, limpa registros antigos de falta da mesma sessão neste ciclo
+                Object.keys(workoutData.history).forEach(k => {
+                    const hItem = workoutData.history[k];
+                    if (hItem && hItem.missed && hItem.dayName === currentDay.name && hItem.weekTitle === `${currentWeek.title || ''} (Ciclo ${cycleNum})`) {
+                        delete workoutData.history[k];
+                    }
+                });
+
                 workoutData.history[dateKey] = {
                     dateKey: dateKey,
                     dateFormatted: dateFormatted,
@@ -1703,7 +1721,6 @@
                 currentVal = field === 'reps' ? defaultReps : 0;
             }
 
-            // Se for exercício com tempo em segundos ('s'), o incremento é de 5s em 5s
             let step = (field === 'reps' && ex.unit === 's') ? 5 : 1;
             let newVal = Math.max(0, currentVal + (delta * step));
             newVal = Math.round(newVal * 10) / 10;
