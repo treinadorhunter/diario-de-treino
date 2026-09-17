@@ -283,7 +283,8 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const alunoParam = urlParams.get('aluno');
-        const currentStudent = alunoParam ? alunoParam.toLowerCase().trim() : null;
+        // Converte espaços para underline e aplica fallback automático
+        const currentStudent = (alunoParam || 'teibe_h_27084347').toLowerCase().trim().replace(/\s+/g, '_');
 
         const WEEK_PALETTES = [
             { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
