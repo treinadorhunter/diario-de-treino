@@ -465,35 +465,42 @@
         }
     } catch (e) {
         console.error("Erro na sincronização:", e);
-        showUnauthorizedScreen();
+       showUnauthorizedScreen();
         setSyncStatus("error", "Offline");
     }
 }
 
-        /* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
-        function smartAutoNavigate() {
-            const weeks = workoutData.weeks || [];
-            for (let w = 0; w < weeks.length; w++) {
-                const days = weeks[w].days || [];
-                for (let d = 0; d < days.length; d++) {
-                    if (!isDayResolved(w, d)) {
-                        currentWeekIdx = w;
-                        currentDayIdx = d;
-                        return;
-                    }
-                }
-            }
-            if (weeks.length > 0) {
-                currentWeekIdx = weeks.length - 1;
-                const lastDays = weeks[currentWeekIdx].days || [];
-                currentDayIdx = Math.max(0, lastDays.length - 1);
-            } else {
-                currentWeekIdx = 0;
-                currentDayIdx = 0;
+/* VERIFICA SE O DIA FOI RESOLVIDO (TREINO FEITO OU FALTA) */
+function isDayResolved(weekIdx, dayIdx) {
+    const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
+    if (!week || !week.days || !week.days[dayIdx]) return false;
+    const day = week.days[dayIdx];
+    if (day.missed) return true;
+    return (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+}
+
+/* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
+function smartAutoNavigate() {
+    const weeks = workoutData.weeks || [];
+    for (let w = 0; w < weeks.length; w++) {
+        const days = weeks[w].days || [];
+        for (let d = 0; d < days.length; d++) {
+            if (!isDayResolved(w, d)) {
+                currentWeekIdx = w;
+                currentDayIdx = d;
+                return;
             }
         }
-
-        /* DATA ATUAL APENAS INFORMATIVA NO CABEÇALHO */
+    }
+    if (weeks.length > 0) {
+        currentWeekIdx = weeks.length - 1;
+        const lastDays = weeks[currentWeekIdx].days || [];
+        currentDayIdx = Math.max(0, lastDays.length - 1);
+    } else {
+        currentWeekIdx = 0;
+        currentDayIdx = 0;
+    }
+}
         function renderHeaderDate() {
             const container = document.getElementById('current-date-text');
             if (container) {
