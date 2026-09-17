@@ -2290,8 +2290,10 @@ function smartAutoNavigate() {
 
         function getTargetRepsNum(targetRepsStr) {
             if (!targetRepsStr) return 10;
-            const match = String(targetRepsStr).match(/\d+/);
-            return match ? parseFloat(match[0]) : 10;
+            const matches = String(targetRepsStr).match(/\d+/g);
+            if (!matches || matches.length === 0) return 10;
+            const nums = matches.map(Number);
+            return Math.max(...nums);
         }
 
         function parseNum(val) {
