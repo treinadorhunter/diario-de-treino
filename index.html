@@ -389,92 +389,107 @@
         }
 
         function getTodayDateKey() {
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function setSyncStatus(status, text) {
+    const icon = document.getElementById('sync-icon');
+    const textEl = document.getElementById('sync-text');
+    if (!icon || !textEl) return;
+
+    textEl.textContent = text;
+    if (status === "loading") {
+        icon.className = "fa-solid fa-arrows-rotate fa-spin text-[9px] text-amber-400";
+    } else if (status === "success") {
+        icon.className = "fa-solid fa-cloud-check text-[9px] text-emerald-400";
+    } else {
+        icon.className = "fa-solid fa-cloud-slash text-[9px] text-red-400";
+    }
+}
+
+async function fetchFromSheetsAndUpdate() {
+    if (!API_URL) return;
+    setSyncStatus("loading", "Sincronizando...");
+    try {
+        const currentMonth = getTodayMonthKey();
+        const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+        const data = await response.json();
+
+        // 1. Aba não existe na planilha ou retorno de erro genérico -> bloqueia
+        if (data && data.error) {
+            setSyncStatus("error", "Não Encontrado");
+            const msg = data.error === "Aluno não encontrado." 
+                ? "Aluno não cadastrado na planilha!" 
+                : data.error;
+            showToast(msg, "fa-triangle-exclamation", "text-amber-400");
+            return;
         }
 
-        function setSyncStatus(status, text) {
-            const icon = document.getElementById('sync-icon');
-            const textEl = document.getElementById('sync-text');
-            if (!icon || !textEl) return;
+        // 2. Aba existe e já tem treino salvo -> carrega normalmente
+        if (data && !data.empty) {
+            workoutData = data;
+            normalizeWorkoutData(workoutData);
+            localStorage.setItem(`WORKOUT_${currentStudent}`, JSON.stringify(data));
+            processDateAndAutoMissedDays();
+            renderHeader();
+            renderApp();
+            setSyncStatus("success", "Nuvem OK");
+            showToast("Sincronizado com a planilha!", "fa-circle-check", "text-emerald-400");
+        } 
+        // 3. Aba criada no Sheets com A1 vazia -> envia a ficha inicial e preenche a A1 sozinho
+        else if (data && data.empty) {
+            const cleanName = currentStudent.split('_')[0];
+            workoutData.studentName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
 
-            textEl.textContent = text;
-            if (status === "loading") {
-                icon.className = "fa-solid fa-arrows-rotate fa-spin text-[9px] text-amber-400";
-            } else if (status === "success") {
-                icon.className = "fa-solid fa-cloud-check text-[9px] text-emerald-400";
-            } else {
-                icon.className = "fa-solid fa-cloud-slash text-[9px] text-red-400";
+            normalizeWorkoutData(workoutData);
+            renderHeader();
+            renderApp();
+
+            sendDataToSheetsDirect(workoutData);
+            setSyncStatus("success", "Criado na Nuvem");
+            showToast("Ficha inicial gerada na planilha!", "fa-circle-check", "text-emerald-400");
+        }
+    } catch (e) {
+        console.error("Erro ao puxar dados da planilha:", e);
+        setSyncStatus("error", "Offline");
+    }
+}
+
+/* VERIFICA SE O DIA FOI RESOLVIDO (PARCIAL OU FALTA) */
+function isDayResolved(weekIdx, dayIdx) {
+    const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
+    if (!week || !week.days || !week.days[dayIdx]) return false;
+    const day = week.days[dayIdx];
+    if (day.missed) return true;
+    return (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+}
+
+/* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
+function smartAutoNavigate() {
+    const weeks = workoutData.weeks || [];
+    for (let w = 0; w < weeks.length; w++) {
+        const days = weeks[w].days || [];
+        for (let d = 0; d < days.length; d++) {
+            if (!isDayResolved(w, d)) {
+                currentWeekIdx = w;
+                currentDayIdx = d;
+                return;
             }
         }
-
-        async function fetchFromSheetsAndUpdate() {
-            if (!API_URL || !currentStudent) return;
-            setSyncStatus("loading", "Sincronizando...");
-            try {
-                const currentMonth = getTodayMonthKey();
-                const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                const data = await response.json();
-
-                if (data && data.error) {
-                    showUnauthorizedScreen();
-                    setSyncStatus("error", "Não Autorizado");
-                    return;
-                }
-
-                if (data && !data.empty) {
-                    hideUnauthorizedScreen();
-                    workoutData = data;
-                    normalizeWorkoutData(workoutData);
-                    smartAutoNavigate();
-                    renderHeader();
-                    renderApp();
-                    setSyncStatus("success", "Nuvem OK");
-                } else {
-                    showUnauthorizedScreen();
-                    setSyncStatus("error", "Planilha Vazia");
-                }
-            } catch (e) {
-                console.error("Erro na sincronização:", e);
-                showUnauthorizedScreen();
-                setSyncStatus("error", "Offline");
-            }
-        }
-
-        /* VERIFICA SE O DIA FOI RESOLVIDO (PARCIAL OU FALTA) */
-        function isDayResolved(weekIdx, dayIdx) {
-            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
-            if (!week || !week.days || !week.days[dayIdx]) return false;
-            const day = week.days[dayIdx];
-            if (day.missed) return true;
-            return (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
-        }
-
-        /* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
-        function smartAutoNavigate() {
-            const weeks = workoutData.weeks || [];
-            for (let w = 0; w < weeks.length; w++) {
-                const days = weeks[w].days || [];
-                for (let d = 0; d < days.length; d++) {
-                    if (!isDayResolved(w, d)) {
-                        currentWeekIdx = w;
-                        currentDayIdx = d;
-                        return;
-                    }
-                }
-            }
-            if (weeks.length > 0) {
-                currentWeekIdx = weeks.length - 1;
-                const lastDays = weeks[currentWeekIdx].days || [];
-                currentDayIdx = Math.max(0, lastDays.length - 1);
-            } else {
-                currentWeekIdx = 0;
-                currentDayIdx = 0;
-            }
-        }
+    }
+    if (weeks.length > 0) {
+        currentWeekIdx = weeks.length - 1;
+        const lastDays = weeks[currentWeekIdx].days || [];
+        currentDayIdx = Math.max(0, lastDays.length - 1);
+    } else {
+        currentWeekIdx = 0;
+        currentDayIdx = 0;
+    }
+}
 
         /* DATA ATUAL APENAS INFORMATIVA NO CABEÇALHO */
         function renderHeaderDate() {
