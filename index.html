@@ -412,46 +412,63 @@
         }
 
         async function fetchFromSheetsAndUpdate() {
-            if (!API_URL || !currentStudent) return;
-            setSyncStatus("loading", "Sincronizando...");
-            try {
-                const currentMonth = getTodayMonthKey();
-                const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                const data = await response.json();
+    if (!API_URL || !currentStudent) return;
+    setSyncStatus("loading", "Sincronizando...");
+    try {
+        const currentMonth = getTodayMonthKey();
+        const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+        const data = await response.json();
 
-                if (data && data.error) {
-                    showUnauthorizedScreen();
-                    setSyncStatus("error", "Não Autorizado");
-                    return;
-                }
-
-                if (data && !data.empty) {
-                    hideUnauthorizedScreen();
-                    workoutData = data;
-                    normalizeWorkoutData(workoutData);
-                    smartAutoNavigate();
-                    renderHeader();
-                    renderApp();
-                    setSyncStatus("success", "Nuvem OK");
-                } else {
-                    showUnauthorizedScreen();
-                    setSyncStatus("error", "Planilha Vazia");
-                }
-            } catch (e) {
-                console.error("Erro na sincronização:", e);
-                showUnauthorizedScreen();
-                setSyncStatus("error", "Offline");
-            }
+        if (data && data.error) {
+            showUnauthorizedScreen();
+            setSyncStatus("error", "Não Autorizado");
+            return;
         }
 
-        /* VERIFICA SE O DIA FOI RESOLVIDO (PARCIAL OU FALTA) */
-        function isDayResolved(weekIdx, dayIdx) {
-            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
-            if (!week || !week.days || !week.days[dayIdx]) return false;
-            const day = week.days[dayIdx];
-            if (day.missed) return true;
-            return (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+        hideUnauthorizedScreen();
+
+        if (data && !data.empty) {
+            workoutData = data;
+            normalizeWorkoutData(workoutData);
+            smartAutoNavigate();
+            renderHeader();
+            renderApp();
+            setSyncStatus("success", "Nuvem OK");
+        } else {
+            // Nova aluna com aba em branco: cria estrutura inicial e salva na planilha
+            const cleanName = currentStudent.split('_')[0];
+            workoutData = {
+                studentName: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+                cycleCount: 1,
+                history: {},
+                weeks: [{
+                    id: "W1",
+                    shortTitle: "Semana 1",
+                    targetReps: "8-12 RM",
+                    title: "Semana 1",
+                    desc: "Treino Inicial",
+                    rirText: "RIR 1-2",
+                    paletteIdx: 2,
+                    days: [
+                        { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                        { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                        { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
+                    ]
+                }]
+            };
+            normalizeWorkoutData(workoutData);
+            renderHeader();
+            renderApp();
+            sendDataToSheetsDirect(workoutData);
+            setSyncStatus("success", "Criado na Nuvem");
+            showToast("Nova aluna detectada! Ficha pronta para edição.", "fa-circle-check", "text-emerald-400");
         }
+    } catch (e) {
+        console.error("Erro na sincronização:", e);
+        showUnauthorizedScreen();
+        setSyncStatus("error", "Offline");
+    }
+}
 
         /* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
         function smartAutoNavigate() {
