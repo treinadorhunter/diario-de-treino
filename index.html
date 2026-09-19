@@ -1796,7 +1796,7 @@
                             ${isAdminMode ? `
                                 <div class="flex items-center gap-2 mb-1.5">
                                     <input type="text" value="${escapeHtml(ex.name)}" 
-                                        onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
+                                        onchange="(${exIdx}, 'name', this.value)"
                                         class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
                                     ${isExHidden ? `
                                         <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
@@ -2100,9 +2100,31 @@
         }
 
         function updateExerciseProp(exIdx, prop, value) {
-            if (prop === 'rest' || prop === 'targetReps') {
+            if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
                 const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
                 if (ex) ex[prop] = value;
+            } else if (prop === 'name') {
+                // Separa o nome principal e o conteúdo entre parênteses digitado
+                const matchCurrent = value.match(/^(.*?)\s*(\([^)]*\))\s*$/);
+                const baseName = matchCurrent ? matchCurrent[1].trim() : value.trim();
+
+                workoutData.weeks.forEach((week, wIdx) => {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
+                        const targetEx = week.days[currentDayIdx].exercises[exIdx];
+                        
+                        if (wIdx === currentWeekIdx) {
+                            // Na semana atual, grava exatamente o que foi digitado
+                            targetEx.name = value;
+                        } else {
+                            // Nas outras semanas, verifica se ela já possui parênteses próprios
+                            const matchOther = targetEx.name.match(/^(.*?)\s*(\([^)]*\))\s*$/);
+                            const otherParens = matchOther ? matchOther[2] : '';
+                            
+                            // Aplica o novo nome base preservando apenas os parênteses daquela semana
+                            targetEx.name = otherParens ? `${baseName} ${otherParens}` : baseName;
+                        }
+                    }
+                });
             } else {
                 workoutData.weeks.forEach(week => {
                     if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
