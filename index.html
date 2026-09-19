@@ -116,6 +116,16 @@
                 </label>
                 <textarea id="session-notes" oninput="saveSessionNotes()" placeholder="Sua percepção de fadiga, dores, pumps ou ajustes..." class="w-full h-20 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
             </div>
+
+            <!-- Seção de Cardio -->
+            <div id="cardio-container" class="pt-2 border-t border-slate-800/80 space-y-2">
+                <div id="cardio-list" class="space-y-1.5"></div>
+                <button type="button" onclick="openCardioModal()" class="w-full py-2.5 px-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-emerald-400 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition active:scale-98 shadow-sm">
+                    <i class="fa-solid fa-person-running text-sm"></i>
+                    <span>Adicionar Cardio</span>
+                </button>
+            </div>
+
             <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80"></div>
         </div>
 
@@ -130,7 +140,61 @@
         </div>
     </main>
 
-    <!-- Modais -->
+    <!-- Modal Adicionar Cardio -->
+    <div id="modal-cardio" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-person-running text-emerald-400"></i> Registrar Cardio
+                </h3>
+                <button onclick="closeModal('modal-cardio')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tipo de Cardio:</label>
+                    <div class="grid grid-cols-3 gap-1.5 mb-2">
+                        <button type="button" onclick="selectCardioPreset('Corrida')" class="py-1.5 px-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-person-running text-emerald-400 text-[10px]"></i> Corrida
+                        </button>
+                        <button type="button" onclick="selectCardioPreset('Bicicleta')" class="py-1.5 px-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-bicycle text-blue-400 text-[10px]"></i> Bicicleta
+                        </button>
+                        <button type="button" onclick="selectCardioPreset('Escada')" class="py-1.5 px-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-stairs text-amber-400 text-[10px]"></i> Escada
+                        </button>
+                    </div>
+                    <input type="text" id="input-cardio-name" placeholder="Ou digite outro (ex: Caminhada Inclinada)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition">
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Intensidade:</label>
+                    <div class="grid grid-cols-3 gap-1.5" id="cardio-intensity-container">
+                        <button type="button" onclick="setCardioIntensity('Leve')" id="btn-intensity-leve" class="py-2 rounded-xl text-xs font-extrabold border border-slate-800 bg-slate-950 text-slate-400 transition">Leve</button>
+                        <button type="button" onclick="setCardioIntensity('Moderado')" id="btn-intensity-moderado" class="py-2 rounded-xl text-xs font-extrabold border border-amber-500/40 bg-amber-500/20 text-amber-300 transition">Moderado</button>
+                        <button type="button" onclick="setCardioIntensity('Vigoroso')" id="btn-intensity-vigoroso" class="py-2 rounded-xl text-xs font-extrabold border border-slate-800 bg-slate-950 text-slate-400 transition">Vigoroso</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Duração (Minutos):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="input-cardio-duration" inputmode="numeric" min="1" max="300" value="30" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-extrabold text-white text-center focus:outline-none focus:border-emerald-500 transition">
+                        <span class="text-xs font-bold text-slate-400">minutos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t border-slate-800/80">
+                <button type="button" onclick="closeModal('modal-cardio')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold active:scale-95 transition">Cancelar</button>
+                <button type="button" onclick="saveCardioEntry()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold active:scale-95 transition">Salvar Cardio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais do Sistema -->
     <div id="modal-mesocycle" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
@@ -187,6 +251,7 @@
                 <button onclick="closeModal('modal-history-detail')" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <p id="detail-week-title" class="text-xs text-amber-400 font-bold bg-slate-950 p-2 rounded-xl border border-slate-800"></p>
+            <div id="detail-cardios-container" class="space-y-2"></div>
             <div id="detail-exercises-container" class="space-y-3"></div>
             <div id="detail-notes-container" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
             <button onclick="closeModal('modal-history-detail')" class="w-full py-3 bg-slate-950 text-slate-400 rounded-xl text-xs font-bold mt-2">Voltar</button>
@@ -350,6 +415,7 @@
         let isAdminMode = sessionStorage.getItem('hunter_admin_mode') === 'true';
         let saveTimeout = null;
 
+        let selectedIntensity = "Moderado";
         let restTimer = { intervalId: null, exIdx: null, endTime: null, total: 0, notified: false };
         let screenWakeLock = null;
 
@@ -457,7 +523,7 @@
                     data = JSON.parse(text);
                 } catch (jsonErr) {
                     console.error("Resposta não é JSON:", text);
-                    throw new Error("Resposta inválida da planilha (verifique o Web App do Apps Script).");
+                    throw new Error("Resposta inválida da planilha.");
                 }
 
                 if (data && data.error) {
@@ -491,9 +557,9 @@
                             rirText: "RIR 1-2",
                             paletteIdx: 2,
                             days: [
-                                { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                                { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                                { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
+                                { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                                { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                                { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
                             ]
                         }]
                     };
@@ -516,7 +582,9 @@
             if (!week || !week.days || !week.days[dayIdx]) return false;
             const day = week.days[dayIdx];
             if (day.missed) return true;
-            return (day.exercises || []).some(ex => (!ex.hidden) && (ex.logs || []).some(l => l && l.done));
+            const hasExActivity = (day.exercises || []).some(ex => (!ex.hidden) && (ex.logs || []).some(l => l && l.done));
+            const hasCardio = (day.cardios && day.cardios.length > 0);
+            return hasExActivity || hasCardio;
         }
 
         function smartAutoNavigate() {
@@ -570,6 +638,7 @@
                                 name: w.days[dKey].name || dKey,
                                 notes: w.days[dKey].notes || '',
                                 missed: Boolean(w.days[dKey].missed),
+                                cardios: w.days[dKey].cardios || [],
                                 exercises: w.days[dKey].exercises || []
                             });
                         });
@@ -577,6 +646,7 @@
                     } else if (w.days && Array.isArray(w.days)) {
                         w.days.forEach(d => {
                             if (d.missed === undefined) d.missed = false;
+                            if (!d.cardios) d.cardios = [];
                             if (d.exercises) {
                                 d.exercises.forEach(ex => {
                                     if (ex.hidden === undefined) ex.hidden = false;
@@ -589,6 +659,120 @@
             }
         }
 
+        /* CARDIO FUNCTIONS */
+        function openCardioModal() {
+            document.getElementById('input-cardio-name').value = '';
+            document.getElementById('input-cardio-duration').value = 30;
+            setCardioIntensity('Moderado');
+            openModal('modal-cardio');
+        }
+
+        function selectCardioPreset(presetName) {
+            document.getElementById('input-cardio-name').value = presetName;
+        }
+
+        function setCardioIntensity(intensity) {
+            selectedIntensity = intensity;
+            const btnLeve = document.getElementById('btn-intensity-leve');
+            const btnMod = document.getElementById('btn-intensity-moderado');
+            const btnVig = document.getElementById('btn-intensity-vigoroso');
+
+            btnLeve.className = "py-2 rounded-xl text-xs font-extrabold border border-slate-800 bg-slate-950 text-slate-400 transition";
+            btnMod.className = "py-2 rounded-xl text-xs font-extrabold border border-slate-800 bg-slate-950 text-slate-400 transition";
+            btnVig.className = "py-2 rounded-xl text-xs font-extrabold border border-slate-800 bg-slate-950 text-slate-400 transition";
+
+            if (intensity === 'Leve') {
+                btnLeve.className = "py-2 rounded-xl text-xs font-extrabold border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 transition";
+            } else if (intensity === 'Moderado') {
+                btnMod.className = "py-2 rounded-xl text-xs font-extrabold border border-amber-500/40 bg-amber-500/20 text-amber-300 transition";
+            } else if (intensity === 'Vigoroso') {
+                btnVig.className = "py-2 rounded-xl text-xs font-extrabold border border-red-500/40 bg-red-500/20 text-red-300 transition";
+            }
+        }
+
+        function saveCardioEntry() {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const currentDay = currentWeek.days[currentDayIdx];
+
+            let name = document.getElementById('input-cardio-name').value.trim();
+            if (!name) name = "Cardio";
+
+            const duration = parseInt(document.getElementById('input-cardio-duration').value, 10) || 30;
+
+            if (!currentDay.cardios) currentDay.cardios = [];
+
+            currentDay.cardios.push({
+                id: `C_${Date.now()}`,
+                name: name,
+                intensity: selectedIntensity,
+                duration: duration
+            });
+
+            saveWorkoutData();
+            closeModal('modal-cardio');
+            renderCardios();
+            renderMissedButton(currentDay);
+            renderCompleteCycleButton();
+            showToast("Sessão de cardio adicionada!", "fa-person-running", "text-emerald-400");
+        }
+
+        function deleteCardio(cIdx) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const currentDay = currentWeek.days[currentDayIdx];
+
+            if (currentDay.cardios && currentDay.cardios[cIdx]) {
+                currentDay.cardios.splice(cIdx, 1);
+                saveWorkoutData();
+                renderCardios();
+                renderMissedButton(currentDay);
+                renderCompleteCycleButton();
+                showToast("Cardio removido!", "fa-trash-can", "text-amber-400");
+            }
+        }
+
+        function renderCardios() {
+            const container = document.getElementById('cardio-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const currentDay = currentWeek.days[currentDayIdx];
+
+            const cardios = currentDay.cardios || [];
+            if (cardios.length === 0) return;
+
+            cardios.forEach((c, cIdx) => {
+                let badgeClass = "bg-amber-500/15 text-amber-300 border-amber-500/30";
+                if (c.intensity === 'Leve') badgeClass = "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+                if (c.intensity === 'Vigoroso') badgeClass = "bg-red-500/15 text-red-300 border-red-500/30";
+
+                const card = document.createElement('div');
+                card.className = "flex items-center justify-between bg-slate-950/80 border border-slate-800/90 px-3 py-2 rounded-xl";
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-person-running"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
+                                <span>${escapeHtml(c.name)}</span>
+                                <span class="text-[9px] px-1.5 py-0.2 rounded-md font-bold border ${badgeClass}">${c.intensity}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-semibold">${c.duration} minutos de duração</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="deleteCardio(${cIdx})" title="Excluir este cardio" class="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-slate-900 rounded-lg transition active:scale-95">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* CRONÔMETRO */
         function parseRestTimeSeconds(str) {
             if (!str) return 60;
             const clean = String(str).toLowerCase().trim();
@@ -793,7 +977,8 @@
                     const day = days[d];
                     totalDays++;
                     const hasActivity = (day.exercises || []).some(ex => (!ex.hidden) && (ex.logs || []).some(l => l && l.done));
-                    if (hasActivity) {
+                    const hasCardio = (day.cardios && day.cardios.length > 0);
+                    if (hasActivity || hasCardio) {
                         executedDays++;
                         resolvedDays++;
                     } else if (day.missed) {
@@ -866,12 +1051,13 @@
             const hasAnyDoneSet = (dayInfo.exercises || []).some(ex => 
                 (!ex.hidden) && (ex.logs || []).some(l => l && l.done)
             );
+            const hasCardio = (dayInfo.cardios && dayInfo.cardios.length > 0);
 
-            if (hasAnyDoneSet) {
+            if (hasAnyDoneSet || hasCardio) {
                 container.innerHTML = `
                     <div class="w-full py-2.5 px-3 bg-emerald-950/20 border border-emerald-800/30 text-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
                         <i class="fa-solid fa-circle-check text-xs"></i>
-                        <span>Treino em andamento / parcial registrado</span>
+                        <span>Treino em andamento / atividade registrada</span>
                     </div>
                 `;
                 return;
@@ -902,9 +1088,10 @@
             const hasAnyDoneSet = (currentDay.exercises || []).some(ex => 
                 (!ex.hidden) && (ex.logs || []).some(l => l && l.done)
             );
+            const hasCardio = (currentDay.cardios && currentDay.cardios.length > 0);
 
-            if (hasAnyDoneSet) {
-                showToast("Treino já possui séries concluídas!", "fa-circle-exclamation", "text-amber-400");
+            if (hasAnyDoneSet || hasCardio) {
+                showToast("Treino já possui atividades registradas!", "fa-circle-exclamation", "text-amber-400");
                 return;
             }
 
@@ -935,9 +1122,10 @@
 
             const currentDay = currentWeek.days[currentDayIdx];
             const exercises = currentDay.exercises || [];
+            const cardios = currentDay.cardios || [];
             const cycleNum = workoutData.cycleCount || 1;
 
-            let hasActivity = false;
+            let hasActivity = (cardios.length > 0);
             exercises.forEach(ex => {
                 if (!ex.hidden && ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
                     hasActivity = true;
@@ -958,6 +1146,7 @@
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes ? `[FALTOU TREINO] ${currentDay.notes}` : "Faltou Treino",
                     missed: true,
+                    cardios: [],
                     exercises: JSON.parse(JSON.stringify(exercises.filter(ex => !ex.hidden))),
                     updatedAt: now.toISOString()
                 };
@@ -977,6 +1166,7 @@
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes || '',
                     missed: false,
+                    cardios: JSON.parse(JSON.stringify(cardios)),
                     exercises: JSON.parse(JSON.stringify(exercises.filter(ex => !ex.hidden))),
                     updatedAt: now.toISOString()
                 };
@@ -1237,6 +1427,7 @@
 
             clonedDays.forEach(day => {
                 day.exercises.forEach(ex => { ex.logs = []; });
+                day.cardios = [];
                 day.notes = "";
                 day.missed = false;
             });
@@ -1274,6 +1465,7 @@
                 clonedWeek.days.forEach(day => {
                     day.missed = false;
                     day.notes = "";
+                    day.cardios = [];
                     if (day.exercises) {
                         day.exercises.forEach(ex => {
                             ex.logs = [];
@@ -1389,6 +1581,7 @@
                     name: newName,
                     notes: '',
                     missed: false,
+                    cardios: [],
                     exercises: [
                         { name: "Novo Exercício", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "Observação de execução...", logs: [] }
                     ]
@@ -1694,12 +1887,12 @@
             notesInput.value = dayInfo.notes || "";
 
             renderMissedButton(dayInfo);
+            renderCardios();
             renderExercises();
             updateMetrics();
             renderCompleteCycleButton();
         }
 
-        // Separa o nome principal da observação entre parênteses ao final
         function splitExerciseName(rawName) {
             if (!rawName) return { base: '', parens: '' };
             const str = String(rawName).trim();
@@ -2027,6 +2220,7 @@
                         w.days.forEach(d => {
                             d.missed = false;
                             d.notes = "";
+                            d.cardios = [];
                             if (d.exercises) {
                                 d.exercises.forEach(ex => {
                                     ex.logs = [];
@@ -2111,7 +2305,6 @@
         }
 
         function updateExerciseProp(exIdx, prop, value) {
-            // Campos que afetam APENAS a semana atual selecionada
             if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
                 const currentWeek = workoutData.weeks[currentWeekIdx];
                 if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises) {
@@ -2119,7 +2312,6 @@
                     if (ex) ex[prop] = value;
                 }
             } else if (prop === 'name') {
-                // Nome com inteligência de parênteses
                 const safeVal = String(value || '').trim();
                 const parsedCurrent = splitExerciseName(safeVal);
                 const newBase = parsedCurrent.base;
@@ -2344,6 +2536,32 @@
             document.getElementById('detail-day-title').textContent = item.dayName || 'Treino Realizado';
             document.getElementById('detail-week-title').textContent = item.weekTitle || '';
 
+            // Renderiza Cardios salvos no Histórico
+            const cardioContainer = document.getElementById('detail-cardios-container');
+            if (cardioContainer) {
+                cardioContainer.innerHTML = '';
+                const cardios = item.cardios || [];
+                if (cardios.length > 0) {
+                    cardios.forEach(c => {
+                        let bClass = "bg-amber-500/15 text-amber-300 border-amber-500/30";
+                        if (c.intensity === 'Leve') bClass = "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+                        if (c.intensity === 'Vigoroso') bClass = "bg-red-500/15 text-red-300 border-red-500/30";
+
+                        const div = document.createElement('div');
+                        div.className = "flex items-center justify-between bg-slate-950 border border-emerald-500/30 px-3 py-2 rounded-xl";
+                        div.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-person-running text-emerald-400 text-xs"></i>
+                                <span class="text-xs font-bold text-white">${escapeHtml(c.name)}</span>
+                                <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded border ${bClass}">${c.intensity}</span>
+                            </div>
+                            <span class="text-xs font-extrabold text-emerald-400">${c.duration} min</span>
+                        `;
+                        cardioContainer.appendChild(div);
+                    });
+                }
+            }
+
             const exContainer = document.getElementById('detail-exercises-container');
             exContainer.innerHTML = '';
 
@@ -2491,6 +2709,7 @@
                                 w.days.forEach(d => {
                                     d.missed = false;
                                     d.notes = "";
+                                    d.cardios = [];
                                     if (d.exercises) {
                                         d.exercises.forEach(ex => { ex.logs = []; });
                                     }
