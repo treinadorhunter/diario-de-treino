@@ -1699,6 +1699,17 @@
             renderCompleteCycleButton();
         }
 
+        // Separa o nome principal da observação entre parênteses ao final
+        function splitExerciseName(rawName) {
+            if (!rawName) return { base: '', parens: '' };
+            const str = String(rawName).trim();
+            const match = str.match(/^(.*?)\s*(\([^)]*\))\s*$/);
+            if (match && match[1].trim().length > 0) {
+                return { base: match[1].trim(), parens: match[2].trim() };
+            }
+            return { base: str, parens: '' };
+        }
+
         function renderExercises() {
             const listEl = document.getElementById('exercises-list');
             listEl.innerHTML = '';
@@ -2100,25 +2111,29 @@
         }
 
         function updateExerciseProp(exIdx, prop, value) {
+            // Campos que afetam APENAS a semana atual selecionada
             if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
-                const ex = workoutData.weeks[currentWeekIdx]?.days[currentDayIdx]?.exercises[exIdx];
-                if (ex) ex[prop] = value;
+                const currentWeek = workoutData.weeks[currentWeekIdx];
+                if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises) {
+                    const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+                    if (ex) ex[prop] = value;
+                }
             } else if (prop === 'name') {
+                // Nome com inteligência de parênteses
                 const safeVal = String(value || '').trim();
-                const matchCurrent = safeVal.match(/^(.*?)\s*(\([^)]*\))\s*$/);
-                const baseName = matchCurrent ? matchCurrent[1].trim() : safeVal;
+                const parsedCurrent = splitExerciseName(safeVal);
+                const newBase = parsedCurrent.base;
 
                 workoutData.weeks.forEach((week, wIdx) => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises && week.days[currentDayIdx].exercises[exIdx]) {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
                         const targetEx = week.days[currentDayIdx].exercises[exIdx];
-                        
+                        if (!targetEx) return;
+
                         if (wIdx === currentWeekIdx) {
                             targetEx.name = safeVal;
                         } else {
-                            const currentName = String(targetEx.name || '').trim();
-                            const matchOther = currentName.match(/^(.*?)\s*(\([^)]*\))\s*$/);
-                            const otherParens = matchOther ? matchOther[2] : '';
-                            targetEx.name = otherParens ? `${baseName} ${otherParens}` : baseName;
+                            const parsedOther = splitExerciseName(targetEx.name);
+                            targetEx.name = parsedOther.parens ? `${newBase} ${parsedOther.parens}` : newBase;
                         }
                     }
                 });
