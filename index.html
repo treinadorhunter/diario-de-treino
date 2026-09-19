@@ -119,7 +119,7 @@
             <div id="missed-workout-container" class="pt-2 border-t border-slate-800/80"></div>
         </div>
 
-        <!-- Botão Concluir Ciclo (Exibido no último dia da última semana) -->
+        <!-- Botão Concluir Ciclo -->
         <div id="complete-cycle-container"></div>
 
         <div class="pt-1">
@@ -349,17 +349,48 @@
         let workoutData = { studentName: "", cycleCount: 1, history: {}, weeks: [] };
         let isAdminMode = sessionStorage.getItem('hunter_admin_mode') === 'true';
         let saveTimeout = null;
-        let restTimer = { intervalId: null, exIdx: null, remaining: 0, total: 0 };
+
+        // Cronômetro baseado em Timestamp Real
+        let restTimer = { intervalId: null, exIdx: null, endTime: null, total: 0, notified: false };
+        let screenWakeLock = null;
 
         let calendarYear = new Date().getFullYear();
         let calendarMonth = new Date().getMonth();
         let historyMonthCache = {};
 
+        /* SCREEN WAKE LOCK API (TELA SEMPRE ACESA NO CELULAR) */
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    screenWakeLock = await navigator.wakeLock.request('screen');
+                    screenWakeLock.addEventListener('release', () => {
+                        screenWakeLock = null;
+                    });
+                } catch (err) {
+                    console.log("Wake Lock não permitido ou não suportado:", err);
+                }
+            }
+        }
+
+        /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             if (!currentStudent) {
                 showUnauthorizedScreen();
                 return;
             }
+
+            requestWakeLock();
+            document.addEventListener('click', () => { if (!screenWakeLock) requestWakeLock(); }, { once: true });
+            document.addEventListener('touchstart', () => { if (!screenWakeLock) requestWakeLock(); }, { once: true });
+
+            // Sincroniza alarme e WakeLock ao trocar de aplicativo (WhatsApp, etc)
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible') {
+                    if (!screenWakeLock) await requestWakeLock();
+                    syncBackgroundTimer();
+                }
+            });
+
             updateAdminUI();
             await fetchFromSheetsAndUpdate();
         });
@@ -412,95 +443,97 @@
         }
 
         async function fetchFromSheetsAndUpdate() {
-    if (!API_URL || !currentStudent) return;
-    setSyncStatus("loading", "Sincronizando...");
-    try {
-        const currentMonth = getTodayMonthKey();
-        const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-        const data = await response.json();
+            if (!API_URL || !currentStudent) return;
+            setSyncStatus("loading", "Sincronizando...");
+            try {
+                const currentMonth = getTodayMonthKey();
+                const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                const data = await response.json();
 
-        if (data && data.error) {
-            showUnauthorizedScreen();
-            setSyncStatus("error", "Não Autorizado");
-            return;
-        }
+                if (data && data.error) {
+                    showUnauthorizedScreen();
+                    setSyncStatus("error", "Não Autorizado");
+                    return;
+                }
 
-        hideUnauthorizedScreen();
+                hideUnauthorizedScreen();
 
-        if (data && !data.empty) {
-            workoutData = data;
-            normalizeWorkoutData(workoutData);
-            smartAutoNavigate();
-            renderHeader();
-            renderApp();
-            setSyncStatus("success", "Nuvem OK");
-        } else {
-            // Nova aluna com aba em branco: cria estrutura inicial e salva na planilha
-            const cleanName = currentStudent.split('_')[0];
-            workoutData = {
-                studentName: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
-                cycleCount: 1,
-                history: {},
-                weeks: [{
-                    id: "W1",
-                    shortTitle: "Semana 1",
-                    targetReps: "8-12 RM",
-                    title: "Semana 1",
-                    desc: "Treino Inicial",
-                    rirText: "RIR 1-2",
-                    paletteIdx: 2,
-                    days: [
-                        { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                        { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                        { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", exercises: [{ name: "Exercício 1", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
-                    ]
-                }]
-            };
-            normalizeWorkoutData(workoutData);
-            renderHeader();
-            renderApp();
-            sendDataToSheetsDirect(workoutData);
-            setSyncStatus("success", "Criado na Nuvem");
-            showToast("Nova aluna detectada! Ficha pronta para edição.", "fa-circle-check", "text-emerald-400");
-        }
-    } catch (e) {
-        console.error("Erro na sincronização:", e);
-       showUnauthorizedScreen();
-        setSyncStatus("error", "Offline");
-    }
-}
-
-/* VERIFICA SE O DIA FOI RESOLVIDO (TREINO FEITO OU FALTA) */
-function isDayResolved(weekIdx, dayIdx) {
-    const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
-    if (!week || !week.days || !week.days[dayIdx]) return false;
-    const day = week.days[dayIdx];
-    if (day.missed) return true;
-    return (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
-}
-
-/* NAVEGAÇÃO SEQUENCIAL INTELIGENTE (SMART AUTO-FOCUS) */
-function smartAutoNavigate() {
-    const weeks = workoutData.weeks || [];
-    for (let w = 0; w < weeks.length; w++) {
-        const days = weeks[w].days || [];
-        for (let d = 0; d < days.length; d++) {
-            if (!isDayResolved(w, d)) {
-                currentWeekIdx = w;
-                currentDayIdx = d;
-                return;
+                if (data && !data.empty) {
+                    workoutData = data;
+                    normalizeWorkoutData(workoutData);
+                    smartAutoNavigate();
+                    renderHeader();
+                    renderApp();
+                    setSyncStatus("success", "Nuvem OK");
+                } else {
+                    const cleanName = currentStudent.split('_')[0];
+                    workoutData = {
+                        studentName: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+                        cycleCount: 1,
+                        history: {},
+                        weeks: [{
+                            id: "W1",
+                            hidden: false,
+                            shortTitle: "Semana 1",
+                            targetReps: "8-12 RM",
+                            title: "Semana 1",
+                            desc: "Treino Inicial",
+                            rirText: "RIR 1-2",
+                            paletteIdx: 2,
+                            days: [
+                                { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                                { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
+                                { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
+                            ]
+                        }]
+                    };
+                    normalizeWorkoutData(workoutData);
+                    renderHeader();
+                    renderApp();
+                    sendDataToSheetsDirect(workoutData);
+                    setSyncStatus("success", "Criado na Nuvem");
+                    showToast("Nova aluna detectada! Ficha pronta para edição.", "fa-circle-check", "text-emerald-400");
+                }
+            } catch (e) {
+                console.error("Erro na sincronização:", e);
+                showUnauthorizedScreen();
+                setSyncStatus("error", "Offline");
             }
         }
-    }
-    if (weeks.length > 0) {
-        currentWeekIdx = weeks.length - 1;
-        const lastDays = weeks[currentWeekIdx].days || [];
-        currentDayIdx = Math.max(0, lastDays.length - 1);
-    } else {
-        currentWeekIdx = 0;
-        currentDayIdx = 0;
-    }
-}
+
+        function isDayResolved(weekIdx, dayIdx) {
+            const week = workoutData.weeks ? workoutData.weeks[weekIdx] : null;
+            if (!week || !week.days || !week.days[dayIdx]) return false;
+            const day = week.days[dayIdx];
+            if (day.missed) return true;
+            return (day.exercises || []).some(ex => (!ex.hidden) && (ex.logs || []).some(l => l && l.done));
+        }
+
+        function smartAutoNavigate() {
+            const weeks = workoutData.weeks || [];
+            for (let w = 0; w < weeks.length; w++) {
+                if (!isAdminMode && weeks[w].hidden) continue;
+                const days = weeks[w].days || [];
+                for (let d = 0; d < days.length; d++) {
+                    if (!isDayResolved(w, d)) {
+                        currentWeekIdx = w;
+                        currentDayIdx = d;
+                        return;
+                    }
+                }
+            }
+
+            const visibleWeeks = weeks.map((w, i) => ({ w, i })).filter(item => isAdminMode || !item.w.hidden);
+            if (visibleWeeks.length > 0) {
+                currentWeekIdx = visibleWeeks[visibleWeeks.length - 1].i;
+                const lastDays = weeks[currentWeekIdx].days || [];
+                currentDayIdx = Math.max(0, lastDays.length - 1);
+            } else {
+                currentWeekIdx = 0;
+                currentDayIdx = 0;
+            }
+        }
+
         function renderHeaderDate() {
             const container = document.getElementById('current-date-text');
             if (container) {
@@ -517,6 +550,7 @@ function smartAutoNavigate() {
 
             if (data.weeks) {
                 data.weeks.forEach((w) => {
+                    if (w.hidden === undefined) w.hidden = false;
                     if (w.days && !Array.isArray(w.days)) {
                         const daysArr = [];
                         Object.keys(w.days).forEach(dKey => {
@@ -535,6 +569,7 @@ function smartAutoNavigate() {
                             if (d.missed === undefined) d.missed = false;
                             if (d.exercises) {
                                 d.exercises.forEach(ex => {
+                                    if (ex.hidden === undefined) ex.hidden = false;
                                     if (!ex.unit) ex.unit = 'rep';
                                 });
                             }
@@ -544,6 +579,7 @@ function smartAutoNavigate() {
             }
         }
 
+        /* CRONÔMETRO COM TIMESTAMP REAL E NOTIFICAÇÃO NATIVA (SEGUNDO PLANO) */
         function parseRestTimeSeconds(str) {
             if (!str) return 60;
             const clean = String(str).toLowerCase().trim();
@@ -571,18 +607,46 @@ function smartAutoNavigate() {
                 const gain = ctx.createGain();
                 osc.type = "sine";
                 osc.frequency.setValueAtTime(880, ctx.currentTime);
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 osc.start();
-                osc.stop(ctx.currentTime + 0.4);
+                osc.stop(ctx.currentTime + 0.5);
             } catch (e) {
                 console.log("Audio feedback error:", e);
             }
         }
 
+        function triggerAlarmAndNotification() {
+            playBeepSound();
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 150, 300, 150, 500]);
+            }
+
+            // Disparo de notificação nativa para quem está no WhatsApp ou tela bloqueada
+            if ("Notification" in window && Notification.permission === "granted") {
+                try {
+                    new Notification("⏰ Descanso Finalizado!", {
+                        body: "Hora da próxima série! Mantenha a intensidade no treino.",
+                        icon: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/dumbbell.svg",
+                        tag: "rest-timer",
+                        renotify: true
+                    });
+                } catch (err) {
+                    console.log("Erro ao emitir notificação nativa:", err);
+                }
+            }
+
+            showToast("Descanso finalizado! Próxima série!", "fa-bell", "text-emerald-400");
+        }
+
         function startRestTimer(exIdx) {
+            // Solicita permissão de notificação nativa ao primeiro clique
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
             const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
@@ -595,26 +659,39 @@ function smartAutoNavigate() {
             }
 
             restTimer.exIdx = exIdx;
-            restTimer.remaining = seconds;
             restTimer.total = seconds;
+            restTimer.endTime = Date.now() + (seconds * 1000);
+            restTimer.notified = false;
 
             updateRestTimerBadgeUI();
 
             restTimer.intervalId = setInterval(() => {
-                restTimer.remaining--;
-                if (restTimer.remaining <= 0) {
+                const remaining = Math.ceil((restTimer.endTime - Date.now()) / 1000);
+                if (remaining <= 0) {
                     clearInterval(restTimer.intervalId);
                     restTimer.intervalId = null;
+                    restTimer.endTime = null;
                     updateRestTimerBadgeUI();
-                    playBeepSound();
-                    if (navigator.vibrate) {
-                        navigator.vibrate([200, 100, 200, 100, 300]);
-                    }
-                    showToast("Descanso finalizado! Próxima série!", "fa-bell", "text-emerald-400");
+                    triggerAlarmAndNotification();
                 } else {
                     updateRestTimerBadgeUI();
                 }
             }, 1000);
+        }
+
+        function syncBackgroundTimer() {
+            if (restTimer.endTime) {
+                const remaining = Math.ceil((restTimer.endTime - Date.now()) / 1000);
+                if (remaining <= 0) {
+                    clearInterval(restTimer.intervalId);
+                    restTimer.intervalId = null;
+                    restTimer.endTime = null;
+                    updateRestTimerBadgeUI();
+                    triggerAlarmAndNotification();
+                } else {
+                    updateRestTimerBadgeUI();
+                }
+            }
         }
 
         function cancelRestTimer() {
@@ -623,7 +700,7 @@ function smartAutoNavigate() {
                 restTimer.intervalId = null;
             }
             restTimer.exIdx = null;
-            restTimer.remaining = 0;
+            restTimer.endTime = null;
             updateRestTimerBadgeUI();
             showToast("Cronômetro cancelado", "fa-stop", "text-slate-400");
         }
@@ -632,13 +709,14 @@ function smartAutoNavigate() {
             const allBadges = document.querySelectorAll('[id^="rest-timer-container-"]');
             allBadges.forEach(el => { el.innerHTML = ''; });
 
-            if (restTimer.exIdx !== null && restTimer.remaining > 0) {
+            if (restTimer.exIdx !== null && restTimer.endTime) {
+                const remaining = Math.max(0, Math.ceil((restTimer.endTime - Date.now()) / 1000));
                 const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
-                if (targetContainer) {
+                if (targetContainer && remaining > 0) {
                     targetContainer.innerHTML = `
                         <button onclick="cancelRestTimer()" title="Clique para cancelar o descanso" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm active:scale-95 transition animate-pulse">
                             <i class="fa-solid fa-stopwatch text-[9px] text-emerald-300"></i>
-                            <span>Descanso: ${formatTimerSeconds(restTimer.remaining)}</span>
+                            <span>Descanso: ${formatTimerSeconds(remaining)}</span>
                             <i class="fa-solid fa-xmark text-[8px] text-slate-400 hover:text-white ml-0.5"></i>
                         </button>
                     `;
@@ -661,18 +739,22 @@ function smartAutoNavigate() {
             renderHeader();
         }
 
+        /* CÁLCULO DE MÉTRICAS (IGNORA ITENS OCULTOS) */
         function calculateDayPlannedMetrics(day) {
             let totalSets = 0;
             let totalRepsEst = 0;
+            let totalExercises = 0;
             if (day && day.exercises) {
                 day.exercises.forEach(ex => {
+                    if (!isAdminMode && ex.hidden) return;
                     const sets = Number(ex.sets) || 0;
                     const reps = getTargetRepsNum(ex.targetReps);
                     totalSets += sets;
                     totalRepsEst += (sets * reps);
+                    totalExercises++;
                 });
             }
-            return { totalSets, totalRepsEst, totalExercises: day && day.exercises ? day.exercises.length : 0 };
+            return { totalSets, totalRepsEst, totalExercises };
         }
 
         function calculateWeekPlannedMetrics(week) {
@@ -690,7 +772,7 @@ function smartAutoNavigate() {
             return { totalSets, totalRepsEst, totalExercises };
         }
 
-        /* VALIDAÇÃO DE ENCERRAMENTO DO CICLO */
+        /* STATUS DE CONCLUSÃO DE CICLO (IGNORA SEMANAS E EXERCÍCIOS OCULTOS) */
         function checkCycleCompletionStatus() {
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return { canComplete: false, allResolved: false, atLeastOneExecuted: false };
@@ -700,11 +782,12 @@ function smartAutoNavigate() {
             let executedDays = 0;
 
             for (let w = 0; w < weeks.length; w++) {
+                if (!isAdminMode && weeks[w].hidden) continue;
                 const days = weeks[w].days || [];
                 for (let d = 0; d < days.length; d++) {
                     const day = days[d];
                     totalDays++;
-                    const hasActivity = (day.exercises || []).some(ex => (ex.logs || []).some(l => l && l.done));
+                    const hasActivity = (day.exercises || []).some(ex => (!ex.hidden) && (ex.logs || []).some(l => l && l.done));
                     if (hasActivity) {
                         executedDays++;
                         resolvedDays++;
@@ -724,19 +807,19 @@ function smartAutoNavigate() {
             };
         }
 
-        /* RENDERIZAÇÃO DO BOTÃO CONCLUIR CICLO NO ÚLTIMO DIA DA ÚLTIMA SEMANA */
         function renderCompleteCycleButton() {
             const container = document.getElementById('complete-cycle-container');
             if (!container) return;
 
-            const weeks = workoutData.weeks || [];
-            if (weeks.length === 0) {
+            const visibleWeeks = (workoutData.weeks || []).map((w, i) => ({ w, i })).filter(item => isAdminMode || !item.w.hidden);
+            if (visibleWeeks.length === 0) {
                 container.innerHTML = '';
                 return;
             }
 
-            const isLastWeek = (currentWeekIdx === weeks.length - 1);
-            const currentWeek = weeks[currentWeekIdx];
+            const lastVisibleWeekIdx = visibleWeeks[visibleWeeks.length - 1].i;
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            const isLastWeek = (currentWeekIdx === lastVisibleWeekIdx);
             const isLastDay = (currentWeek && currentWeek.days && currentDayIdx === currentWeek.days.length - 1);
 
             if (!isLastWeek || !isLastDay) {
@@ -771,13 +854,12 @@ function smartAutoNavigate() {
             }
         }
 
-        /* BOTÃO FALTAR TREINO COM BLOQUEIO AUTOMÁTICO PARA TREINO PARCIAL */
         function renderMissedButton(dayInfo) {
             const container = document.getElementById('missed-workout-container');
             if (!container) return;
 
             const hasAnyDoneSet = (dayInfo.exercises || []).some(ex => 
-                (ex.logs || []).some(l => l && l.done)
+                (!ex.hidden) && (ex.logs || []).some(l => l && l.done)
             );
 
             if (hasAnyDoneSet) {
@@ -813,7 +895,7 @@ function smartAutoNavigate() {
             
             const currentDay = currentWeek.days[currentDayIdx];
             const hasAnyDoneSet = (currentDay.exercises || []).some(ex => 
-                (ex.logs || []).some(l => l && l.done)
+                (!ex.hidden) && (ex.logs || []).some(l => l && l.done)
             );
 
             if (hasAnyDoneSet) {
@@ -827,7 +909,6 @@ function smartAutoNavigate() {
             if (currentDay.missed) {
                 showToast("Falta registrada para esta sessão!", "fa-user-xmark", "text-amber-400");
             } else {
-                // Ao desmarcar a falta, apaga qualquer registro de falta dessa sessão no histórico
                 if (workoutData.history) {
                     Object.keys(workoutData.history).forEach(k => {
                         const hItem = workoutData.history[k];
@@ -843,7 +924,6 @@ function smartAutoNavigate() {
             renderApp();
         }
 
-        /* GRAVAÇÃO COM DATA REAL DA EXECUÇÃO E LIMPEZA DE FALTAS ÓRFÃS */
         function updateTodayHistoryRecord() {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -854,7 +934,7 @@ function smartAutoNavigate() {
 
             let hasActivity = false;
             exercises.forEach(ex => {
-                if (ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
+                if (!ex.hidden && ex.logs && ex.logs.some(l => l && (l.done || (l.load !== '' && l.load !== undefined)))) {
                     hasActivity = true;
                 }
             });
@@ -873,11 +953,10 @@ function smartAutoNavigate() {
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes ? `[FALTOU TREINO] ${currentDay.notes}` : "Faltou Treino",
                     missed: true,
-                    exercises: JSON.parse(JSON.stringify(exercises)),
+                    exercises: JSON.parse(JSON.stringify(exercises.filter(ex => !ex.hidden))),
                     updatedAt: now.toISOString()
                 };
             } else if (hasActivity || (currentDay.notes && currentDay.notes.trim() !== '')) {
-                // Se o treino foi executado hoje, limpa registros antigos de falta da mesma sessão neste ciclo
                 Object.keys(workoutData.history).forEach(k => {
                     const hItem = workoutData.history[k];
                     if (hItem && hItem.missed && hItem.dayName === currentDay.name && hItem.weekTitle === `${currentWeek.title || ''} (Ciclo ${cycleNum})`) {
@@ -893,7 +972,7 @@ function smartAutoNavigate() {
                     dayShortName: currentDay.shortName || '',
                     notes: currentDay.notes || '',
                     missed: false,
-                    exercises: JSON.parse(JSON.stringify(exercises)),
+                    exercises: JSON.parse(JSON.stringify(exercises.filter(ex => !ex.hidden))),
                     updatedAt: now.toISOString()
                 };
             }
@@ -980,6 +1059,7 @@ function smartAutoNavigate() {
             if (isAdminMode) {
                 isAdminMode = false;
                 sessionStorage.removeItem('hunter_admin_mode');
+                smartAutoNavigate();
                 updateAdminUI();
                 showToast("Modo Aluno ativado", "fa-circle-check", "text-blue-400");
             } else {
@@ -1039,24 +1119,68 @@ function smartAutoNavigate() {
             renderApp();
         }
 
+        /* GERENCIAMENTO DE VISIBILIDADE DA SEMANA */
+        function toggleCurrentWeekVisibility() {
+            const week = workoutData.weeks[currentWeekIdx];
+            if (!week) return;
+            week.hidden = !week.hidden;
+            saveWorkoutData();
+            renderApp();
+            showToast(week.hidden ? "Semana oculta para o aluno!" : "Semana visível para o aluno!", week.hidden ? "fa-eye-slash" : "fa-eye", week.hidden ? "text-amber-400" : "text-emerald-400");
+        }
+
+        /* GERENCIAMENTO DE VISIBILIDADE DO EXERCÍCIO (NESTA SEMANA ESPECÍFICA) */
+        function toggleExerciseVisibility(exIdx) {
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
+            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+            if (!ex) return;
+
+            ex.hidden = !ex.hidden;
+            saveWorkoutData();
+            renderApp();
+            showToast(ex.hidden ? "Exercício ocultado nesta semana!" : "Exercício visível nesta semana!", ex.hidden ? "fa-eye-slash" : "fa-eye", ex.hidden ? "text-amber-400" : "text-emerald-400");
+        }
+
         function renderWeekTabs() {
             const container = document.getElementById('week-tabs-container');
             if (!container) return;
             container.innerHTML = '';
 
             const weeks = workoutData.weeks || [];
+
+            // Se for aluno, redireciona caso a semana atual esteja oculta
+            if (!isAdminMode) {
+                const visibleWeeks = weeks.map((w, idx) => ({ w, idx })).filter(item => !item.w.hidden);
+                if (visibleWeeks.length > 0) {
+                    const isCurrentVisible = visibleWeeks.some(item => item.idx === currentWeekIdx);
+                    if (!isCurrentVisible) {
+                        currentWeekIdx = visibleWeeks[0].idx;
+                    }
+                }
+            }
+
             if (currentWeekIdx >= weeks.length) currentWeekIdx = Math.max(0, weeks.length - 1);
 
             weeks.forEach((w, idx) => {
+                // Aluno não enxerga aba de semana oculta
+                if (!isAdminMode && w.hidden) return;
+
                 const palIdx = w.paletteIdx !== undefined ? w.paletteIdx : (idx % WEEK_PALETTES.length);
                 const palette = WEEK_PALETTES[palIdx];
                 const isActive = idx === currentWeekIdx;
+                const isHidden = Boolean(w.hidden);
+
                 const btn = document.createElement('button');
                 btn.onclick = () => { currentWeekIdx = idx; renderApp(); };
-                btn.className = `week-tab flex-1 min-w-[110px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800 opacity-60'}`;
+                btn.className = `week-tab flex-1 min-w-[110px] px-3 py-2 rounded-xl border text-left transition relative overflow-hidden ${isHidden ? 'opacity-50 border-dashed border-amber-600/50' : ''} ${isActive ? 'bg-slate-800 border-blue-500 active-tab-glow' : 'bg-slate-900 border-slate-800'}`;
                 btn.innerHTML = `
                     <div class="text-[9px] font-bold uppercase tracking-wider ${palette.textClass} flex items-center justify-between">
-                        ${escapeHtml(w.shortTitle || `Semana ${idx + 1}`)} <i class="fa-solid ${palette.icon} text-[8px]"></i>
+                        <span class="truncate">${escapeHtml(w.shortTitle || `Semana ${idx + 1}`)}</span>
+                        <div class="flex items-center gap-1 shrink-0 ml-1">
+                            ${isHidden ? '<i class="fa-solid fa-eye-slash text-[9px] text-amber-400" title="Oculta para o aluno"></i>' : ''}
+                            <i class="fa-solid ${palette.icon} text-[8px]"></i>
+                        </div>
                     </div>
                     <div class="font-extrabold text-xs text-white">${escapeHtml(w.targetReps || "8-12 RM")}</div>
                 `;
@@ -1118,6 +1242,7 @@ function smartAutoNavigate() {
 
             weeks.push({
                 id: `W_${Date.now()}`,
+                hidden: false,
                 shortTitle: "Semana Hipertrofia",
                 targetReps: "8-12 RM",
                 title: "Semana Hipertrofia — Hipertrofia Tradicional",
@@ -1132,53 +1257,54 @@ function smartAutoNavigate() {
             renderApp();
             showToast("Nova semana adicionada!", "fa-circle-plus", "text-emerald-400");
         }
+
         function duplicateCurrentWeek() {
-    const weeks = workoutData.weeks || [];
-    if (weeks.length === 0 || !weeks[currentWeekIdx]) return;
+            const weeks = workoutData.weeks || [];
+            if (weeks.length === 0 || !weeks[currentWeekIdx]) return;
 
-    const sourceWeek = weeks[currentWeekIdx];
-    const clonedWeek = JSON.parse(JSON.stringify(sourceWeek));
+            const sourceWeek = weeks[currentWeekIdx];
+            const clonedWeek = JSON.parse(JSON.stringify(sourceWeek));
 
-    clonedWeek.id = `W_${Date.now()}`;
-    clonedWeek.shortTitle = `${sourceWeek.shortTitle || 'Semana'} (Cópia)`;
-    clonedWeek.paletteIdx = (weeks.length) % WEEK_PALETTES.length;
+            clonedWeek.id = `W_${Date.now()}`;
+            clonedWeek.shortTitle = `${sourceWeek.shortTitle || 'Semana'} (Cópia)`;
+            clonedWeek.paletteIdx = (weeks.length) % WEEK_PALETTES.length;
 
-    if (clonedWeek.days) {
-        clonedWeek.days.forEach(day => {
-            day.missed = false;
-            day.notes = "";
-            if (day.exercises) {
-                day.exercises.forEach(ex => {
-                    ex.logs = [];
+            if (clonedWeek.days) {
+                clonedWeek.days.forEach(day => {
+                    day.missed = false;
+                    day.notes = "";
+                    if (day.exercises) {
+                        day.exercises.forEach(ex => {
+                            ex.logs = [];
+                        });
+                    }
                 });
             }
-        });
-    }
 
-    weeks.push(clonedWeek);
-    currentWeekIdx = weeks.length - 1;
-    saveWorkoutData();
-    renderApp();
-    showToast("Semana duplicada com sucesso!", "fa-copy", "text-emerald-400");
-}
+            weeks.push(clonedWeek);
+            currentWeekIdx = weeks.length - 1;
+            saveWorkoutData();
+            renderApp();
+            showToast("Semana duplicada com sucesso!", "fa-copy", "text-emerald-400");
+        }
+
         function moveCurrentWeek(direction) {
-    const weeks = workoutData.weeks || [];
-    const targetIdx = currentWeekIdx + direction;
+            const weeks = workoutData.weeks || [];
+            const targetIdx = currentWeekIdx + direction;
 
-    if (targetIdx < 0 || targetIdx >= weeks.length) return;
+            if (targetIdx < 0 || targetIdx >= weeks.length) return;
 
-    // Inverte a posição das semanas no array
-    const temp = weeks[currentWeekIdx];
-    weeks[currentWeekIdx] = weeks[targetIdx];
-    weeks[targetIdx] = temp;
+            const temp = weeks[currentWeekIdx];
+            weeks[currentWeekIdx] = weeks[targetIdx];
+            weeks[targetIdx] = temp;
 
-    // Mantém a semana movida selecionada na tela
-    currentWeekIdx = targetIdx;
+            currentWeekIdx = targetIdx;
 
-    saveWorkoutData();
-    renderApp();
-    showToast(`Semana movida para a posição ${targetIdx + 1}!`, "fa-arrows-left-right", "text-blue-400");
-}
+            saveWorkoutData();
+            renderApp();
+            showToast(`Semana movida para a posição ${targetIdx + 1}!`, "fa-arrows-left-right", "text-blue-400");
+        }
+
         function deleteCurrentWeek() {
             const weeks = workoutData.weeks || [];
             if (weeks.length <= 1) {
@@ -1263,7 +1389,7 @@ function smartAutoNavigate() {
                     notes: '',
                     missed: false,
                     exercises: [
-                        { name: "Novo Exercício", sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "Observação de execução...", logs: [] }
+                        { name: "Novo Exercício", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "Observação de execução...", logs: [] }
                     ]
                 });
             });
@@ -1304,7 +1430,6 @@ function smartAutoNavigate() {
             renderApp();
         }
 
-        /* REORDENAÇÃO DE EXERCÍCIOS (SUBIR / DESCER) */
         function moveExercise(exIdx, direction) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -1329,7 +1454,6 @@ function smartAutoNavigate() {
             showToast("Ordem dos exercícios atualizada!", "fa-arrows-up-down", "text-blue-400");
         }
 
-        /* ALTERNÂNCIA DE UNIDADE (REPETIÇÕES 'rep' VS SEGUNDOS 's') */
         function toggleExerciseUnit(exIdx) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -1381,12 +1505,11 @@ function smartAutoNavigate() {
                                 <i class="fa-solid fa-sliders"></i> Configurações da Semana
                             </span>
 
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <button onclick="resetCycleCount()" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
                                     <i class="fa-solid fa-rotate-left text-xs"></i> Zerar Ciclo (#1)
                                 </button>
                                 
-                                <!-- Botões para Reordenar a Semana Selecionada -->
                                 <div class="flex items-center bg-slate-950 border border-slate-700/80 rounded-lg p-0.5">
                                     <button onclick="moveCurrentWeek(-1)" title="Mover para a esquerda" class="px-2 py-1 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md text-xs font-bold active:scale-95 transition ${currentWeekIdx === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}">
                                         <i class="fa-solid fa-arrow-left"></i>
@@ -1395,6 +1518,11 @@ function smartAutoNavigate() {
                                         <i class="fa-solid fa-arrow-right"></i>
                                     </button>
                                 </div>
+
+                                <button onclick="toggleCurrentWeekVisibility()" class="px-2.5 py-1 ${weekInfo.hidden ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-slate-800 border-slate-700 text-slate-300'} border rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
+                                    <i class="fa-solid ${weekInfo.hidden ? 'fa-eye-slash text-amber-400' : 'fa-eye text-emerald-400'}"></i>
+                                    <span>${weekInfo.hidden ? 'Semana Oculta' : 'Semana Visível'}</span>
+                                </button>
 
                                 <button onclick="duplicateCurrentWeek()" class="px-2.5 py-1 bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-bold flex items-center gap-1.5 active:scale-95 transition">
                                     <i class="fa-solid fa-copy text-xs"></i> Duplicar Semana
@@ -1591,19 +1719,26 @@ function smartAutoNavigate() {
                 return;
             }
 
-            if (!exercises || exercises.length === 0) {
+            const visibleCount = (exercises || []).filter(ex => isAdminMode || !ex.hidden).length;
+
+            if (!exercises || exercises.length === 0 || visibleCount === 0) {
                 listEl.innerHTML = `
                     <div class="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
                         <i class="fa-solid fa-dumbbell text-2xl mb-2 block"></i>
-                        <p class="text-xs">Nenhum exercício cadastrado nesta sessão.</p>
+                        <p class="text-xs">Nenhum exercício ativo nesta sessão.</p>
                     </div>
                 `;
                 return;
             }
 
             exercises.forEach((ex, exIdx) => {
+                // Aluno não enxerga exercícios ocultos nesta semana
+                if (!isAdminMode && ex.hidden) return;
+
                 const exCard = document.createElement('div');
-                exCard.className = 'bg-slate-900 border border-slate-800/90 rounded-2xl p-3.5 shadow-sm space-y-3';
+                const isExHidden = Boolean(ex.hidden);
+
+                exCard.className = `bg-slate-900 border ${isExHidden ? 'border-dashed border-amber-600/50 opacity-60' : 'border-slate-800/90'} rounded-2xl p-3.5 shadow-sm space-y-3 relative`;
 
                 const setsCount = ex.sets || 4;
                 if (!ex.logs) ex.logs = [];
@@ -1659,9 +1794,16 @@ function smartAutoNavigate() {
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1">
                             ${isAdminMode ? `
-                                <input type="text" value="${escapeHtml(ex.name)}" 
-                                    onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
-                                    class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none mb-1.5">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <input type="text" value="${escapeHtml(ex.name)}" 
+                                        onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
+                                        class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
+                                    ${isExHidden ? `
+                                        <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
+                                            <i class="fa-solid fa-eye-slash"></i> Oculto nesta semana
+                                        </span>
+                                    ` : ''}
+                                </div>
                                 
                                 <div class="flex flex-wrap items-center gap-2">
                                     <button onclick="toggleExerciseUnit(${exIdx})" title="Alternar entre Repetições e Segundos" class="flex items-center gap-1 bg-slate-950 border ${exUnit === 's' ? 'border-amber-500/50 text-amber-300' : 'border-blue-500/50 text-blue-300'} rounded-md px-2 py-0.5 text-[10px] font-extrabold active:scale-95 transition">
@@ -1714,6 +1856,9 @@ function smartAutoNavigate() {
 
                         ${isAdminMode ? `
                             <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="toggleExerciseVisibility(${exIdx})" title="${isExHidden ? 'Exibir nesta semana' : 'Ocultar nesta semana'}" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-lg text-xs font-bold ${isExHidden ? 'text-amber-400 border-amber-500/50' : 'text-slate-400 hover:text-white'} flex items-center justify-center">
+                                    <i class="fa-solid ${isExHidden ? 'fa-eye-slash' : 'fa-eye'} text-[10px]"></i>
+                                </button>
                                 <button onclick="moveExercise(${exIdx}, -1)" ${exIdx === 0 ? 'disabled class="w-7 h-7 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-600 cursor-not-allowed flex items-center justify-center"' : 'class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-lg text-xs font-bold text-blue-400 flex items-center justify-center"'} title="Mover para Cima">
                                     <i class="fa-solid fa-arrow-up text-[10px]"></i>
                                 </button>
@@ -1861,7 +2006,6 @@ function smartAutoNavigate() {
             renderCompleteCycleButton();
         }
 
-        /* REINÍCIO DO CICLO ACIONADO PELO BOTÃO CONCLUIR CICLO */
         function confirmMesocycleReset() {
             updateTodayHistoryRecord();
             workoutData.cycleCount = (workoutData.cycleCount || 1) + 1;
@@ -1907,6 +2051,8 @@ function smartAutoNavigate() {
                 completedSets = 0;
             } else {
                 exercises.forEach(ex => {
+                    if (!isAdminMode && ex.hidden) return;
+
                     const count = ex.sets || 4;
                     totalSets += count;
 
@@ -1935,7 +2081,7 @@ function smartAutoNavigate() {
                 });
             }
 
-            if (totalSets === 0 && dayInfo.missed) totalSets = exercises.reduce((acc, ex) => acc + (ex.sets || 4), 0);
+            if (totalSets === 0 && dayInfo.missed) totalSets = exercises.filter(ex => isAdminMode || !ex.hidden).reduce((acc, ex) => acc + (ex.sets || 4), 0);
             const pct = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
             const elPercent = document.getElementById('metric-progress-percent');
@@ -1992,11 +2138,12 @@ function smartAutoNavigate() {
                 if (week.days && week.days[currentDayIdx]) {
                     week.days[currentDayIdx].exercises.push({
                         name: "Novo Exercício",
+                        hidden: false,
                         sets: 4,
                         targetReps: "8-12",
                         rest: defaultRestTime,
                         unit: "rep",
-                        notes: "Dica de execução...",
+                        notes: "Observação de execução...",
                         logs: []
                     });
                 }
