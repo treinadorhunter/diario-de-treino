@@ -283,7 +283,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const alunoParam = urlParams.get('aluno');
-        const currentStudent = alunoParam ? alunoParam.toLowerCase().trim() : null;
+        const currentStudent = alunoParam ? alunoParam.toLowerCase().trim().replace(/\s+/g, '_') : null;
 
         const WEEK_PALETTES = [
             { textClass: "text-amber-400", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "fa-bolt" },
@@ -350,7 +350,6 @@
         let isAdminMode = sessionStorage.getItem('hunter_admin_mode') === 'true';
         let saveTimeout = null;
 
-        // Cronômetro baseado em Timestamp Real
         let restTimer = { intervalId: null, exIdx: null, endTime: null, total: 0, notified: false };
         let screenWakeLock = null;
 
@@ -358,7 +357,6 @@
         let calendarMonth = new Date().getMonth();
         let historyMonthCache = {};
 
-        /* SCREEN WAKE LOCK API (TELA SEMPRE ACESA NO CELULAR) */
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
@@ -367,15 +365,14 @@
                         screenWakeLock = null;
                     });
                 } catch (err) {
-                    console.log("Wake Lock não permitido ou não suportado:", err);
+                    console.log("Wake Lock não permitido:", err);
                 }
             }
         }
 
-        /* INICIALIZAÇÃO */
         window.addEventListener('DOMContentLoaded', async () => {
             if (!currentStudent) {
-                showUnauthorizedScreen();
+                showUnauthorizedScreen("Nenhum aluno informado na URL.");
                 return;
             }
 
@@ -383,7 +380,6 @@
             document.addEventListener('click', () => { if (!screenWakeLock) requestWakeLock(); }, { once: true });
             document.addEventListener('touchstart', () => { if (!screenWakeLock) requestWakeLock(); }, { once: true });
 
-            // Sincroniza alarme e WakeLock ao trocar de aplicativo (WhatsApp, etc)
             document.addEventListener('visibilitychange', async () => {
                 if (document.visibilityState === 'visible') {
                     if (!screenWakeLock) await requestWakeLock();
@@ -402,8 +398,10 @@
             }
         });
 
-        function showUnauthorizedScreen() {
+        function showUnauthorizedScreen(msg) {
             const screen = document.getElementById('unauthorized-screen');
+            const msgEl = document.getElementById('unauthorized-msg');
+            if (msgEl && msg) msgEl.textContent = msg;
             if (screen) screen.classList.remove('hidden');
         }
 
@@ -448,10 +446,22 @@
             try {
                 const currentMonth = getTodayMonthKey();
                 const response = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${currentMonth}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`Servidor retornou status ${response.status}`);
+                }
+
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (jsonErr) {
+                    console.error("Resposta não é JSON:", text);
+                    throw new Error("Resposta inválida da planilha (verifique o Web App do Apps Script).");
+                }
 
                 if (data && data.error) {
-                    showUnauthorizedScreen();
+                    showUnauthorizedScreen(data.error === "Aluno não encontrado." ? "Planilha não cadastrada pelo Treinador para este aluno." : data.error);
                     setSyncStatus("error", "Não Autorizado");
                     return;
                 }
@@ -496,7 +506,7 @@
                 }
             } catch (e) {
                 console.error("Erro na sincronização:", e);
-                showUnauthorizedScreen();
+                showUnauthorizedScreen("Erro ao conectar com a planilha: " + e.message);
                 setSyncStatus("error", "Offline");
             }
         }
@@ -579,7 +589,6 @@
             }
         }
 
-        /* CRONÔMETRO COM TIMESTAMP REAL E NOTIFICAÇÃO NATIVA (SEGUNDO PLANO) */
         function parseRestTimeSeconds(str) {
             if (!str) return 60;
             const clean = String(str).toLowerCase().trim();
@@ -624,7 +633,6 @@
                 navigator.vibrate([300, 150, 300, 150, 500]);
             }
 
-            // Disparo de notificação nativa para quem está no WhatsApp ou tela bloqueada
             if ("Notification" in window && Notification.permission === "granted") {
                 try {
                     new Notification("⏰ Descanso Finalizado!", {
@@ -642,7 +650,6 @@
         }
 
         function startRestTimer(exIdx) {
-            // Solicita permissão de notificação nativa ao primeiro clique
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
@@ -739,7 +746,6 @@
             renderHeader();
         }
 
-        /* CÁLCULO DE MÉTRICAS (IGNORA ITENS OCULTOS) */
         function calculateDayPlannedMetrics(day) {
             let totalSets = 0;
             let totalRepsEst = 0;
@@ -772,7 +778,6 @@
             return { totalSets, totalRepsEst, totalExercises };
         }
 
-        /* STATUS DE CONCLUSÃO DE CICLO (IGNORA SEMANAS E EXERCÍCIOS OCULTOS) */
         function checkCycleCompletionStatus() {
             const weeks = workoutData.weeks || [];
             if (weeks.length === 0) return { canComplete: false, allResolved: false, atLeastOneExecuted: false };
@@ -1119,7 +1124,6 @@
             renderApp();
         }
 
-        /* GERENCIAMENTO DE VISIBILIDADE DA SEMANA */
         function toggleCurrentWeekVisibility() {
             const week = workoutData.weeks[currentWeekIdx];
             if (!week) return;
@@ -1129,7 +1133,6 @@
             showToast(week.hidden ? "Semana oculta para o aluno!" : "Semana visível para o aluno!", week.hidden ? "fa-eye-slash" : "fa-eye", week.hidden ? "text-amber-400" : "text-emerald-400");
         }
 
-        /* GERENCIAMENTO DE VISIBILIDADE DO EXERCÍCIO (NESTA SEMANA ESPECÍFICA) */
         function toggleExerciseVisibility(exIdx) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx]) return;
@@ -1149,7 +1152,6 @@
 
             const weeks = workoutData.weeks || [];
 
-            // Se for aluno, redireciona caso a semana atual esteja oculta
             if (!isAdminMode) {
                 const visibleWeeks = weeks.map((w, idx) => ({ w, idx })).filter(item => !item.w.hidden);
                 if (visibleWeeks.length > 0) {
@@ -1163,7 +1165,6 @@
             if (currentWeekIdx >= weeks.length) currentWeekIdx = Math.max(0, weeks.length - 1);
 
             weeks.forEach((w, idx) => {
-                // Aluno não enxerga aba de semana oculta
                 if (!isAdminMode && w.hidden) return;
 
                 const palIdx = w.paletteIdx !== undefined ? w.paletteIdx : (idx % WEEK_PALETTES.length);
@@ -1732,7 +1733,6 @@
             }
 
             exercises.forEach((ex, exIdx) => {
-                // Aluno não enxerga exercícios ocultos nesta semana
                 if (!isAdminMode && ex.hidden) return;
 
                 const exCard = document.createElement('div');
@@ -1796,7 +1796,7 @@
                             ${isAdminMode ? `
                                 <div class="flex items-center gap-2 mb-1.5">
                                     <input type="text" value="${escapeHtml(ex.name)}" 
-                                        onchange="(${exIdx}, 'name', this.value)"
+                                        onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
                                         class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
                                     ${isExHidden ? `
                                         <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
@@ -2101,33 +2101,30 @@
 
         function updateExerciseProp(exIdx, prop, value) {
             if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
-                const ex = workoutData.weeks[currentWeekIdx].days[currentDayIdx].exercises[exIdx];
+                const ex = workoutData.weeks[currentWeekIdx]?.days[currentDayIdx]?.exercises[exIdx];
                 if (ex) ex[prop] = value;
             } else if (prop === 'name') {
-                // Separa o nome principal e o conteúdo entre parênteses digitado
-                const matchCurrent = value.match(/^(.*?)\s*(\([^)]*\))\s*$/);
-                const baseName = matchCurrent ? matchCurrent[1].trim() : value.trim();
+                const safeVal = String(value || '').trim();
+                const matchCurrent = safeVal.match(/^(.*?)\s*(\([^)]*\))\s*$/);
+                const baseName = matchCurrent ? matchCurrent[1].trim() : safeVal;
 
                 workoutData.weeks.forEach((week, wIdx) => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises && week.days[currentDayIdx].exercises[exIdx]) {
                         const targetEx = week.days[currentDayIdx].exercises[exIdx];
                         
                         if (wIdx === currentWeekIdx) {
-                            // Na semana atual, grava exatamente o que foi digitado
-                            targetEx.name = value;
+                            targetEx.name = safeVal;
                         } else {
-                            // Nas outras semanas, verifica se ela já possui parênteses próprios
-                            const matchOther = targetEx.name.match(/^(.*?)\s*(\([^)]*\))\s*$/);
+                            const currentName = String(targetEx.name || '').trim();
+                            const matchOther = currentName.match(/^(.*?)\s*(\([^)]*\))\s*$/);
                             const otherParens = matchOther ? matchOther[2] : '';
-                            
-                            // Aplica o novo nome base preservando apenas os parênteses daquela semana
                             targetEx.name = otherParens ? `${baseName} ${otherParens}` : baseName;
                         }
                     }
                 });
             } else {
                 workoutData.weeks.forEach(week => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises[exIdx]) {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises && week.days[currentDayIdx].exercises[exIdx]) {
                         week.days[currentDayIdx].exercises[exIdx][prop] = value;
                     }
                 });
