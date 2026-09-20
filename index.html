@@ -2396,10 +2396,37 @@
             saveWorkoutData();
         }
 
-        function openHistoryModal() {
-            renderHistoryCalendar();
-            renderHistoryRecentList();
+        /* CONSULTA DIRETA DE HISTÓRICO DA PLANILHA */
+        async function fetchHistoryFromSheet(year, month) {
+            const monthStr = String(month + 1).padStart(2, '0');
+            const targetMonthKey = `${year}-${monthStr}`;
+
+            renderHistoryCalendar(true);
+
+            if (!API_URL || !currentStudent) return;
+            try {
+                const res = await fetch(`${API_URL}?action=getHistory&aluno=${currentStudent}&mes=${targetMonthKey}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
+                const result = await res.json();
+                if (result && result.success && result.history) {
+                    workoutData.history = result.history;
+                    historyMonthCache[targetMonthKey] = result.history;
+                } else if (result && result.history) {
+                    workoutData.history = result.history;
+                } else {
+                    workoutData.history = {};
+                }
+            } catch (e) {
+                console.error("Erro ao buscar histórico da planilha:", e);
+                showToast("Erro ao carregar histórico da nuvem", "fa-triangle-exclamation", "text-red-400");
+            } finally {
+                renderHistoryCalendar(false);
+                renderHistoryRecentList();
+            }
+        }
+
+        async function openHistoryModal() {
             openModal('modal-history');
+            await fetchHistoryFromSheet(calendarYear, calendarMonth);
         }
 
         async function changeHistoryMonth(delta) {
@@ -2411,35 +2438,26 @@
                 calendarMonth = 0;
                 calendarYear++;
             }
-
-            const monthStr = String(calendarMonth + 1).padStart(2, '0');
-            const targetMonthKey = `${calendarYear}-${monthStr}`;
-
-            if (!historyMonthCache[targetMonthKey] && API_URL) {
-                try {
-                    showToast(`Buscando dados de ${monthStr}/${calendarYear}...`, "fa-spinner fa-spin", "text-blue-400");
-                    const res = await fetch(`${API_URL}?aluno=${currentStudent}&mes=${targetMonthKey}&token=${encodeURIComponent(API_SECRET_TOKEN)}`);
-                    const data = await res.json();
-                    if (data && data.history) {
-                        historyMonthCache[targetMonthKey] = data.history;
-                        workoutData.history = Object.assign({}, workoutData.history, data.history);
-                    }
-                } catch (e) {
-                    console.log("Mês sem registros adicionais.");
-                }
-            }
-
-            renderHistoryCalendar();
-            renderHistoryRecentList();
+            await fetchHistoryFromSheet(calendarYear, calendarMonth);
         }
 
-        function renderHistoryCalendar() {
+        function renderHistoryCalendar(isLoading = false) {
             const monthYearEl = document.getElementById('calendar-month-year');
             const gridContainer = document.getElementById('calendar-grid-container');
             if (!gridContainer || !monthYearEl) return;
 
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             monthYearEl.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+            if (isLoading) {
+                gridContainer.innerHTML = `
+                    <div class="py-8 text-center text-slate-500 space-y-2">
+                        <i class="fa-solid fa-arrows-rotate fa-spin text-lg text-blue-400"></i>
+                        <p class="text-xs">Consultando registros na planilha...</p>
+                    </div>
+                `;
+                return;
+            }
 
             const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
             const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
@@ -2494,7 +2512,7 @@
             const keys = Object.keys(history).sort().reverse();
 
             if (keys.length === 0) {
-                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino registrado ainda.</div>`;
+                listEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-3">Nenhum treino registrado neste mês na planilha.</div>`;
                 return;
             }
 
@@ -2703,6 +2721,8 @@
 
                 if (result && result.valid) {
                     workoutData.cycleCount = 1;
+                    workoutData.history = {}; // Limpeza completa do histórico em memória
+
                     if (workoutData.weeks) {
                         workoutData.weeks.forEach(w => {
                             if (w.days) {
