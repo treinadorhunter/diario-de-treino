@@ -1632,20 +1632,14 @@
 
             if (targetIdx < 0 || targetIdx >= exercises.length) return;
 
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
-                    const list = week.days[currentDayIdx].exercises;
-                    if (list[exIdx] && list[targetIdx]) {
-                        const temp = list[exIdx];
-                        list[exIdx] = list[targetIdx];
-                        list[targetIdx] = temp;
-                    }
-                }
-            });
+            // Inverte a ordem apenas no dia da semana atual selecionada
+            const temp = exercises[exIdx];
+            exercises[exIdx] = exercises[targetIdx];
+            exercises[targetIdx] = temp;
 
             saveWorkoutData();
             renderExercises();
-            showToast("Ordem dos exercícios atualizada!", "fa-arrows-up-down", "text-blue-400");
+            showToast("Ordem atualizada nesta semana!", "fa-arrows-up-down", "text-blue-400");
         }
 
         function toggleExerciseUnit(exIdx) {
