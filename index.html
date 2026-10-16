@@ -1632,14 +1632,20 @@
 
             if (targetIdx < 0 || targetIdx >= exercises.length) return;
 
-            // Inverte a ordem apenas no dia da semana atual selecionada
-            const temp = exercises[exIdx];
-            exercises[exIdx] = exercises[targetIdx];
-            exercises[targetIdx] = temp;
+            workoutData.weeks.forEach(week => {
+                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
+                    const list = week.days[currentDayIdx].exercises;
+                    if (list[exIdx] && list[targetIdx]) {
+                        const temp = list[exIdx];
+                        list[exIdx] = list[targetIdx];
+                        list[targetIdx] = temp;
+                    }
+                }
+            });
 
             saveWorkoutData();
             renderExercises();
-            showToast("Ordem atualizada nesta semana!", "fa-arrows-up-down", "text-blue-400");
+            showToast("Ordem dos exercícios atualizada!", "fa-arrows-up-down", "text-blue-400");
         }
 
         function toggleExerciseUnit(exIdx) {
@@ -2298,28 +2304,43 @@
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
 
-        function updateExerciseProp(exIdx, prop, value) {
+       function updateExerciseProp(exIdx, prop, value) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx] || !currentWeek.days[currentDayIdx].exercises) return;
-            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-            if (!ex) return;
+            const currentEx = currentWeek.days[currentDayIdx].exercises[exIdx];
+            if (!currentEx) return;
 
-            const safeVal = (prop === 'name') ? String(value || '').trim() : value;
+            if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
+                currentEx[prop] = value;
+            } else if (prop === 'name') {
+                const safeVal = String(value || '').trim();
+                const oldName = String(currentEx.name || '').trim().toLowerCase();
 
-            // Se for a primeira definição do nome (saindo do padrão "Novo Exercício"), replica em todas as semanas
-            if (prop === 'name' && ex.name === "Novo Exercício") {
-                workoutData.weeks.forEach(week => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
-                        const targetEx = week.days[currentDayIdx].exercises[exIdx];
-                        if (targetEx && targetEx.name === "Novo Exercício") {
-                            targetEx.name = safeVal;
+                // Identifica se é a primeira definição de nome (saindo do padrão "Novo Exercício")
+                const isInitialName = oldName === 'novo exercício' || oldName === 'novo exercicio' || oldName.indexOf('novo exerc') === 0 || oldName === '';
+
+                if (isInitialName) {
+                    // Primeiro nome do exercício recém-criado: replica em todas as semanas
+                    workoutData.weeks.forEach(week => {
+                        if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
+                            const targetEx = week.days[currentDayIdx].exercises[exIdx];
+                            if (targetEx) {
+                                targetEx.name = safeVal;
+                            }
                         }
+                    });
+                    showToast("Exercício nomeado em todas as semanas!", "fa-circle-check", "text-emerald-400");
+                } else {
+                    // Exercício já existente: altera o nome APENAS na semana atual selecionada
+                    currentEx.name = safeVal;
+                    showToast("Nome alterado nesta semana!", "fa-pen", "text-blue-400");
+                }
+            } else {
+                workoutData.weeks.forEach(week => {
+                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises && week.days[currentDayIdx].exercises[exIdx]) {
+                        week.days[currentDayIdx].exercises[exIdx][prop] = value;
                     }
                 });
-                showToast("Exercício nomeado em todas as semanas!", "fa-circle-check", "text-emerald-400");
-            } else {
-                // Alterações posteriores de nome ou ajustes individuais afetam apenas a semana atual
-                ex[prop] = safeVal;
             }
 
             saveWorkoutData();
