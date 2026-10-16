@@ -1994,7 +1994,7 @@
                             ${isAdminMode ? `
                                 <div class="flex items-center gap-2 mb-1.5">
                                     <input type="text" value="${escapeHtml(ex.name)}" 
-                                        onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
+                                        onchange="(${exIdx}, 'name', this.value)"
                                         class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
                                     ${isExHidden ? `
                                         <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
@@ -2012,7 +2012,7 @@
                                     <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
                                         <span class="text-[10px] font-bold text-slate-400">${exUnit === 's' ? 'Tempo:' : 'Reps:'}</span>
                                         <input type="text" value="${escapeHtml(ex.targetReps || '')}" 
-                                            onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)"
+                                            onchange="(${exIdx}, 'targetReps', this.value)"
                                             class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
                                     </div>
 
@@ -2020,7 +2020,7 @@
                                         <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
                                         <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
                                         <input type="text" value="${escapeHtml(ex.rest || '')}" 
-                                            onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
+                                            onchange="(${exIdx}, 'rest', this.value)"
                                             class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
                                     </div>
 
@@ -2083,7 +2083,7 @@
                         <div>
                             ${isAdminMode ? `
                                 <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
-                                    onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
+                                    onchange="(${exIdx}, 'notes', this.value)"
                                     class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
                             ` : `
                                 <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
@@ -2299,37 +2299,29 @@
         }
 
         function updateExerciseProp(exIdx, prop, value) {
-            if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
-                const currentWeek = workoutData.weeks[currentWeekIdx];
-                if (currentWeek && currentWeek.days && currentWeek.days[currentDayIdx] && currentWeek.days[currentDayIdx].exercises) {
-                    const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
-                    if (ex) ex[prop] = value;
-                }
-            } else if (prop === 'name') {
-                const safeVal = String(value || '').trim();
-                const parsedCurrent = splitExerciseName(safeVal);
-                const newBase = parsedCurrent.base;
+            const currentWeek = workoutData.weeks[currentWeekIdx];
+            if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx] || !currentWeek.days[currentDayIdx].exercises) return;
+            const ex = currentWeek.days[currentDayIdx].exercises[exIdx];
+            if (!ex) return;
 
-                workoutData.weeks.forEach((week, wIdx) => {
+            const safeVal = (prop === 'name') ? String(value || '').trim() : value;
+
+            // Se for a primeira definição do nome (saindo do padrão "Novo Exercício"), replica em todas as semanas
+            if (prop === 'name' && ex.name === "Novo Exercício") {
+                workoutData.weeks.forEach(week => {
                     if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
                         const targetEx = week.days[currentDayIdx].exercises[exIdx];
-                        if (!targetEx) return;
-
-                        if (wIdx === currentWeekIdx) {
+                        if (targetEx && targetEx.name === "Novo Exercício") {
                             targetEx.name = safeVal;
-                        } else {
-                            const parsedOther = splitExerciseName(targetEx.name);
-                            targetEx.name = parsedOther.parens ? `${newBase} ${parsedOther.parens}` : newBase;
                         }
                     }
                 });
+                showToast("Exercício nomeado em todas as semanas!", "fa-circle-check", "text-emerald-400");
             } else {
-                workoutData.weeks.forEach(week => {
-                    if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises && week.days[currentDayIdx].exercises[exIdx]) {
-                        week.days[currentDayIdx].exercises[exIdx][prop] = value;
-                    }
-                });
+                // Alterações posteriores de nome ou ajustes individuais afetam apenas a semana atual
+                ex[prop] = safeVal;
             }
+
             saveWorkoutData();
             renderApp();
         }
