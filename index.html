@@ -460,7 +460,7 @@
         window.addEventListener('beforeunload', () => {
             if (saveTimeout) {
                 clearTimeout(saveTimeout);
-                (workoutData);
+                sendDataToSheetsDirect(workoutData);
             }
         });
 
@@ -566,7 +566,7 @@
                     normalizeWorkoutData(workoutData);
                     renderHeader();
                     renderApp();
-                    (workoutData);
+                    sendDataToSheetsDirect(workoutData);
                     setSyncStatus("success", "Criado na Nuvem");
                     showToast("Nova aluna detectada! Ficha pronta para edição.", "fa-circle-check", "text-emerald-400");
                 }
@@ -1632,20 +1632,14 @@
 
             if (targetIdx < 0 || targetIdx >= exercises.length) return;
 
-            workoutData.weeks.forEach(week => {
-                if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
-                    const list = week.days[currentDayIdx].exercises;
-                    if (list[exIdx] && list[targetIdx]) {
-                        const temp = list[exIdx];
-                        list[exIdx] = list[targetIdx];
-                        list[targetIdx] = temp;
-                    }
-                }
-            });
+            // Inverte a ordem apenas no dia da semana atual selecionada
+            const temp = exercises[exIdx];
+            exercises[exIdx] = exercises[targetIdx];
+            exercises[targetIdx] = temp;
 
             saveWorkoutData();
             renderExercises();
-            showToast("Ordem dos exercícios atualizada!", "fa-arrows-up-down", "text-blue-400");
+            showToast("Ordem atualizada nesta semana!", "fa-arrows-up-down", "text-blue-400");
         }
 
         function toggleExerciseUnit(exIdx) {
@@ -2000,7 +1994,7 @@
                             ${isAdminMode ? `
                                 <div class="flex items-center gap-2 mb-1.5">
                                     <input type="text" value="${escapeHtml(ex.name)}" 
-                                        onchange="(${exIdx}, 'name', this.value)"
+                                        onchange="updateExerciseProp(${exIdx}, 'name', this.value)"
                                         class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
                                     ${isExHidden ? `
                                         <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
@@ -2018,7 +2012,7 @@
                                     <div class="flex items-center gap-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5">
                                         <span class="text-[10px] font-bold text-slate-400">${exUnit === 's' ? 'Tempo:' : 'Reps:'}</span>
                                         <input type="text" value="${escapeHtml(ex.targetReps || '')}" 
-                                            onchange="(${exIdx}, 'targetReps', this.value)"
+                                            onchange="updateExerciseProp(${exIdx}, 'targetReps', this.value)"
                                             class="w-14 bg-transparent text-[10px] font-extrabold text-blue-400 focus:outline-none">
                                     </div>
 
@@ -2026,7 +2020,7 @@
                                         <i class="fa-solid fa-stopwatch text-[10px] text-amber-400"></i>
                                         <span class="text-[10px] font-bold text-slate-400">Descanso:</span>
                                         <input type="text" value="${escapeHtml(ex.rest || '')}" 
-                                            onchange="(${exIdx}, 'rest', this.value)"
+                                            onchange="updateExerciseProp(${exIdx}, 'rest', this.value)"
                                             class="w-14 bg-transparent text-[10px] font-extrabold text-amber-400 focus:outline-none">
                                     </div>
 
@@ -2089,7 +2083,7 @@
                         <div>
                             ${isAdminMode ? `
                                 <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
-                                    onchange="(${exIdx}, 'notes', this.value)"
+                                    onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
                                     class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
                             ` : `
                                 <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
@@ -2304,7 +2298,7 @@
             if (elRir) elRir.textContent = weekInfo.rirText || '-';
         }
 
-       function updateExerciseProp(exIdx, prop, value) {
+        function updateExerciseProp(exIdx, prop, value) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx] || !currentWeek.days[currentDayIdx].exercises) return;
             const currentDay = currentWeek.days[currentDayIdx];
