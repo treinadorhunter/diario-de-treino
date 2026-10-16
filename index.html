@@ -460,7 +460,7 @@
         window.addEventListener('beforeunload', () => {
             if (saveTimeout) {
                 clearTimeout(saveTimeout);
-                sendDataToSheetsDirect(workoutData);
+                (workoutData);
             }
         });
 
@@ -566,7 +566,7 @@
                     normalizeWorkoutData(workoutData);
                     renderHeader();
                     renderApp();
-                    sendDataToSheetsDirect(workoutData);
+                    (workoutData);
                     setSyncStatus("success", "Criado na Nuvem");
                     showToast("Nova aluna detectada! Ficha pronta para edição.", "fa-circle-check", "text-emerald-400");
                 }
@@ -1179,7 +1179,7 @@
             fetch(API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({
                     aluno: currentStudent,
                     mes: currentMonth,
@@ -2307,33 +2307,46 @@
        function updateExerciseProp(exIdx, prop, value) {
             const currentWeek = workoutData.weeks[currentWeekIdx];
             if (!currentWeek || !currentWeek.days || !currentWeek.days[currentDayIdx] || !currentWeek.days[currentDayIdx].exercises) return;
-            const currentEx = currentWeek.days[currentDayIdx].exercises[exIdx];
+            const currentDay = currentWeek.days[currentDayIdx];
+            const currentEx = currentDay.exercises[exIdx];
             if (!currentEx) return;
 
             if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
                 currentEx[prop] = value;
             } else if (prop === 'name') {
                 const safeVal = String(value || '').trim();
-                const oldName = String(currentEx.name || '').trim().toLowerCase();
+                const oldName = String(currentEx.name || '').trim();
+                const isFirstNaming = (oldName.toLowerCase() === 'novo exercício' || oldName.toLowerCase() === 'novo exercicio' || oldName === '');
 
-                // Identifica se é a primeira definição de nome (saindo do padrão "Novo Exercício")
-                const isInitialName = oldName === 'novo exercício' || oldName === 'novo exercicio' || oldName.indexOf('novo exerc') === 0 || oldName === '';
-
-                if (isInitialName) {
-                    // Primeiro nome do exercício recém-criado: replica em todas as semanas
+                if (isFirstNaming) {
+                    // 1º Nome de um exercício recém-adicionado: replica para todas as semanas
                     workoutData.weeks.forEach(week => {
                         if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
                             const targetEx = week.days[currentDayIdx].exercises[exIdx];
-                            if (targetEx) {
+                            if (targetEx && (targetEx.name === 'Novo Exercício' || targetEx.name === '')) {
                                 targetEx.name = safeVal;
                             }
                         }
                     });
                     showToast("Exercício nomeado em todas as semanas!", "fa-circle-check", "text-emerald-400");
                 } else {
-                    // Exercício já existente: altera o nome APENAS na semana atual selecionada
+                    // Alteração de exercício já existente: muda APENAS na semana atual
                     currentEx.name = safeVal;
-                    showToast("Nome alterado nesta semana!", "fa-pen", "text-blue-400");
+
+                    // Atualiza também no histórico do ciclo atual caso já tenha séries concluídas na planilha
+                    const cycleNum = workoutData.cycleCount || 1;
+                    const expectedWeekTitle = `${currentWeek.title || ''} (Ciclo ${cycleNum})`;
+                    if (workoutData.history) {
+                        Object.keys(workoutData.history).forEach(dKey => {
+                            const hItem = workoutData.history[dKey];
+                            if (hItem && hItem.weekTitle === expectedWeekTitle && hItem.dayName === currentDay.name && hItem.exercises) {
+                                hItem.exercises.forEach(hEx => {
+                                    if (hEx.name === oldName) hEx.name = safeVal;
+                                });
+                            }
+                        });
+                    }
+                    showToast("Nome atualizado nesta semana!", "fa-pen", "text-blue-400");
                 }
             } else {
                 workoutData.weeks.forEach(week => {
