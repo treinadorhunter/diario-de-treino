@@ -202,10 +202,10 @@
             </button>
         </div>
     </main>
-
-    <!-- PAINEL FLUTUANTE GIGANTE DE DESCANSO (ALTA VISIBILIDADE) -->
-    <div id="floating-rest-timer" class="fixed bottom-0 inset-x-0 z-40 p-3 hidden pointer-events-none">
-        <div class="max-w-md mx-auto bg-slate-900/95 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-4 shadow-[0_0_40px_rgba(16,185,129,0.25)] pointer-events-auto space-y-3">
+    
+   <!-- PAINEL FLUTUANTE GIGANTE DE DESCANSO (ALTA VISIBILIDADE - CENTRALIZADO) -->
+    <div id="floating-rest-timer" class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-5 shadow-[0_0_50px_rgba(16,185,129,0.3)] space-y-4">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
@@ -217,25 +217,25 @@
             </div>
 
             <div class="flex items-center justify-between gap-3">
-                <button onclick="adjustRestTimer(-15)" class="py-3 px-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
+                <button onclick="adjustRestTimer(-15)" class="py-3.5 px-4 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
                     -15s
                 </button>
 
-                <div id="floating-timer-digits" class="text-5xl sm:text-6xl font-black tracking-tight text-emerald-400 tabular-nums text-center flex-1 leading-none py-1">
+                <div id="floating-timer-digits" class="text-6xl sm:text-7xl font-black tracking-tight text-emerald-400 tabular-nums text-center flex-1 leading-none py-2">
                     00:00
                 </div>
 
-                <button onclick="adjustRestTimer(15)" class="py-3 px-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
+                <button onclick="adjustRestTimer(15)" class="py-3.5 px-4 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
                     +15s
                 </button>
             </div>
 
-            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+            <div class="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden border border-slate-800">
                 <div id="floating-timer-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300" style="width: 100%"></div>
             </div>
         </div>
     </div>
-
+    
     <!-- Modal de Vídeo / GIF de Execução do Exercício -->
     <div id="modal-video" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-4 shadow-2xl space-y-3">
