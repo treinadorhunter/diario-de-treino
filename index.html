@@ -27,9 +27,72 @@
         .active-tab-glow {
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
+
+        /* ESTILOS DE IMPRESSÃO / GERADOR DE PDF */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                user-select: text !important;
+            }
+            body > *:not(#print-workout-sheet) {
+                display: none !important;
+            }
+            #print-workout-sheet {
+                display: block !important;
+                width: 100% !important;
+            }
+            .print-week-block {
+                page-break-inside: avoid;
+                margin-bottom: 18px;
+            }
+            .print-day-block {
+                page-break-inside: avoid;
+                margin-bottom: 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            table.print-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10px;
+            }
+            table.print-table th {
+                background-color: #f1f5f9 !important;
+                color: #1e293b !important;
+                text-align: left;
+                padding: 5px 8px;
+                border-bottom: 1px solid #cbd5e1;
+                font-weight: 800;
+                text-transform: uppercase;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            table.print-table td {
+                padding: 5px 8px;
+                border-bottom: 1px solid #e2e8f0;
+                vertical-align: top;
+                color: #0f172a !important;
+            }
+            table.print-table tr:last-child td {
+                border-bottom: none;
+            }
+        }
     </style>
 </head>
-<body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-20">
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased select-none pb-28">
+
+    <!-- Container Oculto Exclusivo para Impressão / PDF -->
+    <div id="print-workout-sheet" class="hidden"></div>
 
     <!-- Tela de Bloqueio de Segurança -->
     <div id="unauthorized-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 hidden">
@@ -140,6 +203,67 @@
         </div>
     </main>
 
+    <!-- PAINEL FLUTUANTE GIGANTE DE DESCANSO (ALTA VISIBILIDADE) -->
+    <div id="floating-rest-timer" class="fixed bottom-0 inset-x-0 z-40 p-3 hidden pointer-events-none">
+        <div class="max-w-md mx-auto bg-slate-900/95 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-4 shadow-[0_0_40px_rgba(16,185,129,0.25)] pointer-events-auto space-y-3">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+                    <span id="floating-timer-ex-name" class="text-xs font-extrabold text-slate-300 truncate">Descanso em andamento</span>
+                </div>
+                <button onclick="cancelRestTimer()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-red-950/60 text-slate-300 hover:text-red-300 border border-slate-700 text-[11px] font-bold flex items-center gap-1 active:scale-95 transition shrink-0">
+                    <i class="fa-solid fa-xmark"></i> Pular
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+                <button onclick="adjustRestTimer(-15)" class="py-3 px-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
+                    -15s
+                </button>
+
+                <div id="floating-timer-digits" class="text-5xl sm:text-6xl font-black tracking-tight text-emerald-400 tabular-nums text-center flex-1 leading-none py-1">
+                    00:00
+                </div>
+
+                <button onclick="adjustRestTimer(15)" class="py-3 px-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-extrabold text-xs active:scale-95 transition shrink-0">
+                    +15s
+                </button>
+            </div>
+
+            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                <div id="floating-timer-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Vídeo / GIF de Execução do Exercício -->
+    <div id="modal-video" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-4 shadow-2xl space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="min-w-0 pr-2">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-400 block">Demonstração Técnica</span>
+                    <h3 id="modal-video-title" class="text-sm font-extrabold text-white truncate">Exercício</h3>
+                </div>
+                <button onclick="closeVideoModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div id="modal-video-content" class="w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center min-h-[240px] max-h-[65vh]"></div>
+
+            <div id="modal-video-notes" class="text-xs text-slate-300 bg-slate-950/80 border border-slate-800/80 p-3 rounded-xl hidden"></div>
+
+            <div class="flex items-center justify-between gap-2 pt-1">
+                <a id="modal-video-external" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Abrir no Drive
+                </a>
+                <button onclick="closeVideoModal()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-extrabold active:scale-95 transition">
+                    Fechar Visualização
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Adicionar Cardio -->
     <div id="modal-cardio" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
@@ -203,7 +327,7 @@
             <div>
                 <h3 class="text-base font-extrabold text-white mb-1">Parabéns!</h3>
                 <p id="modal-mesocycle-msg" class="text-xs text-slate-300 leading-relaxed">
-                    Você concluiu todos os treinos previstos para este ciclo. O treino foi arquivado no histórico e o próximo ciclo será iniciado.
+                    Você concluiu todos os treinos previstos para este ciclo. As últimas cargas utilizadas foram salvas como referência para o próximo ciclo!
                 </p>
             </div>
             <div class="flex gap-2 pt-2">
@@ -273,8 +397,8 @@
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-upload text-emerald-400"></i> Importar Backup (JSON)</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
-                <button onclick="window.print(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
-                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir ou Gerar PDF</span>
+                <button onclick="printWorkoutSheet();" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center justify-between transition border border-slate-700/60">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-print text-amber-400"></i> Imprimir Ficha ou Gerar PDF</span>
                     <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
                 <button onclick="confirmReset(); closeModal('modal-menu');" class="w-full py-3 px-4 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded-xl text-xs font-bold flex items-center justify-between transition border border-red-800/40">
@@ -416,7 +540,7 @@
         let saveTimeout = null;
 
         let selectedIntensity = "Moderado";
-        let restTimer = { intervalId: null, exIdx: null, endTime: null, total: 0, notified: false };
+        let restTimer = { intervalId: null, exIdx: null, exName: "", endTime: null, total: 0, notified: false };
         let screenWakeLock = null;
 
         let calendarYear = new Date().getFullYear();
@@ -557,9 +681,9 @@
                             rirText: "RIR 1-2",
                             paletteIdx: 2,
                             days: [
-                                { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                                { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] },
-                                { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", logs: [] }] }
+                                { id: "SEG", shortName: "Seg • Treino A", name: "Segunda: Treino A", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", videoUrl: "", previousLoads: [], logs: [] }] },
+                                { id: "QUA", shortName: "Qua • Treino B", name: "Quarta: Treino B", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", videoUrl: "", previousLoads: [], logs: [] }] },
+                                { id: "SEX", shortName: "Sex • Treino C", name: "Sexta: Treino C", cardios: [], exercises: [{ name: "Exercício 1", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "", videoUrl: "", previousLoads: [], logs: [] }] }
                             ]
                         }]
                     };
@@ -651,12 +775,197 @@
                                 d.exercises.forEach(ex => {
                                     if (ex.hidden === undefined) ex.hidden = false;
                                     if (!ex.unit) ex.unit = 'rep';
+                                    if (ex.videoUrl === undefined) ex.videoUrl = '';
+                                    if (!Array.isArray(ex.previousLoads)) ex.previousLoads = [];
                                 });
                             }
                         });
                     }
                 });
             }
+        }
+
+        /* 1. FUNÇÃO DE BUSCA DA ÚLTIMA CARGA UTILIZADA PELO ALUNO */
+        function getLastUsedLoad(ex, setIdx) {
+            // 1º Prioridade: carga salva na virada do ciclo anterior (previousLoads)
+            if (ex.previousLoads && ex.previousLoads[setIdx] !== undefined && ex.previousLoads[setIdx] !== '' && Number(ex.previousLoads[setIdx]) > 0) {
+                return Number(ex.previousLoads[setIdx]);
+            }
+
+            // 2º Prioridade: busca nos registros históricos sincronizados da planilha (do mais recente para o mais antigo)
+            const history = workoutData.history || {};
+            const dates = Object.keys(history).sort().reverse();
+            const targetName = String(ex.name || '').trim().toLowerCase();
+
+            for (let i = 0; i < dates.length; i++) {
+                const h = history[dates[i]];
+                if (!h || h.missed || !h.exercises) continue;
+                const matchedEx = h.exercises.find(e => String(e.name || '').trim().toLowerCase() === targetName);
+                if (matchedEx && matchedEx.logs && matchedEx.logs.length > 0) {
+                    const targetLog = matchedEx.logs[setIdx] || matchedEx.logs[matchedEx.logs.length - 1];
+                    if (targetLog && targetLog.load !== '' && targetLog.load !== undefined && Number(targetLog.load) > 0) {
+                        return Number(targetLog.load);
+                    }
+                }
+            }
+
+            // 3º Prioridade: Carga Recomendada pelo Treinador
+            if (ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null && Number(ex.recommendedLoad) > 0) {
+                return Number(ex.recommendedLoad);
+            }
+
+            return 0;
+        }
+
+        /* 4. MODAL DE VÍDEO / GIF DE EXECUÇÃO (GOOGLE DRIVE) */
+        function extractGoogleDriveId(url) {
+            if (!url) return null;
+            const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (m1) return m1[1];
+            const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (m2) return m2[1];
+            return null;
+        }
+
+        function openExerciseVideo(wIdx, dIdx, exIdx) {
+            const week = workoutData.weeks[wIdx];
+            if (!week || !week.days || !week.days[dIdx]) return;
+            const ex = week.days[dIdx].exercises[exIdx];
+            if (!ex || !ex.videoUrl) return;
+
+            const rawUrl = String(ex.videoUrl).trim();
+            const titleEl = document.getElementById('modal-video-title');
+            const contentEl = document.getElementById('modal-video-content');
+            const notesEl = document.getElementById('modal-video-notes');
+            const extLink = document.getElementById('modal-video-external');
+
+            titleEl.textContent = ex.name || 'Execução do Exercício';
+            extLink.href = rawUrl;
+
+            if (ex.notes && ex.notes.trim() !== '') {
+                notesEl.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 mr-1.5"></i><span>${escapeHtml(ex.notes)}</span>`;
+                notesEl.classList.remove('hidden');
+            } else {
+                notesEl.classList.add('hidden');
+            }
+
+            const driveId = extractGoogleDriveId(rawUrl);
+            const isDirectGifOrImg = /\.(gif|webp|png|jpg|jpeg)(\?.*)?$/i.test(rawUrl);
+            const isDirectVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(rawUrl);
+
+            if (isDirectGifOrImg) {
+                contentEl.innerHTML = `<img src="${escapeHtml(rawUrl)}" alt="${escapeHtml(ex.name)}" class="max-w-full max-h-[60vh] object-contain mx-auto rounded-lg">`;
+            } else if (isDirectVideo) {
+                contentEl.innerHTML = `<video src="${escapeHtml(rawUrl)}" controls autoplay loop playsinline class="w-full max-h-[60vh] rounded-lg"></video>`;
+            } else if (driveId) {
+                const previewUrl = `https://drive.google.com/file/d/${driveId}/preview`;
+                contentEl.innerHTML = `<iframe src="${previewUrl}" class="w-full h-72 sm:h-80 border-0 rounded-lg" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            } else {
+                contentEl.innerHTML = `<iframe src="${escapeHtml(rawUrl)}" class="w-full h-72 sm:h-80 border-0 rounded-lg" allowfullscreen></iframe>`;
+            }
+
+            openModal('modal-video');
+        }
+
+        function closeVideoModal() {
+            const contentEl = document.getElementById('modal-video-content');
+            if (contentEl) contentEl.innerHTML = '';
+            closeModal('modal-video');
+        }
+
+        /* 3. GERADOR DE FICHA DE TREINO PRONTA PARA IMPRESSÃO / PDF */
+        function printWorkoutSheet() {
+            closeModal('modal-menu');
+            const printContainer = document.getElementById('print-workout-sheet');
+            if (!printContainer) return;
+
+            const studentName = workoutData.studentName || "Aluno(a)";
+            const cycleNum = workoutData.cycleCount || 1;
+            const issueDate = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            let html = `
+                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px;">TREINADOR HUNTER <span style="font-size: 11px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">PRO</span></div>
+                        <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 2px;">Planejamento e Prescrição de Treinamento Individualizado</div>
+                    </div>
+                    <div style="text-align: right; font-size: 11px; color: #1e293b;">
+                        <div><strong>Aluno(a):</strong> ${escapeHtml(studentName)}</div>
+                        <div><strong>Ciclo Atual:</strong> #${cycleNum} &nbsp;|&nbsp; <strong>Emissão:</strong> ${issueDate}</div>
+                    </div>
+                </div>
+            `;
+
+            const weeks = (workoutData.weeks || []).filter(w => isAdminMode || !w.hidden);
+
+            weeks.forEach((w, wIdx) => {
+                html += `
+                    <div class="print-week-block">
+                        <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                            <div>
+                                <span style="font-size: 13px; font-weight: 800;">${escapeHtml(w.title || w.shortTitle || `Semana ${wIdx + 1}`)}</span>
+                                ${w.desc ? `<div style="font-size: 10px; color: #cbd5e1; margin-top: 1px;">${escapeHtml(w.desc)}</div>` : ''}
+                            </div>
+                            <div style="text-align: right; font-size: 10px; font-weight: 700; white-space: nowrap; margin-left: 10px;">
+                                <div>Alvo: ${escapeHtml(w.targetReps || '-')}</div>
+                                <div>Meta: ${escapeHtml(w.rirText || '-')}</div>
+                            </div>
+                        </div>
+                `;
+
+                (w.days || []).forEach(d => {
+                    const activeExercises = (d.exercises || []).filter(ex => isAdminMode || !ex.hidden);
+                    if (activeExercises.length === 0) return;
+
+                    html += `
+                        <div class="print-day-block">
+                            <div style="background: #e2e8f0; color: #0f172a; padding: 5px 10px; font-size: 11px; font-weight: 800; border-bottom: 1px solid #cbd5e1; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                                ${escapeHtml(d.name || d.shortName || 'Sessão de Treino')}
+                            </div>
+                            <table class="print-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 34%;">Exercício</th>
+                                        <th style="width: 14%;">Séries × Alvo</th>
+                                        <th style="width: 10%;">Descanso</th>
+                                        <th style="width: 16%;">Carga Base / Anotar</th>
+                                        <th style="width: 26%;">Orientações Técnicas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    activeExercises.forEach(ex => {
+                        const setsCount = ex.sets || 4;
+                        const unitLabel = ex.unit === 's' ? 's' : ' reps';
+                        const lastLoad = getLastUsedLoad(ex, 0);
+                        const loadDisplay = lastLoad > 0 ? `${lastLoad} kg ( últ. )` : `____ kg`;
+
+                        html += `
+                            <tr>
+                                <td style="font-weight: 700;">${escapeHtml(ex.name)}</td>
+                                <td style="font-weight: 700;">${setsCount} × ${escapeHtml(ex.targetReps || '8-12')}${unitLabel}</td>
+                                <td>${escapeHtml(ex.rest || '60s')}</td>
+                                <td style="font-weight: 600;">${loadDisplay}</td>
+                                <td style="color: #334155; font-size: 9.5px;">${escapeHtml(ex.notes || '-')}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            printContainer.innerHTML = html;
+            setTimeout(() => {
+                window.print();
+            }, 150);
         }
 
         /* CARDIO FUNCTIONS */
@@ -772,7 +1081,7 @@
             });
         }
 
-        /* CRONÔMETRO */
+        /* 2. CRONÔMETRO GIGANTE DE ALTA VISIBILIDADE */
         function parseRestTimeSeconds(str) {
             if (!str) return 60;
             const clean = String(str).toLowerCase().trim();
@@ -850,6 +1159,7 @@
             }
 
             restTimer.exIdx = exIdx;
+            restTimer.exName = ex.name || "Descanso";
             restTimer.total = seconds;
             restTimer.endTime = Date.now() + (seconds * 1000);
             restTimer.notified = false;
@@ -867,7 +1177,22 @@
                 } else {
                     updateRestTimerBadgeUI();
                 }
-            }, 1000);
+            }, 250);
+        }
+
+        function adjustRestTimer(deltaSeconds) {
+            if (!restTimer.endTime) return;
+            restTimer.endTime += (deltaSeconds * 1000);
+            const remaining = Math.ceil((restTimer.endTime - Date.now()) / 1000);
+            if (remaining > restTimer.total) {
+                restTimer.total = remaining;
+            }
+            if (remaining <= 0) {
+                cancelRestTimer();
+                triggerAlarmAndNotification();
+            } else {
+                updateRestTimerBadgeUI();
+            }
         }
 
         function syncBackgroundTimer() {
@@ -893,26 +1218,42 @@
             restTimer.exIdx = null;
             restTimer.endTime = null;
             updateRestTimerBadgeUI();
-            showToast("Cronômetro cancelado", "fa-stop", "text-slate-400");
+            showToast("Cronômetro encerrado", "fa-stop", "text-slate-400");
         }
 
         function updateRestTimerBadgeUI() {
+            const floatingPanel = document.getElementById('floating-rest-timer');
+            const digitsEl = document.getElementById('floating-timer-digits');
+            const exNameEl = document.getElementById('floating-timer-ex-name');
+            const barEl = document.getElementById('floating-timer-bar');
+
             const allBadges = document.querySelectorAll('[id^="rest-timer-container-"]');
             allBadges.forEach(el => { el.innerHTML = ''; });
 
             if (restTimer.exIdx !== null && restTimer.endTime) {
                 const remaining = Math.max(0, Math.ceil((restTimer.endTime - Date.now()) / 1000));
-                const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
-                if (targetContainer && remaining > 0) {
-                    targetContainer.innerHTML = `
-                        <button onclick="cancelRestTimer()" title="Clique para cancelar o descanso" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm active:scale-95 transition animate-pulse">
-                            <i class="fa-solid fa-stopwatch text-[9px] text-emerald-300"></i>
-                            <span>Descanso: ${formatTimerSeconds(remaining)}</span>
-                            <i class="fa-solid fa-xmark text-[8px] text-slate-400 hover:text-white ml-0.5"></i>
-                        </button>
-                    `;
+                if (remaining > 0) {
+                    if (floatingPanel) floatingPanel.classList.remove('hidden');
+                    if (digitsEl) digitsEl.textContent = formatTimerSeconds(remaining);
+                    if (exNameEl) exNameEl.textContent = `Descanso • ${restTimer.exName}`;
+                    if (barEl && restTimer.total > 0) {
+                        const pct = Math.min(100, Math.max(0, (remaining / restTimer.total) * 100));
+                        barEl.style.width = `${pct}%`;
+                    }
+
+                    const targetContainer = document.getElementById(`rest-timer-container-${restTimer.exIdx}`);
+                    if (targetContainer) {
+                        targetContainer.innerHTML = `
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-extrabold flex items-center gap-1 animate-pulse">
+                                <i class="fa-solid fa-stopwatch text-[9px]"></i> ${formatTimerSeconds(remaining)}
+                            </span>
+                        `;
+                    }
+                    return;
                 }
             }
+
+            if (floatingPanel) floatingPanel.classList.add('hidden');
         }
 
         function resetCycleCount() {
@@ -1583,7 +1924,7 @@
                     missed: false,
                     cardios: [],
                     exercises: [
-                        { name: "Novo Exercício", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "Observação de execução...", logs: [] }
+                        { name: "Novo Exercício", hidden: false, sets: 4, targetReps: "8-12", rest: "60s", unit: "rep", notes: "Observação de execução...", videoUrl: "", previousLoads: [], logs: [] }
                     ]
                 });
             });
@@ -1948,6 +2289,8 @@
                 for (let s = 0; s < setsCount; s++) {
                     const log = ex.logs[s] || { load: '', reps: '', done: false };
                     const isDone = Boolean(log.done);
+                    const lastLoadVal = getLastUsedLoad(ex, s);
+                    const loadPlaceholder = lastLoadVal > 0 ? lastLoadVal : 0;
 
                     setsRowsHtml += `
                         <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-xl transition ${isDone ? 'bg-emerald-950/25 border border-emerald-800/40' : 'bg-slate-950 border border-slate-800/80'}">
@@ -1958,10 +2301,10 @@
                             <div class="flex-1 min-w-0 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-800/80">
                                 <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">-</button>
                                 <div class="flex items-center justify-center gap-0.5 min-w-0 px-0.5">
-                                    <input type="number" step="0.5" inputmode="decimal" placeholder="0" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" 
+                                    <input type="number" step="0.5" inputmode="decimal" placeholder="${loadPlaceholder}" value="${log.load !== undefined && log.load !== '' ? log.load : ''}" 
                                         oninput="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
                                         onchange="updateSetLog(${exIdx}, ${s}, 'load', this.value)"
-                                        class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                        class="w-8 sm:w-10 bg-transparent text-center font-extrabold text-xs text-white placeholder-slate-500 focus:outline-none p-0">
                                     <span class="text-[9px] text-slate-500 font-bold shrink-0">kg</span>
                                 </div>
                                 <button onclick="adjustSetVal(${exIdx}, ${s}, 'load', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
@@ -1973,7 +2316,7 @@
                                     <input type="number" inputmode="numeric" placeholder="${defaultRepsPlaceholder}" value="${log.reps !== undefined ? log.reps : ''}" 
                                         oninput="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
                                         onchange="updateSetLog(${exIdx}, ${s}, 'reps', this.value)"
-                                        class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white focus:outline-none p-0">
+                                        class="w-7 sm:w-9 bg-transparent text-center font-extrabold text-xs text-white placeholder-slate-500 focus:outline-none p-0">
                                     <span class="text-[9px] text-slate-500 font-bold shrink-0">${exUnit}</span>
                                 </div>
                                 <button onclick="adjustSetVal(${exIdx}, ${s}, 'reps', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 rounded-md font-bold text-xs flex items-center justify-center shrink-0">+</button>
@@ -1987,10 +2330,12 @@
                 }
 
                 const hasRecLoad = ex.recommendedLoad !== undefined && ex.recommendedLoad !== '' && ex.recommendedLoad !== null;
+                const hasVideo = ex.videoUrl && String(ex.videoUrl).trim() !== '';
+                const lastRefLoad = getLastUsedLoad(ex, 0);
 
                 let titleHtml = `
                     <div class="flex items-start justify-between gap-2">
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             ${isAdminMode ? `
                                 <div class="flex items-center gap-2 mb-1.5">
                                     <input type="text" value="${escapeHtml(ex.name)}" 
@@ -1998,7 +2343,7 @@
                                         class="w-full bg-slate-950 text-sm font-extrabold text-white border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
                                     ${isExHidden ? `
                                         <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold whitespace-nowrap flex items-center gap-1">
-                                            <i class="fa-solid fa-eye-slash"></i> Oculto nesta semana
+                                            <i class="fa-solid fa-eye-slash"></i> Oculto
                                         </span>
                                     ` : ''}
                                 </div>
@@ -2034,7 +2379,15 @@
                                     </div>
                                 </div>
                             ` : `
-                                <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h3 class="text-sm font-extrabold text-white leading-snug">${escapeHtml(ex.name)}</h3>
+                                    ${hasVideo ? `
+                                        <button type="button" onclick="openExerciseVideo(${currentWeekIdx}, ${currentDayIdx}, ${exIdx})" class="px-2.5 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold flex items-center gap-1.5 shrink-0 active:scale-95 transition shadow-sm">
+                                            <i class="fa-solid fa-circle-play text-xs"></i>
+                                            <span>Ver Execução</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
                                 <div class="flex flex-wrap items-center gap-2 mt-1">
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
                                         ${setsCount} séries × ${ex.targetReps} ${exUnit === 's' ? 's' : 'reps'}
@@ -2046,7 +2399,11 @@
                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                                             <i class="fa-solid fa-weight-hanging text-[9px]"></i> Rec: ${ex.recommendedLoad} kg
                                         </span>
-                                    ` : ''}
+                                    ` : (lastRefLoad > 0 ? `
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                                            <i class="fa-solid fa-clock-rotate-left text-[9px] text-emerald-400"></i> Última: ${lastRefLoad} kg
+                                        </span>
+                                    ` : '')}
                                     <div id="rest-timer-container-${exIdx}"></div>
                                 </div>
                             `}
@@ -2080,11 +2437,24 @@
                 let notesHtml = '';
                 if (ex.notes || isAdminMode) {
                     notesHtml = `
-                        <div>
+                        <div class="space-y-1.5">
                             ${isAdminMode ? `
                                 <input type="text" value="${escapeHtml(ex.notes || '')}" placeholder="Dica de execução cinesiológica..." 
                                     onchange="updateExerciseProp(${exIdx}, 'notes', this.value)"
                                     class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 focus:outline-none">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="flex-1 flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1">
+                                        <i class="fa-brands fa-google-drive text-blue-400 text-xs"></i>
+                                        <input type="url" value="${escapeHtml(ex.videoUrl || '')}" placeholder="Cole o link do vídeo/GIF (Google Drive)..." 
+                                            onchange="updateExerciseProp(${exIdx}, 'videoUrl', this.value)"
+                                            class="w-full bg-transparent text-[11px] text-blue-300 placeholder-slate-600 focus:outline-none">
+                                    </div>
+                                    ${hasVideo ? `
+                                        <button type="button" onclick="openExerciseVideo(${currentWeekIdx}, ${currentDayIdx}, ${exIdx})" class="px-2.5 py-1 rounded-lg bg-blue-600/20 border border-blue-500/40 text-blue-400 text-[10px] font-bold shrink-0">
+                                            Testar Vídeo
+                                        </button>
+                                    ` : ''}
+                                </div>
                             ` : `
                                 <p class="text-[11px] text-slate-400 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 flex items-start gap-2">
                                     <i class="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
@@ -2142,12 +2512,13 @@
             if (!ex.logs) ex.logs = [];
 
             let defaultReps = getTargetRepsNum(ex.targetReps);
+            let defaultLoad = getLastUsedLoad(ex, setIdx);
 
-            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
+            if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: defaultLoad > 0 ? defaultLoad : '', reps: defaultReps, done: false };
 
             let currentVal = parseNum(ex.logs[setIdx][field]);
             if (typeof currentVal !== 'number') {
-                currentVal = field === 'reps' ? defaultReps : 0;
+                currentVal = field === 'reps' ? defaultReps : defaultLoad;
             }
 
             let step = (field === 'reps' && ex.unit === 's') ? 5 : 1;
@@ -2179,11 +2550,17 @@
             if (!ex.logs) ex.logs = [];
 
             let defaultReps = getTargetRepsNum(ex.targetReps);
+            let defaultLoad = getLastUsedLoad(ex, setIdx);
 
             if (!ex.logs[setIdx]) ex.logs[setIdx] = { load: '', reps: defaultReps, done: false };
 
-            if (!ex.logs[setIdx].done && (ex.logs[setIdx].reps === '' || ex.logs[setIdx].reps === undefined)) {
-                ex.logs[setIdx].reps = defaultReps;
+            if (!ex.logs[setIdx].done) {
+                if (ex.logs[setIdx].reps === '' || ex.logs[setIdx].reps === undefined) {
+                    ex.logs[setIdx].reps = defaultReps;
+                }
+                if ((ex.logs[setIdx].load === '' || ex.logs[setIdx].load === undefined) && defaultLoad > 0) {
+                    ex.logs[setIdx].load = defaultLoad;
+                }
             }
 
             const wasDone = ex.logs[setIdx].done;
@@ -2217,6 +2594,19 @@
                             d.cardios = [];
                             if (d.exercises) {
                                 d.exercises.forEach(ex => {
+                                    // Salva as últimas cargas executadas neste ciclo antes de zerar as séries
+                                    const setsCount = ex.sets || 4;
+                                    const savedLoads = [];
+                                    for (let s = 0; s < setsCount; s++) {
+                                        const l = ex.logs && ex.logs[s] ? ex.logs[s] : null;
+                                        if (l && l.load !== '' && l.load !== undefined && Number(l.load) > 0) {
+                                            savedLoads.push(Number(l.load));
+                                        } else {
+                                            const prev = getLastUsedLoad(ex, s);
+                                            savedLoads.push(prev > 0 ? prev : '');
+                                        }
+                                    }
+                                    ex.previousLoads = savedLoads;
                                     ex.logs = [];
                                 });
                             }
@@ -2232,7 +2622,7 @@
             closeModal('modal-mesocycle');
             renderHeader();
             renderApp();
-            showToast(`Ciclo #${workoutData.cycleCount} iniciado!`, "fa-rotate-left", "text-emerald-400");
+            showToast(`Ciclo #${workoutData.cycleCount} iniciado com histórico de cargas!`, "fa-rotate-left", "text-emerald-400");
         }
 
         function updateMetrics() {
@@ -2307,6 +2697,24 @@
 
             if (prop === 'rest' || prop === 'targetReps' || prop === 'notes') {
                 currentEx[prop] = value;
+            } else if (prop === 'videoUrl') {
+                const safeUrl = String(value || '').trim();
+                const wasEmpty = !currentEx.videoUrl || String(currentEx.videoUrl).trim() === '';
+                currentEx.videoUrl = safeUrl;
+
+                // Se for o primeiro cadastro de vídeo e os exercícios nas outras semanas tiverem o mesmo nome, replica para poupar tempo
+                if (wasEmpty && safeUrl !== '') {
+                    const baseName = splitExerciseName(currentEx.name).base.toLowerCase();
+                    workoutData.weeks.forEach(week => {
+                        if (week.days && week.days[currentDayIdx] && week.days[currentDayIdx].exercises) {
+                            const targetEx = week.days[currentDayIdx].exercises[exIdx];
+                            if (targetEx && (!targetEx.videoUrl || targetEx.videoUrl === '') && splitExerciseName(targetEx.name).base.toLowerCase() === baseName) {
+                                targetEx.videoUrl = safeUrl;
+                            }
+                        }
+                    });
+                }
+                showToast("Link de vídeo atualizado!", "fa-video", "text-blue-400");
             } else if (prop === 'name') {
                 const safeVal = String(value || '').trim();
                 const oldName = String(currentEx.name || '').trim();
@@ -2384,6 +2792,8 @@
                         rest: defaultRestTime,
                         unit: "rep",
                         notes: "Observação de execução...",
+                        videoUrl: "",
+                        previousLoads: [],
                         logs: []
                     });
                 }
@@ -2568,7 +2978,6 @@
             document.getElementById('detail-day-title').textContent = item.dayName || 'Treino Realizado';
             document.getElementById('detail-week-title').textContent = item.weekTitle || '';
 
-            // Renderiza Cardios salvos no Histórico
             const cardioContainer = document.getElementById('detail-cardios-container');
             if (cardioContainer) {
                 cardioContainer.innerHTML = '';
@@ -2610,7 +3019,6 @@
                     const exCard = document.createElement('div');
                     exCard.className = "bg-slate-950 border border-slate-800/80 p-3 rounded-xl space-y-2";
                     
-                    // Trava de segurança: apenas é segundos se explicitamente 's' e não contiver termos de repetições
                     const isSecondsUnit = (ex.unit === 's') && !/rep/i.test(ex.targetReps || '') && !/eleva|agacha|supino|puxada|remada|flexora|extensora|abdutora|adutora|panturrilha|triceps|biceps|rosca|desenvolvimento|leg/i.test(ex.name || '');
 
                     let setsHtml = '';
@@ -2753,7 +3161,10 @@
                                     d.notes = "";
                                     d.cardios = [];
                                     if (d.exercises) {
-                                        d.exercises.forEach(ex => { ex.logs = []; });
+                                        d.exercises.forEach(ex => {
+                                            ex.logs = [];
+                                            ex.previousLoads = [];
+                                        });
                                     }
                                 });
                             }
